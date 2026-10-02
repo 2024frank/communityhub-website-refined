@@ -6,8 +6,8 @@
     "media": "community-hub-media.zip"
   },
   "fileCount": 875,
-  "totalBytes": 28928308,
-  "sourceFingerprint": "7a4cf7b83871bbba55656742ed0e2940a293161cac417f69dcfa8927a64dd2ee",
+  "totalBytes": 28928391,
+  "sourceFingerprint": "832daa0734cc72c2f6a6fd4220d775b9fce7b6c4accc73b1a01a62bfa6dc5f42",
   "assetPreservation": {
     "originalFiles": 597,
     "currentFiles": 630,
@@ -202,8 +202,8 @@
     },
     {
       "path": "docs/refinement-20261002/README.md",
-      "bytes": 6330,
-      "sha256": "f13794936accccc69510dce295b96b96e05c51a9f8972b6f0b7a95620051eb65",
+      "bytes": 6395,
+      "sha256": "9e42c25e22519e5af96218d4c496a60e4e9f2af2489f1616b8b3667f6d8d3eb1",
       "zip": "source"
     },
     {
@@ -280,8 +280,8 @@
     },
     {
       "path": "docs/refinement-20261002/swipe-revision.md",
-      "bytes": 5440,
-      "sha256": "92e7d4d3fd2803253e4ec667fc1e3464e380f7294d9532857fe58a1e135a01cf",
+      "bytes": 5458,
+      "sha256": "d78decdd33a39243eeeec96705043f344942f85086f7803219c915be825df16d",
       "zip": "source"
     },
     {
