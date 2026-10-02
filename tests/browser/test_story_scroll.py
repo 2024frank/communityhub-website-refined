@@ -160,14 +160,14 @@ class StoryScrollTests(unittest.TestCase):
         self.settled()
         self.assert_position(720)
 
-    def test_reversal_inside_one_gesture_does_not_rewind(self):
+    def test_deliberate_reversal_cancels_the_prior_direction(self):
         self.wheel()
         self.settled()
         self.wheel()
         self.page.wait_for_timeout(100)
         self.wheel(delta=-60)
         self.settled()
-        self.assert_position(1440)
+        self.assert_position(720)
 
     def test_repeated_public_navigation_shares_one_transition(self):
         self.page.evaluate("""async () => {

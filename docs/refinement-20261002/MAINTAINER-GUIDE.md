@@ -91,7 +91,10 @@ Hamilton's private application endpoint and private dashboard imagery must never
 
 `src/scripts/pages_home6.ts` owns the page frame list and the public `window.chStory` interface. Other modules listen for `ch:storychange`, use the current semantic owner, or request `go(direction)`. Preserve script initialization order in `src/scripts/index.ts`.
 
-- One intentional wheel/touch gesture advances one complete authored scene with an immediate cut. Inertia from that gesture must not skip another scene or begin scrolling a newly revealed native control.
+- One intentional wheel/touch gesture advances one complete authored scene with an immediate cut. Inertia from that gesture must not skip another scene or begin scrolling a newly revealed native control. `ui/wheel-gesture.ts` uses a260ms quiet interval with no extra post-cut hold; a meaningful opposite stroke cancels the previous direction. These thresholds are implementation heuristics, not physical-contact detection.
+- `ui/product-navigation.ts` preserves the full vertical product sequence on narrow screens. Finish a selected product’s reading frames before entering its adjacent product. Example autoplay and horizontal example arrows never change the selected product.
+- Resizing preserves the selected product via its semantic panel anchor. The mobile menu captures the current story before changing page overflow and restores it on close. Do not reintroduce selection from stale pixels or make the old reading-part index choose a different product.
+- The brief homepage Web example uses the existing Cleveland live event feed. Only Building uses the special scroll-through canvas. Detailed app pages retain their native controls and source recovery.
 - A fresh gesture over a genuinely scrollable region remains native. Menus, dialogs, form controls, horizontal gestures, browser zoom and reduced-motion preferences keep their expected ownership.
 - `data-story-scene` identifies authored reading groups. The `all`, `desktop` and `short-phone` modes are intentional responsive contracts, not decorative classes.
 - Long reading groups can have continuation stops. Do not throw away a final content-bearing tail just because it is shorter than the preferred quarter-screen step: its last links or lines must remain reachable. Bottom padding alone must not create a dead stop.

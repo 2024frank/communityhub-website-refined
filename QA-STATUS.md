@@ -1,53 +1,62 @@
-# Community Hub — October 2 Story of Dashboard revision
+# Community Hub — October 2 navigation revision
 
-## Candidate
+## Accepted candidate
 
-The bounded final source and rendered review is accepted. Known local defects identified during review are closed; the external and device limits below remain explicit.
+The reopened swipe/navigation defects are repaired and independently accepted. The source preserves the accepted original Story of Dashboard replacement and all 35 content routes plus 3 redirects. All 630 current public files remain byte-for-byte unchanged from the prior accepted handoff, including all 597 supplied originals.
 
-This handoff refines the supplied Astro/TypeScript source. It contains 35 content pages and three legacy redirects. All 597 supplied public files remain byte-for-byte unchanged; 33 separately named files add the approved product photo, source-extracted workflow and evidence elements, the video’s first-frame poster, and local fonts/licenses.
+The final private preview is version 23, source commit `d9596eeb8197397ccadf7419420280d2372ed1fb`. The tested bundle is `KpN3kooo.js`. The production candidate was built at 2026-10-02 19:51:15 UTC; `index.html` SHA-256 is `756d92cd5f5998aec292a91bf19c7016a2d69cdb4eaedab7e8777a7335186991`. All 675 production files are recorded in `docs/refinement-20261002/final-build-manifest.json`.
 
-The source was reviewed through an owner-only private hosted preview. It has not been publicly deployed. The original uploaded source and prior reconstruction remain separate from this handoff.
+This is an owner-only private preview, not a public deployment. The GitHub source commit is separate from the preview’s commit and is verified by the repository handoff process.
+
+## What changed
+
+- Deliberate opposite wheel input can cancel the prior direction promptly. Continuing momentum and tiny sign jitter do not skip another scene. A fresh gesture no longer waits for an extra 450ms hold, and an outward attempt at either boundary does not block returning.
+- Narrow vertical navigation now visits every product within Engage, Educate and Motivate in the same order, with exact reverse traversal. Complete copy/media reading frames remain reachable; visitors do not have to exhaust examples before moving to another product.
+- Resizing preserves the selected product through a semantic panel anchor. Closing the mobile menu restores the original visible story after scrollbar/layout changes.
+- The brief Web Embeddables example uses current Cleveland calendar events through the site’s existing live-feed component. Scrolling over these event rows remains page navigation. The complete native calendar remains on its detailed page. Building retains its explicit internal scroll-through canvas and native controls.
+- Redundant normal-state homepage demo links are hidden. The product action, chart help, native controls, screen-reader status and detailed-page recovery/source actions remain. Empty calendar data and network failure have distinct truthful states.
+
+The final meeting agreement, root causes and implementation contracts are documented in `docs/refinement-20261002/swipe-revision.md`. No gesture thresholds are attributed to the meeting; they are engineering heuristics.
 
 ## Automated verification
 
-On October 2, the production candidate passed:
+The final source independently passes:
 
-- Astro/TypeScript: 0 errors and 0 warnings, with 7 informational hints
+- Astro/TypeScript: 78 files, 0 errors, 0 warnings, 7 informational hints
 - Production build: 38 HTML outputs
-- Node unit tests: 141 passed, 0 failed
-- Route, local asset, fragment, privacy and original-copy contracts: 11 passed
-- Browser test fixtures: 26 TypeScript bundles and 47 stylesheets compiled
-- Browser-suite syntax: 30 Python modules and 334 embedded JavaScript snippets checked
+- Node tests: 170 passed, 0 failed
+- Route, asset, fragment, privacy and original-copy contracts: 11 passed
+- Browser fixtures: 26 TypeScript bundles and 47 stylesheets compiled
+- Changed Python browser tests compile successfully
 
-The automated browser suite itself was not executed in this environment. Historical migration-parity checks require an optional reference checkout absent from the supplied archive; that evidence has not been invented.
+Current check, unit and contract logs are under `docs/refinement-20261002/swipe-*.log`. The automated browser suite itself was not executed in this environment. Historical migration-parity checks require an optional reference checkout absent from the supplied archive.
 
-The exact built files are hashed in `docs/refinement-20261002/final-build-manifest.json`. This candidate was built at 2026-10-02 15:31:53 UTC. The final owner-only preview is version 20, source commit `e8e6654ea415a1f2894822f0f2181b6dd1090ae9`. Its `index.html` SHA-256 is `fb41a8a8ada4925f3342bd55bba9322d67026ce7e08ee606582a0b6140442d2a`.
+## Actual rendered and interactive review
 
-## Actual hosted review
+On the confirmed V21–V23 private builds, the review exercised:
 
-The review covered every content route with a desktop scene walk to the ending/footer and every route’s initial narrow view. Changed scenes and high-risk interactions were then retested. These are observed browser checks, not a claim of exhaustive coverage of every external application state.
+- Complete forward and reverse narrow product order across categories, direct product tabs, reading continuations and previous-category entry
+- Repeated opposite wheel inputs about 104–109ms apart, a continuous 1.08-second stream, suppression of a 188ms repeat and rearming after 332ms of quiet input
+- First/last boundaries, native Building Dashboard scrolling and page wheel input over real Cleveland event rows
+- Selected Web/Phone preservation from narrow to desktop and back, including media continuation; a settled593px intermediate width
+- Building → Menu → Tab/Down → Escape, and normal menu destination navigation
+- Accepted combined opening and its continuation, form editing keys, tall-directory tail, example-only carousel controls, and original Products slide keyboard navigation
 
-The browser review included the combined video-and-people opening, remaining-time carousel pause/resume, centered identity animation, scene navigation, actual public product embeds, phone walkthrough, lesson search/grade filters/PDF links, menus, FAQs, selected partner pages, native application controls and local loading recovery. Whole source presentation slides remain in the dedicated source viewer; marketing pages use the relevant individual evidence elements. The Data Hub platform component retains the accepted slide-10 explanation. At the owner’s later request, Products #how now displays the complete original 31-slide Story of Dashboard presentation from the official Environmental Dashboard site. Local source frames are unchanged, including all authored explanatory strips.
+The current navigation retakes used resized desktop Chrome around 504×757,593×757 and1173×757 CSS pixels at 100% zoom. They are actual browser checks. Physical trackpad momentum/contact phases and touch hardware were not available; handler event-trace tests are not represented as physical-device tests.
 
-The narrow review used resized desktop Chrome at approximately 388 × 606 CSS pixels and 125% browser zoom. The final fit retakes include the Who We Are next control, Citywide, the College orb map, and the Research, Neighborhoods, Phone App and Web Embeddables openings. Community Voices’ complete display and category row fit together at 1173 × 757 CSS pixels with no inner scrolling. A larger 1342 × 934 display-filling browser window was also checked; this is not a claim of a separate browser fullscreen-mode test. Physical phones, touch hardware, Safari and Firefox were not tested.
+The prior accepted review covered all 35 desktop route scene walks, all 35 narrow initial views, source-matched assets and targeted repairs. That historical evidence remains relevant to unchanged areas; this scoped revision did not repeat all earlier page captures. The original 31-slide Products viewer was previously accepted at desktop, short-laptop and 390×606 narrow sizes and was smoke-tested again here. Full frames, captions, quiet controls and the official-source/full-size actions remain intact.
 
-The Products-only revision was independently checked in actual desktop, short-laptop and narrow browser views. First, middle and final original frames, previous/next buttons, left/right keys, endpoint behavior, full-size image, official-source link and page continuation pass. V20’s final narrow correction uses the full available slide width; complete caption, 44px controls and source link remain inside a 390 × 606 CSS-pixel viewport. The title and controls do not move between slides.
+Cached pre-update HTML and screenshots captured during an unfinished resize were excluded from final acceptance. No known local defect remained in the observed final checks.
 
-Official live deck identity was verified: `StoryOfDashboard_200121`, 31 slides, linked at https://environmentaldashboard.org/story-of-dashboard. Four representative source frames were visually compared with the local originals. All 31 local slide images decode correctly and remain byte-identical to the supplied archive. See `docs/refinement-20261002/original-story-revision.md`.
+## External and coverage limits
 
-The broad initial website review remains relevant to unchanged routes. This revision did not repeat every earlier page capture. V19 supplies the complete new-viewer interaction checks; V20 changes only its image-height cap and adds the final narrow fit proof. The older `final-copy-delta.json` is historical evidence of the initial V18 handoff, not the scope of this later revision.
+- Public applications, calendars, controllers, Community Voices and lesson PDFs require their source hosts and internet access. A load event alone is not an upstream health guarantee.
+- The original YouTube player and source watch page previously remained buffering in this cloud browser. Local loading/layout behavior was verified; remote video playback is not claimed.
+- Original presentation text remains inside 960×720 source images. Their full-size action supports closer reading.
+- Narrow portrait Voices and native applications can require genuine internal scrolling to retain readable content; the Building-only special canvas contract does not remove native menus, form controls or necessary long-resource reading.
+- Physical phones, touch hardware, Safari and Firefox were not tested. No exhaustive cold-cache trace, every external-app state or every link traversal is claimed.
+- Contact/email preparation was reviewed without sending a message; this website report makes no delivery claim.
 
-## Remaining external and coverage limits
+## Source handoff
 
-- Public dashboards, controllers, calendars, Community Voices and lesson PDFs need internet access and remain controlled by their source hosts. A successful iframe load event does not prove upstream application health; recovery links are retained.
-- The YouTube player and original source watch page both remained buffering in the review browser. Local loading controls, preserved captions and player sizing were verified; actual remote playback is unconfirmed.
-- Original slide text remains part of the authored 960×720 source images. A full-size image action is provided for closer reading; physical-device legibility at every possible screen size is not claimed.
-- Narrow portrait Community Voices keeps its full photograph and quote in a deliberately scrollable region; they cannot all fit simultaneously with every category in a short phone-height viewport without making the content unreadable. Native dashboards also retain their own internal scrolling.
-- Contact/email preparation was reviewed without sending a message. Delivery is not claimed.
-- No separate cold-cache trace was recorded for every route, and no exhaustive keyboard traversal of every link or all narrow continuation frames is claimed.
-
-## Use the source
-
-Both ZIP files are required. Extract them into the same folder, merging their `community-hub-source/` directory. Read `HANDOFF.md`, then run `python3 verify-source.py` before installing dependencies. Use Node 22.12 or newer, `npm ci`, `npm run build`, and `npm run preview -- --port 4327`.
-
-The ZIP integrity check verifies all included files and exact checksums. It does not replace the build and interaction evidence above.
+Both ZIPs merge into the same `community-hub-source/` folder. The media ZIP is unchanged from the prior handoff. Run `python3 verify-source.py` on the clean merged extraction before installing dependencies, then use Node 22.12 or newer with `npm ci`, `npm run check`, `npm run build` and `npm run preview -- --port 4327`. See `README.md`, `HANDOFF.md` and the maintainer guide for complete instructions.

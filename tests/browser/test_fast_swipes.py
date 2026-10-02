@@ -74,9 +74,9 @@ class FastSwipeTests(unittest.TestCase):
         self.wheel_stream([[0, 60], [600, -60]])
         self.assert_settled(0)
 
-    def test_reversal_inside_one_gesture_does_not_rewind(self):
+    def test_deliberate_reversal_cancels_the_prior_direction(self):
         self.wheel_stream([[0, 60], [100, -60]])
-        self.assert_settled(720)
+        self.assert_settled(0)
 
     def test_renewed_impulse_inside_one_gesture_does_not_advance_again(self):
         self.wheel_stream(

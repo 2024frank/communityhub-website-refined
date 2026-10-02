@@ -153,6 +153,7 @@ import { $, $$, isPresent, required, eventElement } from "./dom";
     const mb = $(".menu-btn");
     const mnav = $("#mnav");
     let priorOverflow = "";
+    let menuStory: ReturnType<NonNullable<Window["chStory"]>["current"]> = null;
     const menuBackground = new Map<HTMLElement, boolean>();
     function menuControls() {
       if (!mb || !mnav) return [];
@@ -166,6 +167,7 @@ import { $, $$, isPresent, required, eventElement } from "./dom";
     function setMenu(open: boolean, restoreFocus = true) {
       if (!mb || !mnav) return;
       if (open === !mnav.hidden) return;
+      if (open) menuStory = window.chStory?.current() || null;
       mb.setAttribute("aria-expanded", String(open));
       mnav.hidden = !open;
       const t = $(".menu-t", mb);
@@ -187,6 +189,8 @@ import { $, $$, isPresent, required, eventElement } from "./dom";
         menuBackground.clear();
         doc.body.style.overflow = priorOverflow;
         if (restoreFocus) mb.focus({ preventScroll: true });
+        if (menuStory) window.dispatchEvent(new CustomEvent("ch:fit", { detail: { anchor: menuStory } }));
+        menuStory = null;
       }
     }
     if (mb)
@@ -1319,7 +1323,11 @@ import { $, $$, isPresent, required, eventElement } from "./dom";
             return true;
           })
           .slice(0, n);
-        if (!list.length) throw 0;
+        if (!list.length) {
+          const fallback = $(".events-fallback", box);
+          if (fallback) fallback.textContent = "No upcoming " + city.name + " events are available in this preview.";
+          return;
+        }
         box.innerHTML =
           '<ul class="events-list">' +
           list
@@ -1373,10 +1381,10 @@ import { $, $$, isPresent, required, eventElement } from "./dom";
       .catch(function () {
         const f = $(".events-fallback", box);
         if (f)
-          f.textContent =
-            "Upcoming events couldn't load here. Browse the " +
-            city.name +
-            " community calendar.";
+          f.innerHTML =
+            "Upcoming events couldn't load here. <a href=\"" + city.api +
+            "/calendar/\" target=\"_blank\" rel=\"noopener\">Browse the " +
+            city.name + " community calendar</a>.";
       });
   }
   window.chLoadEvents = loadEvents;

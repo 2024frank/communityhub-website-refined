@@ -176,15 +176,13 @@ export function register(H: SiteContext): void {
     ] as const,
   ];
   const ctl_html = `<figure class="native-photo"><img src="assets/phone-person-water-display.jpg" alt="A visitor holds the phone controller beside a large display showing Water Use" loading="lazy"><figcaption>Using a phone to choose what appears on a shared display.</figcaption></figure>`;
-  const CLE_CAL =
-    "https://cleveland.communityhub.cloud/calendar/?embed=1&show-menu-bar=1";
   const sign_media = H.story_player(
     signs,
     "Community Hub signs in Oberlin and Cleveland",
     "",
     true,
   );
-  const emb_media = nativeScrollable(CLE_CAL, "Cleveland community calendar", 1250);
+  const emb_media = `<h4 class="calendar-place">Coming up in Cleveland</h4><div class="ev-mini calendar-brief" data-events data-city="cleveland" data-count="3"><p class="events-fallback" role="status">Loading Cleveland events…</p></div>`;
   const live = {
     "data-dashboard": nativeScrollable("https://oberlin.communityhub.cloud/dh-public/oc-embed?active-page=exploreData&active-data-dashboard=815", "Harkness and Co-op Building Dashboard", 1500),
     "the-hub": H.data_views("Whole city electricity", ["heat"]),

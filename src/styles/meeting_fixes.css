@@ -85,3 +85,11 @@
  #main#main .native-voices-content {max-height:calc(100dvh - 320px);min-height:260px;overflow-y:auto;scrollbar-color:#194638 #e6eddb;}
  #main#main .native-voices-hint {display:block;font-size:14px;margin:6px 0 10px;}
 }
+
+/* The brief Web example shares the existing live calendar feed. Its events
+   belong to the outer page; only Building has a scroll-through canvas. */
+#main#main#main[data-page="index"] .calendar-brief {height:auto;max-height:none;overflow:visible;}
+/* Keep one product action in homepage copy. Detailed pages retain source and
+   full-size recovery actions; hidden native targets still support live updates. */
+#main#main#main[data-page="index"] :is(.native-caption > a,.dv-source,.dv-cap > a,#motivate .mini-cap){display:none;}
+#main#main#main[data-page="index"] .native-caption{margin:0;padding:0;}

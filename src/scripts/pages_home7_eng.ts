@@ -1,3 +1,4 @@
+import { registerProductNavigation } from "./ui/product-navigation";
 /* Task 8: To Engage keeps its heading on screen while three stops (signs, phones,
    partner websites) pass under it, then the page moves on to To Educate.
    John (30 Sep) wants the original's three colour-coded groups, so To educate and
@@ -17,6 +18,7 @@ Array.from(
   let shown = -1;
   let frame = 0;
   let layoutFrame = 0;
+  let activeSection = false;
   function layoutPanel() {
     layoutFrame = 0;
     const panel = panels[shown];
@@ -108,7 +110,12 @@ Array.from(
   function selectPanel(k: number) {
       if (!stage.matches) {
         const rail = sec.querySelector<HTMLElement>("[data-story-rail]");
-        if (rail && panels[k]) rail.scrollTo({left: panels[k].offsetLeft - panels[0].offsetLeft, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth"});
+        if (rail && panels[k]) {
+          rail.scrollTo({left: panels[k].offsetLeft - panels[0].offsetLeft, behavior: "instant"});
+          show(k);
+          if (layoutFrame) { cancelAnimationFrame(layoutFrame); layoutFrame = 0; }
+          layoutPanel();
+        }
         return;
       }
       const r = room();
@@ -122,6 +129,12 @@ Array.from(
         behavior: "instant",
       });
   }
+  registerProductNavigation(sec, {
+    enabled: () => !stage.matches && innerWidth <= 900,
+    current: () => Math.max(0, shown),
+    count: () => panels.length,
+    select: selectPanel,
+  });
   tabs.forEach((t,k) => t.addEventListener("click", () => selectPanel(k)));
   choice?.addEventListener("change", () => selectPanel(Number(choice.value)));
   const rail = sec.querySelector<HTMLElement>("[data-story-rail]");
@@ -144,8 +157,26 @@ Array.from(
     },
     { passive: true },
   );
-  window.addEventListener("resize", () => { update(); scheduleLayout(); });
-  stage.addEventListener("change", () => { update(); scheduleLayout(); });
+  window.addEventListener("ch:storychange", event => {
+    activeSection = event.detail.els.includes(sec);
+  });
+  function resizeProduct() {
+    if (frame) { cancelAnimationFrame(frame); frame = 0; }
+    const previous = window.chStory?.current();
+    if (!activeSection && !previous?.els.includes(sec)) { scheduleLayout(); return; }
+    const selected = Math.max(0, shown);
+    const anchor = previous?.els.includes(sec) ? previous : { y: window.scrollY, els: [sec], part: 0 };
+    // Pixel positions change at the breakpoint. Preserve the selected semantic
+    // product, then let the page restore its complete reading frame.
+    selectPanel(selected);
+    if (layoutFrame) { cancelAnimationFrame(layoutFrame); layoutFrame = 0; }
+    layoutPanel();
+    window.dispatchEvent(new CustomEvent("ch:fit", { detail: {
+      anchor: { ...anchor, anchor: panels[selected] },
+    } }));
+  }
+  window.addEventListener("resize", resizeProduct);
+  stage.addEventListener("change", resizeProduct);
   window.addEventListener("load", scheduleLayout);
   document.fonts?.ready.then(scheduleLayout);
   if (window.ResizeObserver) {

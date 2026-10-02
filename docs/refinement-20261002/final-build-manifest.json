@@ -1,14 +1,15 @@
 {
-  "buildUtc": "2026-10-02T15:31:53.950368+00:00",
+  "buildUtc": "2026-10-02T19:51:15.939236+00:00",
   "files": 675,
   "htmlPages": 38,
-  "indexSha256": "fb41a8a8ada4925f3342bd55bba9322d67026ce7e08ee606582a0b6140442d2a",
-  "distFingerprint": "d091368d3a7a2a83bba920db05508d5d09dbf2a672fc0fd8e6681126bfd18484",
+  "indexSha256": "756d92cd5f5998aec292a91bf19c7016a2d69cdb4eaedab7e8777a7335186991",
+  "distFingerprint": "d89c2c99b423333f199fc9b90a4b6c1acda1347453f35a10389804a76f829cee",
+  "fingerprintFormat": "sha256 of ordered path + NUL + sha256 + LF records",
   "entries": [
     {
       "path": "404.html",
       "bytes": 30067,
-      "sha256": "aa4bb0021224913e27bc6ab8257763efeb535af4c1b2894e23e5ec23dd4976a8"
+      "sha256": "b4fbb531a9c0db866c00262db1b93892deb2109a502d1f395053aad458c315dd"
     },
     {
       "path": "_astro/Footer.astro_astro_type_script_index_0_lang.BmZhcA76.js",
@@ -16,14 +17,14 @@
       "sha256": "2d73f9203d32037b6958eb525759c0d44ba79c54afc3c6d53d09408197595260"
     },
     {
-      "path": "_astro/PageLayout.KJScBPr3.css",
-      "bytes": 492576,
-      "sha256": "8f25a31a93c6abe86bfd74723257f2b5f6d89aa264ac78f9ebd73087eaa22b59"
+      "path": "_astro/PageLayout.DSqLT3Y4.css",
+      "bytes": 492848,
+      "sha256": "70cc88f1eccaa96078865f18d3d84f9cc80fa32b899d0cb52fbb7c53af838d54"
     },
     {
-      "path": "_astro/PageLayout.astro_astro_type_script_index_0_lang.h1IP23ua.js",
-      "bytes": 140987,
-      "sha256": "82164ee8ddb79e44101b889e3fbfd5c5c2c55d504f85b91675ec822c7a2a577b"
+      "path": "_astro/PageLayout.astro_astro_type_script_index_0_lang.KpN3kooo.js",
+      "bytes": 143377,
+      "sha256": "7cfc50b791f23dbd62d27ff5be7fd571532c48238a3e6ff7d7ef9e153d48260d"
     },
     {
       "path": "_astro/_example_.BQ7PIsbM.css",
@@ -43,7 +44,7 @@
     {
       "path": "about.html",
       "bytes": 39124,
-      "sha256": "c1ce1682f7c72f97a15e91c3a168bf28feab5bb99507f70237acc6063e628e3c"
+      "sha256": "c01e374dcc3e0ea0560641610d056d224ae1b1e073034e7a21da1ffdf1fa5013"
     },
     {
       "path": "assets/art-campus-band.jpg",
@@ -3143,82 +3144,82 @@
     {
       "path": "bring-a-dashboard.html",
       "bytes": 36896,
-      "sha256": "60f594b64d567ad15945467d83e0c604b3b795225080d4b52c532ee5466fd2f2"
+      "sha256": "0daa46eb328bdd0d28c38080a922ec70a4192abe6622ba974690935a272a90e2"
     },
     {
       "path": "building-dashboard.html",
       "bytes": 441,
-      "sha256": "d87569b231e1e322e54c6480629df643e739e13952dcd919a88e8d16b096c365"
+      "sha256": "b348a6011fc3c699df3393cb17a307f969526e2efae468ce28cd8fd344ec670c"
     },
     {
       "path": "campuses.html",
       "bytes": 41522,
-      "sha256": "4443ce90be7bccebb0812b1a873def389fb0cdfec949bebf0fbba07629eb5696"
+      "sha256": "be0e1aa925123f2da69ac502aaaa2efe04e90c82c539edceb543a148a9f82996"
     },
     {
       "path": "cities.html",
       "bytes": 36864,
-      "sha256": "807f12c90b337cc47b677aaad4f5ca2d609b7be2cef8de8f3c0afef34de5ea04"
+      "sha256": "d4d7a2f0abfaf48c7bd879303c6f756c9a6614f95257664059c75620bbe11f6e"
     },
     {
       "path": "city-of-oberlin.html",
       "bytes": 42467,
-      "sha256": "75b20133075979e2c82d8c38e6b74b19b5e85f22edce13ab096bffc48125fdfd"
+      "sha256": "e2cfb33fb80942acc5733f14b1b58a1fd4819e77b9141ebb61b4977666e14f0c"
     },
     {
       "path": "citywide-dashboard.html",
       "bytes": 441,
-      "sha256": "5c84bbd779ff0cd098b866007bdb058efba5b0dbd26d2b4f77e3713018612997"
+      "sha256": "efb880f8ac4c174aad8854ea4ff0cbd6d20094301f4daaba6b3a54ff2c5c1f83"
     },
     {
       "path": "community-calendar.html",
       "bytes": 40784,
-      "sha256": "7481076487e54cb21d09e11e480e38718df1fbcb7dfafc3a702d0261683afae0"
+      "sha256": "c8ea9c80b748205abf2d942838a88d438e1876269484b2b4ae3e0e847dad18f1"
     },
     {
       "path": "community-voices.html",
       "bytes": 48591,
-      "sha256": "af7be3d80eb49c562af1167c90bd949a5607c81a99e2cfc57ed872921ac1d42c"
+      "sha256": "bcbf1b9b7c6e4ab235b7c541c3aa1f6eb74b82a0c590fc76ab7736c73b6639c8"
     },
     {
       "path": "contact.html",
       "bytes": 34629,
-      "sha256": "c1537e9768a1f388e947a6d15733d6a88792ecfc70fb6905ea7a3ef6237caaa5"
+      "sha256": "f57eea47deed0fdc06135935aa1027ff60e5b060e7a982accd5b6f2ebe1de5d6"
     },
     {
       "path": "dashboards.html",
       "bytes": 37148,
-      "sha256": "eff059a9da928edb9abfc7c53ce713a7c5c7d1a87a7f9e2acf3ead1fb186c00b"
+      "sha256": "225c327a34b97537f36084e00004a9f9fd42f5a16cb7dd7ffb3d37555154eee9"
     },
     {
       "path": "data-dashboard.html",
       "bytes": 42710,
-      "sha256": "4734b27dcfb06e8ea992804b6756b2c1f3915cd9ebde4dc532a0d5eb9cc94f1d"
+      "sha256": "bc2170e290fd4b13d9f3575b942af2564ee2938dbd5ee2722a59924a68813b0f"
     },
     {
       "path": "data-hub.html",
       "bytes": 373,
-      "sha256": "7b2849dfd5dd0bfdaa2e8c1e3ecd61c93c74ea417171f0797d6de5de99007cf0"
+      "sha256": "22b485e35d33ae222393eda6050c527d66a0c2d326cf47066e3728fc813815bf"
     },
     {
       "path": "digital-signage.html",
       "bytes": 41474,
-      "sha256": "a9dde5756dc9fce447f219065e162707e025bc3e637cfbe1a4d19323c95a48c3"
+      "sha256": "9a4e5735b5fda00b9ff9227da30a2ee3625a1826b0689c77d54edf947a2869a0"
     },
     {
       "path": "education.html",
       "bytes": 48278,
-      "sha256": "c7c2fa0bba9a4550514c4631bfaadc5cc31ba755216437edc3f19c8f96f152a6"
+      "sha256": "5fd79eb40c48af795b7c2afa09856edf1eec1aeadb174a28faf88b74d744f84e"
     },
     {
       "path": "environmental-dashboard.html",
       "bytes": 36863,
-      "sha256": "b55a1c339eeb74fcd816b1e99e945b9c3127ac9cf94a4d05593229f0d7acb7ee"
+      "sha256": "6ad37338adeed4cf8951fce156edbf7cbb66411a30d99465f19bfb0930888513"
     },
     {
       "path": "examples.html",
       "bytes": 34681,
-      "sha256": "9084112fcedb58e6943b625873673a145db79b9ea3437bc19beebe978bb81f4e"
+      "sha256": "e960fe19b372ba36804dfb7ab4b6295a227b377bc8c9347893b464986c085e86"
     },
     {
       "path": "fonts/alegreya-sans/OFL.txt",
@@ -3278,77 +3279,77 @@
     {
       "path": "great-lakes-science-center.html",
       "bytes": 38923,
-      "sha256": "7a5988b2e719dcfff87fcec4a982ff79850cb3d8721a9d6804dd3f441acb21e9"
+      "sha256": "76a115b73f3917af827ea9c59a843a5b35a1e051115f951dd76f0030b91a7372"
     },
     {
       "path": "hamilton-college.html",
       "bytes": 38612,
-      "sha256": "aae028c5a70d09bd045bf4373e8964d07d374b3ace6ba1af28c98141ae1537ba"
+      "sha256": "47bd6bab3b4d2c3a2764d7ea72a1c2d312229feddec62fb43747cb16e3ac9a9e"
     },
     {
       "path": "index.html",
-      "bytes": 63170,
-      "sha256": "fb41a8a8ada4925f3342bd55bba9322d67026ce7e08ee606582a0b6140442d2a"
+      "bytes": 62639,
+      "sha256": "756d92cd5f5998aec292a91bf19c7016a2d69cdb4eaedab7e8777a7335186991"
     },
     {
       "path": "media.html",
       "bytes": 39098,
-      "sha256": "2df9631224bd6b9c0308fbe86c7c0c799d5b126f54e6545ab8d466692fcd1da6"
+      "sha256": "883864ca5f6b75badf212545064c5a667cbe442b2c5a45398dd736f5bc42224b"
     },
     {
       "path": "midtown-cleveland.html",
       "bytes": 41326,
-      "sha256": "f37b866dc5eb5d7087f0dbf3f492f77674323da8030a8a5861a3b6f1ba394ab0"
+      "sha256": "5828c86ddf84a67d4e3fcdb52ff848f3bba6746c720f4f9f9fd8b06fc0687e97"
     },
     {
       "path": "museums.html",
       "bytes": 37456,
-      "sha256": "e104d28faed61a930f531755da90552967d87651ac0a711a3f29bbef6dc51c22"
+      "sha256": "f4133218c155ced230c20e357986e04150798768d4aa59c45285068a1b08155e"
     },
     {
       "path": "neighborhoods.html",
       "bytes": 38343,
-      "sha256": "afd3cf4a842776ba8652fcb90b6b6fd3c37a8dc3ac7e886f31888722855fbda8"
+      "sha256": "9ee6a5f14e3d00ba885e1ce9724d25536f847a5742aa0d87c3cd43b647ddb694"
     },
     {
       "path": "oberlin-college.html",
       "bytes": 43705,
-      "sha256": "bcbfc4683e6ad3ded0e04f0cbb866e7f8dbc908850df75ced39a6044a4739e97"
+      "sha256": "ad40489a97656e3b269c3ef5d759574925ecefc046905fc67ce8d5ed10b2bfad"
     },
     {
       "path": "phone-app.html",
       "bytes": 37754,
-      "sha256": "68acee018810e6a4dbf3b8c4256f79ab9927fa0a0af424228f02cf8bb450595f"
+      "sha256": "de7aee02de17050662c2c3d6c2b297cf933cb15f0da79f693776307d1844be38"
     },
     {
       "path": "pricing.html",
       "bytes": 38521,
-      "sha256": "76fc317f47e1fff91ebda3bd77f0ab87d11ececbae71ae2e5cca782477d1a87c"
+      "sha256": "8fbd1bfaf824b630ed0d98b99eb304e423624cfe6304a9ec7d72ca98c2d7b839"
     },
     {
       "path": "products.html",
       "bytes": 38391,
-      "sha256": "99db1a876d7f5aeca87d3ed5ca28a0c2d812387bf762cee68810ad7ec7959159"
+      "sha256": "08a348ec437e656a8d2abea6151fe4f65f34d449fa6c965e5149acd57a1d481c"
     },
     {
       "path": "research.html",
       "bytes": 41623,
-      "sha256": "5dc3fe6abccbc4148d0ea701020259f684ead4e774f5bba9daaf98c4d54c32c6"
+      "sha256": "304ccdcf0a9ad6b45a0b917a481b0932ffd7eb7c214e577378d17d92745d4dba"
     },
     {
       "path": "resources.html",
       "bytes": 33876,
-      "sha256": "e75561f4a3fc1af8f7b99fde7be6f23ede80eb897ad4970aa20c9572bd640179"
+      "sha256": "190805c2636ef7d91792b540486899afc7435ba58a0e5648981221b275c87d88"
     },
     {
       "path": "schools.html",
       "bytes": 37828,
-      "sha256": "fa8920672e5bf4f52ac615c2e983e8a09571d4a3ca927a918676f150f86f8db0"
+      "sha256": "5a6ef93355c91b5aa540ba2d15a7ad7e0fd596f6beeebf50b652eeacff96c364"
     },
     {
       "path": "see-it-live.html",
       "bytes": 33562,
-      "sha256": "c3e086644a90f4247c1ff89bd2bd3f6af86d059bf58496e78c1e0305c61c6d9b"
+      "sha256": "1a5ed035a28d4099bd5bc1762ccebf29822ffcdae36a7f5b55e4dabf7f76a9ff"
     },
     {
       "path": "sitemap.xml",
@@ -3358,27 +3359,27 @@
     {
       "path": "stories.html",
       "bytes": 38191,
-      "sha256": "2da2853efb62dac412e0a8c6562d3865ef44027c1450e434cf84b5a578365f71"
+      "sha256": "9ea8616d14729c7678d5c15abee0315572b32c424cb860c48d2faa9ca39c31a9"
     },
     {
       "path": "story-of-dashboard.html",
       "bytes": 46093,
-      "sha256": "152286c695bc7fcd7910d6956b9b15afd85f650cc4b05abe888c23f6f46c9b58"
+      "sha256": "193ebe32cb083bf893504eadafba8826bd0f54ee48fa1e0da31821aa944f60c4"
     },
     {
       "path": "the-hub.html",
       "bytes": 49512,
-      "sha256": "6678c67bb4f06d3f8eb63c4a27116e129c77142437b987a81f73afe77d2215b6"
+      "sha256": "fe54964766c000d9b87891a0480f939e9693ff28c0a008833081dd98af43379f"
     },
     {
       "path": "web-embeddables.html",
       "bytes": 64446,
-      "sha256": "cac88ab7a81d0c321de5b0459a6519294adf93c2fa335f3db38103525e6d28da"
+      "sha256": "c4a3c78651aa6175f52529b2ce54201dedc49abd0f9d2d5bb4d83effd240fe2b"
     },
     {
       "path": "who-its-for.html",
       "bytes": 33962,
-      "sha256": "ecf3d54b513942440d03f87dc8c6281b9f11ce31ddbd6b994aa872ddd3d3b2fc"
+      "sha256": "6a4304a32c80c6c19fe42cef6acb27be0afc3648e52f1359885f568d61d56d5b"
     }
   ]
 }

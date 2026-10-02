@@ -1,4 +1,6 @@
 import type { StoryFrame, StoryTouch } from "./types";
+import { WheelGesture } from "./ui/wheel-gesture";
+import { productBoundary } from "./ui/product-navigation";
 import { mayAutoAdvanceHero } from "./ui/hero-policy";
 import { required, eventElement, htmlChildren } from "./dom";
 /* v6 home: problem line over the drone zoom, connection diagram, scaled live embeds */
@@ -389,15 +391,8 @@ import { required, eventElement, htmlChildren } from "./dom";
     if (!img.complete || !img.offsetHeight) img.loading = "eager";
   });
   let touch: StoryTouch | null = null;
-  let lastWheel = -Infinity;
-  let wheelDirection = 0;
-  let intent = 0;
-  let consumed = false;
+  const wheelGesture = new WheelGesture();
   let guardUntil = 0;
-  const WHEEL_QUIET = 260;
-  const WHEEL_HOLD = 450;
-  let triggeredAt = 0;
-  let nestedWheel = false;
   // Fields that use the arrow, page and wheel keys themselves. A horizontal tablist,
   // button, link or slider arrow does not: page keys keep cutting scenes from there.
   const controls =
@@ -425,13 +420,7 @@ import { required, eventElement, htmlChildren } from "./dom";
   function cancel() {
     publicRequest = null;
   }
-  function resetGesture() {
-    lastWheel = -Infinity;
-    wheelDirection = 0;
-    intent = 0;
-    consumed = false;
-    nestedWheel = false;
-  }
+  function resetGesture() { wheelGesture.reset(); }
   function syncChrome() {
     const base = header ? header.offsetHeight : 0;
     const h = base;
@@ -685,6 +674,17 @@ import { required, eventElement, htmlChildren } from "./dom";
         frame.els.some(owner => owner.contains(document.activeElement)) ? document.activeElement : null;
       const anchor = focus || frame.anchor || frame.scene;
       if (anchor) {
+        const owner = frame.els[0];
+        const panel = anchor.closest<HTMLElement>("[data-eng-panel]") ||
+          frame.anchor?.closest<HTMLElement>("[data-eng-panel]");
+        const stage = owner.querySelector<HTMLElement>(".eng-stage");
+        if (panel && stage && getComputedStyle(stage).position === "sticky") {
+          const index = Array.from(owner.querySelectorAll("[data-eng-panel]")).indexOf(panel);
+          if (index >= 0 && matches[index]) {
+            matches[index].anchor = panel;
+            return matches[index];
+          }
+        }
         const sameScene = frame.scene ? matches.filter(f => f.scene === frame.scene) : [];
         const semantic = sameScene.length ? sameScene : matches.filter(f => f.scene &&
           (f.scene.contains(anchor) || anchor.contains(f.scene)));
@@ -773,13 +773,21 @@ import { required, eventElement, htmlChildren } from "./dom";
           break;
         }
     }
+    const product = productBoundary(current()?.els[0], target?.els[0], dir);
+    if (product) {
+      // Selection changes the narrow product's height and authored reading
+      // frames. Remeasure synchronously before selecting its first/last frame.
+      dirty = true;
+      const selected = frames().filter(frame => frame.els.includes(product.section));
+      target = (dir > 0 ? selected[0] : selected.at(-1)) || null;
+    }
     if (target) {
       // Change position and ownership in the same task: no intermediate scene
       // is painted while a deliberate story gesture crosses the document.
       cutTo(target.y);
       publicRequest = { direction: dir, y: target.y, until: performance.now() + 220 };
     }
-    return true;
+    return !!target;
   }
   /* Tab to a control below or above the screen: show its whole scene rather
      than the browser's partial scroll-into-view, which rests between stops. */
@@ -857,45 +865,12 @@ import { required, eventElement, htmlChildren } from "./dom";
           : e.deltaMode === 2
             ? window.innerHeight - headerHeight
             : 1);
-      const dir = dy > 0 ? 1 : -1;
-      const magnitude = Math.abs(dy);
-      const gap = now - lastWheel;
-      // One gesture, including trackpad momentum, moves exactly one section. After a
-      // step the gesture stays locked until the wheel has been quiet for WHEEL_QUIET
-      // ms and at least WHEEL_HOLD ms have passed since the step. Nothing inside the
-      // burst (direction change, a renewed impulse) can unlock it.
-      if (consumed ? gap > WHEEL_QUIET && now - triggeredAt > WHEEL_HOLD : gap > 220)
-        resetGesture();
-      lastWheel = now;
-      // A cut changes what is beneath the pointer. Its remaining wheel events
-      // still belong to the gesture that made the cut, even if the newly shown
-      // scene contains a native scroller. A fresh gesture may use that control.
-      if (consumed) {
-        e.preventDefault();
-        return;
-      }
-      const inner = innerScroller(eventElement(e), dy, true);
-      if (inner || nestedWheel) {
-        cancel();
-        // The remainder of a nested gesture stays inside it even after it reaches
-        // its edge. A fresh gesture at that edge can navigate the page normally.
-        if (!inner) e.preventDefault();
-        nestedWheel = true;
-        return;
-      }
+      const decision = wheelGesture.next(dy, now, innerScroller(eventElement(e), dy, true));
+      if (decision.kind === "native") { cancel(); return; }
       e.preventDefault();
-      if (magnitude < 1) return;
-      if (dir !== wheelDirection) {
-        wheelDirection = dir;
-        intent = 0;
-      }
-      intent += magnitude;
-      if (intent >= 28) {
-        consumed = true;
-        intent = 0;
-        triggeredAt = now;
-        go(dir, true);
-      }
+      if (decision.kind === "step" && !go(decision.direction, true))
+        resetGesture(); // An outward boundary attempt must not hold an inward swipe.
+
     },
     { passive: false },
   );

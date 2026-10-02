@@ -6,7 +6,11 @@ This project is a working copy of the supplied Astro/TypeScript archive. The upl
 
 The official CommunityHub website is the wording source. The homepage mission and omission of an unconfirmed job title are explicit approved revisions recorded in `tests/fixtures/approved-refinements.json`. Existing team and testimonial photographs are preserved byte for byte from the uploaded optimized archive.
 
-## Latest Products revision
+## Latest navigation revision
+
+The final meeting agreement and the later swipe repair are documented in [navigation revision](swipe-revision.md). The repair separates vertical product order from within-product examples, preserves deliberate direction changes and semantic position, and keeps the brief homepage quieter.
+
+## Products revision
 
 The Products `#how` section now uses all 31 original Story of Dashboard frames from the official Environmental Dashboard presentation, with full-frame containment and quiet manual controls. This supersedes the earlier Products slide-10 reconstruction only. The Data Hub explanation and separate resource viewer remain unchanged. See [source and verification details](original-story-revision.md).
 
