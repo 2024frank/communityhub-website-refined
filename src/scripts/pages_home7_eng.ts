@@ -1,0 +1,159 @@
+/* Task 8: To Engage keeps its heading on screen while three stops (signs, phones,
+   partner websites) pass under it, then the page moves on to To Educate.
+   John (30 Sep) wants the original's three colour-coded groups, so To educate and
+   To motivate and empower stage the same way. Each section is one stop per panel
+   tall; this shows the panel for the stop in view. */
+Array.from(
+  document.querySelectorAll<HTMLElement>("#main > section.eng"),
+).forEach(function (sec) {
+  const stage = matchMedia(
+    "(pointer:fine) and (min-width:901px) and (min-height:480px)",
+  );
+  const tabs = Array.from(sec.querySelectorAll<HTMLElement>("[data-eng-tab]"));
+  const panels = Array.from(
+    sec.querySelectorAll<HTMLElement>("[data-eng-panel]"),
+  );
+  const choice = sec.querySelector<HTMLSelectElement>("[data-eng-select]");
+  let shown = -1;
+  let frame = 0;
+  let layoutFrame = 0;
+  function layoutPanel() {
+    layoutFrame = 0;
+    const panel = panels[shown];
+    if (!panel) return;
+    const copy = panel.querySelector<HTMLElement>("[data-eng-context]");
+    const media = panel.querySelector<HTMLElement>("[data-eng-view]");
+    const heading = sec.querySelector<HTMLElement>(".chapter-heading");
+    if (!copy || !media || !heading) return;
+    // Measure the selected product's natural composition, before the authored
+    // context/media scenes add their viewport heights. Offscreen products do
+    // not decide how tall the current product is.
+    sec.classList.add("eng-measuring");
+    const style = getComputedStyle(sec);
+    const headingSpace = heading.offsetHeight +
+      (parseFloat(getComputedStyle(heading).marginBottom) || 0) +
+      (parseFloat(style.paddingTop) || 0);
+    const natural = headingSpace + copy.offsetHeight + media.offsetHeight +
+      (parseFloat(getComputedStyle(panel).rowGap) || 0) +
+      (parseFloat(style.paddingBottom) || 0);
+    sec.classList.remove("eng-measuring");
+    const split = innerWidth <= 900 && natural > room() + 1;
+    const mode = innerWidth <= 699 && innerHeight <= 740 ? "short-phone" : "";
+    sec.style.setProperty("--eng-context-room", Math.max(0, room() - headingSpace) + "px");
+    sec.classList.toggle("eng-sequenced", split);
+    panels.forEach(function (item, index) {
+      item.querySelectorAll<HTMLElement>("[data-eng-context], [data-eng-view]").forEach(function (scene) {
+        if (split && index === shown) scene.setAttribute("data-story-scene", mode);
+        else {
+          scene.removeAttribute("data-story-scene");
+          scene.classList.remove("ch-authored-scene", "is-scene-in");
+          scene.inert = false;
+        }
+      });
+    });
+    // Scene identity can change without changing the section's total height.
+    // Ask the existing controller to publish ownership immediately.
+    window.dispatchEvent(new CustomEvent("ch:fit", { detail: {} }));
+  }
+  function scheduleLayout() {
+    if (!layoutFrame) layoutFrame = requestAnimationFrame(layoutPanel);
+  }
+  function room() {
+    return (
+      window.innerHeight -
+      (parseFloat(
+        getComputedStyle(document.documentElement).getPropertyValue(
+          "--story-hdr-h",
+        ),
+      ) || 0)
+    );
+  }
+  function show(i: number) {
+    if (i === shown) return;
+    if (panels[shown]?.contains(document.activeElement)) {
+      const control = choice || tabs[i] || sec.querySelector<HTMLElement>("[data-story-rail]");
+      control?.focus({ preventScroll: true });
+    }
+    shown = i;
+    sec.setAttribute("data-i", String(i));
+    if (choice) choice.value = String(i);
+    tabs.forEach(function (t, k) {
+      t.setAttribute("aria-selected", k === i ? "true" : "false");
+      t.tabIndex = k === i ? 0 : -1;
+    });
+    panels.forEach(function (p, k) {
+      p.toggleAttribute("inert", k !== i);
+    });
+    scheduleLayout();
+  }
+  function update() {
+    frame = 0;
+    if (!stage.matches) {
+      const rail = sec.querySelector<HTMLElement>("[data-story-rail]");
+      const left = rail?.getBoundingClientRect().left ?? 0;
+      const index = panels.reduce((best, panel, i) => Math.abs(panel.getBoundingClientRect().left - left) < Math.abs(panels[best].getBoundingClientRect().left - left) ? i : best, 0);
+      show(index);
+      return;
+    }
+    const r = room();
+    const span = Math.max(1, sec.offsetHeight - r);
+    const p = (window.innerHeight - r - sec.getBoundingClientRect().top) / span;
+    show(
+      Math.max(
+        0,
+        Math.min(panels.length - 1, Math.round(p * (panels.length - 1))),
+      ),
+    );
+  }
+  function selectPanel(k: number) {
+      if (!stage.matches) {
+        const rail = sec.querySelector<HTMLElement>("[data-story-rail]");
+        if (rail && panels[k]) rail.scrollTo({left: panels[k].offsetLeft - panels[0].offsetLeft, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth"});
+        return;
+      }
+      const r = room();
+      const step = (sec.offsetHeight - r) / (panels.length - 1);
+      const top =
+        sec.getBoundingClientRect().top +
+        window.scrollY -
+        (window.innerHeight - r);
+      window.scrollTo({
+        top: Math.round(top + step * k),
+        behavior: "instant",
+      });
+  }
+  tabs.forEach((t,k) => t.addEventListener("click", () => selectPanel(k)));
+  choice?.addEventListener("change", () => selectPanel(Number(choice.value)));
+  const rail = sec.querySelector<HTMLElement>("[data-story-rail]");
+  rail?.addEventListener("scroll", () => {
+    if (stage.matches || !rail) return;
+    const index = panels.reduce((best, panel, i) => Math.abs(panel.getBoundingClientRect().left - rail.getBoundingClientRect().left) < Math.abs(panels[best].getBoundingClientRect().left - rail.getBoundingClientRect().left) ? i : best, 0);
+    show(index);
+  }, { passive: true });
+  tabs.forEach((tab, i) => tab.addEventListener("keydown", event => {
+    if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+    event.preventDefault();
+    const next = event.key === "Home" ? 0 : event.key === "End" ? tabs.length - 1 : (i + (event.key === "ArrowRight" ? 1 : -1) + tabs.length) % tabs.length;
+    tabs[next].focus({preventScroll:true});
+    tabs[next].click();
+  }));
+  window.addEventListener(
+    "scroll",
+    function () {
+      if (!frame) frame = requestAnimationFrame(update);
+    },
+    { passive: true },
+  );
+  window.addEventListener("resize", () => { update(); scheduleLayout(); });
+  stage.addEventListener("change", () => { update(); scheduleLayout(); });
+  window.addEventListener("load", scheduleLayout);
+  document.fonts?.ready.then(scheduleLayout);
+  if (window.ResizeObserver) {
+    const observer = new ResizeObserver(scheduleLayout);
+    panels.forEach(panel => {
+      panel.querySelectorAll<HTMLElement>("[data-eng-context], [data-eng-view]").forEach(scene => observer.observe(scene));
+    });
+  }
+  sec.classList.add("eng-enhanced");
+  update();
+});
