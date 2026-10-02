@@ -3,8 +3,8 @@ npm warn Unknown env config "http-proxy". This will stop working in the next maj
 > community-hub-website@1.0.0 check
 > node ./node_modules/astro/bin/astro.mjs check
 
-10:06:50 [types] Generated 100ms
-10:06:50 [check] Getting diagnostics for Astro files in /workspace/shared/communityhub-refined-site...
+11:31:41 [types] Generated 101ms
+11:31:41 [check] Getting diagnostics for Astro files in /workspace/shared/communityhub-refined-site...
 [96msrc/scripts/base.ts[0m:[93m767[0m:[93m19[0m - [93mwarning[0m[90m ts(80006): [0mThis may be converted to an async function.
 
 [7m767[0m           ids.map(function (id) {
@@ -37,7 +37,7 @@ npm warn Unknown env config "http-proxy". This will stop working in the next maj
 [7m736[0m     function getJSON(url: string): Promise<unknown> {
 [7m   [0m [93m             ~~~~~~~[0m
 
-Result (75 files): 
+Result (76 files): 
 - 0 errors
 - 0 warnings
 - 7 hints

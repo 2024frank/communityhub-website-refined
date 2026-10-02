@@ -35,7 +35,8 @@ Open `http://127.0.0.1:4327/`. Preview serves `dist/`; it does not rebuild edite
 | `src/content/products*.ts` | Product and live-dashboard page content |
 | `src/content/resources.ts`, `directories.ts` | Resource content and overview directories |
 | `src/content/meeting-embeds.ts` | Verified native application contexts and phone walkthrough markup |
-| `src/content/hub-flow.ts` | Source-led Dashboard Platform explanation markup |
+| `src/content/hub-flow.ts` | Source-led Dashboard Platform explanation on Data Hub |
+| `src/content/original-story.ts` | Products `#how`: complete original Story of Dashboard slides, using the shared manual controller |
 | `src/content/lesson-links.json` | Verified individual lesson PDFs |
 | `src/lib/site.ts`, `content-helpers.ts`, `types.ts` | Typed page construction, images, shared live frames and common markup |
 | `src/scripts/index.ts` | Ordered initialization of browser modules |
@@ -109,7 +110,8 @@ The initial poster is the film's true first frame. Switch fallback and playable 
 ## 5. Animations and interaction
 
 - The homepage centered identity has a 2.4-second animation and 6.6-second reading hold on its first uninterrupted visit. It may advance once only while that scene owns the viewport. Manual navigation cancels the pending advance; revisits must not cause a delayed jump. Reduced motion keeps manual navigation.
-- The interior Dashboard explanation has its own source-led reveal sequence and quiet previous/next controls. It does not automatically advance to another website section. The separate platform notes describe its source assets and exact current sequence.
+- Products `#how` shows the original 31-frame Story of Dashboard deck with manual arrows and a full-size image action. Its complete authored caption strips must remain visible and uncropped.
+- The Data Hub Dashboard explanation has its own source-led reveal sequence and quiet previous/next controls. It does not automatically advance to another website section. The separate platform notes describe its source assets and exact current sequence.
 - Testimonial and photo galleries show one complete item at a time. Hover/focus, explicit pause, a hidden tab and offscreen state preserve the unspent display time. Resuming must not rewind the progress; choosing another item deliberately starts that new item.
 - Secondary controls reveal on the content container's hover or keyboard focus and remain usable on touch. Do not restore large persistent Previous/Next/Pause bars or visible item counts. Screen-reader status can remain available.
 - Avoid ordinary-content entrance fades that conceal forms or directories during arrival. Purposeful film/identity/story animation is separate from ornamental reveal effects.

@@ -1,6 +1,6 @@
 /** Product overview: the products first, then how the platform works. */
 import type { SiteContext } from "../lib/site";
-import { hub_flow } from "./hub-flow";
+import { originalStory } from "./original-story";
 
 export function register(H: SiteContext): void {
   const groups = ["Engage", "Educate", "Motivate and empower"] as const;
@@ -15,9 +15,9 @@ export function register(H: SiteContext): void {
   const products = `<section class="product-directory" id="groups" aria-labelledby="prods-h"><div class="wrap">
     ${H.crumbs([null, "Products"] as const)}<h1 class="h1" id="prods-h">Products and Services</h1><p class="lede">Choose a product to see how it works.</p>
     <div class="product-directory-grid">${groups.map(column).join("")}</div>
-    <a class="product-how-link" href="#how">How the products work together ${H.ARR}</a>
+    <a class="product-how-link" href="#how">Story of Dashboard ${H.ARR}</a>
   </div></section>`;
-  const hub = hub_flow("how", "How the Dashboard Platform Works");
+  const hub = originalStory();
   const body = products + hub + H.cta_band("Contact Us", "");
   H.write_page(
     "products",

@@ -1,6 +1,8 @@
 # Platform explanations: current implementation and source provenance
 
-## Scope of the latest correction
+> Later October 2 revision: Products `#how` now displays the original Story of Dashboard slideshow. The slide-10 component described below remains on the Data Hub page only. See [the Products revision](original-story-revision.md).
+
+## Scope of the earlier slide-10 correction
 
 The user identified the dark “How the Dashboard Platform Works” component on Products and asked for the supplied presentation's slide 10 explanation. This replaces the former generic card-based model. The same component is used in Data Hub's Data Manager section, so both routes receive the reconstruction.
 

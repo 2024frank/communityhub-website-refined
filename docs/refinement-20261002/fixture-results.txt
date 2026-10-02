@@ -3,4 +3,4 @@ npm warn Unknown env config "http-proxy". This will stop working in the next maj
 > community-hub-website@1.0.0 test:fixtures
 > node scripts/build-test-runtime.mjs
 
-Prepared 26 TypeScript fixture bundles and 46 stylesheets in tests/runtime.
+Prepared 26 TypeScript fixture bundles and 47 stylesheets in tests/runtime.

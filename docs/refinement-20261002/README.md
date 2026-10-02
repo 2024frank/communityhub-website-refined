@@ -6,6 +6,10 @@ This project is a working copy of the supplied Astro/TypeScript archive. The upl
 
 The official CommunityHub website is the wording source. The homepage mission and omission of an unconfirmed job title are explicit approved revisions recorded in `tests/fixtures/approved-refinements.json`. Existing team and testimonial photographs are preserved byte for byte from the uploaded optimized archive.
 
+## Latest Products revision
+
+The Products `#how` section now uses all 31 original Story of Dashboard frames from the official Environmental Dashboard presentation, with full-frame containment and quiet manual controls. This supersedes the earlier Products slide-10 reconstruction only. The Data Hub explanation and separate resource viewer remain unchanged. See [source and verification details](original-story-revision.md).
+
 ## Visual and interaction changes
 
 - Local Comfortaa headings and Lato body text, consistent controls, quieter page hierarchy
@@ -35,12 +39,12 @@ A byte-level comparison on October 2 confirms all 597 files originally supplied 
 
 ## Verification
 
-Current automated results are saved beside this document: Astro/TypeScript reports 0 errors and 0 warnings (7 informational hints); the production build emits 38 HTML pages; all 136 Node unit tests and all 11 local route, asset, privacy and copy contracts pass. The exact production file hashes are recorded in `final-build-manifest.json`. These results do not imply physical-device verification.
+Current automated results are saved beside this document: Astro/TypeScript reports 0 errors and 0 warnings (7 informational hints); the production build emits 38 HTML pages; all 141 Node unit tests and all 11 local route, asset, privacy and copy contracts pass. The exact production file hashes are recorded in `final-build-manifest.json`. These results do not imply physical-device verification.
 
 Authenticated, owner-only hosted Chrome review covered every content route: all 35 desktop page walks reached their ending/footer, and all 35 initial narrow views were captured. Changed scenes were then retested at successive checkpoints. The narrow review used a resized desktop browser at approximately 388 × 606 CSS pixels and 125% browser zoom, not a physical phone. The review included selected real upstream controls, the combined video/people opening, staged platform presentation, photo galleries, lesson filtering, phone walkthrough, FAQs, menus and error recovery. Exact final-candidate acceptance and remaining limitations are recorded in the handoff’s `QA-STATUS.md`.
 
 The broad route walk and targeted interaction checks are distinct: they are not a claim that every third-party application state, every link, every browser, or every narrow continuation was exhaustively tested.
 
-The authored browser suite is aligned to the new contracts. All 30 Python modules and 334 embedded JavaScript snippets pass syntax checks, and all 26 TypeScript fixture bundles and 46 associated stylesheets compile. This does not mean the automated browser suite was executed. See [the browser-test migration notes](browser-test-migration.md).
+The authored browser suite is aligned to the new contracts. All 30 Python modules and 334 embedded JavaScript snippets pass syntax checks, and all 26 TypeScript fixture bundles and 47 associated stylesheets compile. This does not mean the automated browser suite was executed. See [the browser-test migration notes](browser-test-migration.md).
 
 Remote public applications require internet access and remain controlled by their respective hosts. A cross-origin iframe load event cannot prove the upstream application is functioning; open-in-new-tab recovery remains available.

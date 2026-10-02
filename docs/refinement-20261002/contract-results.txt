@@ -11,6 +11,6 @@ test_live_testimonial_quotes_attributions_photos_and_primary_links_are_preserved
 test_original_product_descriptions_remain_on_the_corresponding_pages (test_site_contracts.SiteContractsTests.test_original_product_descriptions_remain_on_the_corresponding_pages) ... ok
 
 ----------------------------------------------------------------------
-Ran 11 tests in 1.084s
+Ran 11 tests in 1.091s
 
 OK
