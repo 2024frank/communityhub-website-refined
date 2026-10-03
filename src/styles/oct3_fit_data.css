@@ -132,3 +132,11 @@
  #main#main#main#main[data-page="see-it-live"] .live-frame .lf-body{position:relative;overflow:hidden;container-type:inline-size}
  #main#main#main#main[data-page="see-it-live"] .live-frame .lf-body>iframe{position:absolute;top:0;left:0;max-width:none;width:calc(100cqw / .52);height:calc(100% / .52)!important;transform:scale(.52);transform-origin:0 0}
 }
+
+/* ===== Data dashboard, phone: the Cleveland "Orbs" label is a full section band like the others (16px above and below, full-width rule), not a bare line against the header. ===== */
+@media(max-width:699px){
+ #main#main#main#main[data-page="data-dashboard"] .orb-product-scene--cleveland .orb-scene-label{
+  font-family:var(--font-display);font-weight:700;font-size:clamp(26px,5vw,36px);line-height:1.25;color:#244b38;
+  padding:16px 0;margin:0 0 12px;border-bottom:1px solid #c9d2c4;
+  border-image:linear-gradient(#c9d2c4,#c9d2c4) 0 0 1 0/0 0 1px 0/0 100vmax 0 stretch}
+}

@@ -184,6 +184,9 @@ interface Source {
   hint?: HTMLElement;
   /** Last scrollTop seen: a region holding a cross-origin frame reports its scrolling only this way. */
   top?: number;
+  /** Where the current burst of scrolling began, and when its latest event came. */
+  from?: number;
+  scrollAt?: number;
 }
 interface AutoTarget { sel: string; text: string; side: Side; kind: "scroll" | "control"; scope?: string }
 
@@ -260,7 +263,17 @@ export function initAttentionSquirrel(): Handle | undefined {
   }
   function overflows(el: HTMLElement) { return el.scrollHeight - el.clientHeight > MIN_OVERFLOW; }
 
+  /* A frame that fills a scroll region is scaled to its whole height, so the region does the scrolling. If the frame
+     could also scroll itself (its page is a little taller than it reports), the visitor's first swipe or wheel notch
+     would move the frame's own content: nothing the page can hear, the region still at the top, the cue still up. */
+  function lockFrames() {
+    doc.querySelectorAll<HTMLIFrameElement>("[data-scroll-owner] iframe[data-native-scroll-frame]").forEach(f => {
+      if (f.getAttribute("scrolling") !== "no") f.setAttribute("scrolling", "no");
+    });
+  }
+
   function collect() {
+    lockFrames();
     const seen = new Set<HTMLElement>();
     const list: Source[] = [];
     function add(el: HTMLElement, text: string, side: Side, kind: Source["kind"]) {
@@ -579,10 +592,14 @@ export function initAttentionSquirrel(): Handle | undefined {
     if (!el || el === (doc as unknown as HTMLElement) || !el.hasAttribute || !el.hasAttribute("data-scroll-owner")) return;
     const s = sources.find(x => x.el === el);
     if (!s) return;
-    const prev = s.top ?? el.scrollTop;
+    const now = performance.now();
+    // A swipe or wheel notch arrives as many small scroll events. Measure the whole burst from where it began, so a slow first drag (1-3px an event) still counts.
+    if (now - (s.scrollAt ?? -1e9) > 250 || s.from == null) s.from = s.top ?? el.scrollTop;
+    s.scrollAt = now;
     s.top = el.scrollTop;
-    if (!e.isTrusted || done.has(s.id) || el.hasAttribute("data-scroll-hinting") || !el.querySelector("iframe")) return;
-    if (Math.abs(s.top - prev) >= 4) finish(s, "did");
+    if (el.hasAttribute("data-scroll-hinting")) { s.from = s.top; return; }
+    if (!e.isTrusted || done.has(s.id) || !el.querySelector("iframe")) return;
+    if (Math.abs(s.top - s.from) >= 4) finish(s, "did");
   }
   window.addEventListener("scroll", onRegionScroll, { capture: true, passive: true });
   const onScene = () => { lastScene = lastActivity = performance.now(); schedule(); };

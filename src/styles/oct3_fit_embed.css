@@ -125,7 +125,18 @@
   #main#main#main[data-page="phone-app"] .phone-workflow { position:relative; --pa-avail:calc(100dvh - var(--story-hdr-h,77px) - 72px); }
   #main#main#main[data-page="phone-app"] .phone-workflow .pw-status { font-size:15px; line-height:1.4; min-height:2.8em; margin-bottom:8px; }
   #main#main#main[data-page="phone-app"] .phone-workflow .pw-stage { gap:12px; }
-  #main#main#main[data-page="phone-app"] .phone-workflow .pw-tv figcaption { font-size:13px; line-height:1.35; min-height:0; margin-top:6px; }
+  #main#main#main[data-page="phone-app"] .phone-workflow .pw-tv figcaption { font-size:13px; line-height:1.35; min-height:2.7em; margin-top:6px; }
   #main#main#main[data-page="phone-app"] .phone-workflow .pw-phone-column { width:clamp(150px, calc((var(--pa-avail) - 346px) * 0.562 + 14px), 78%); }
   #main#main#main[data-page="phone-app"] .phone-workflow .pw-foot { position:absolute; right:0; bottom:0; margin:0; width:44px; height:44px; }
+
+  /* Landing (scrollY 0): the phone would poke up under the next circle and be cut by the screen edge, so it stays out of sight until the page moves to the controller stop (it fades in over the first 120px of scroll). Without scroll-driven animation support it simply shows as before. The TV caption keeps two lines in every state so the stop never changes height when a channel is chosen. */
+  @supports (animation-timeline: scroll()) {
+    #main#main#main[data-page="phone-app"] .phone-workflow .pw-phone-column { animation: pa-phone-in linear both; animation-timeline: scroll(root block); animation-range: 0px 120px; }
+  }
+}
+@keyframes pa-phone-in { from { opacity:0; visibility:hidden; } to { opacity:1; visibility:visible; } }
+
+/* ---- final "Keep exploring" stop on a phone: content starts under the header instead of floating in the middle of a tall band (phone-app, stories, see-it-live). ---- */
+@media (max-width:699px) {
+  #main#main#main:is([data-page="phone-app"],[data-page="stories"],[data-page="see-it-live"]) .page-ending-explore { justify-content:flex-start; }
 }
