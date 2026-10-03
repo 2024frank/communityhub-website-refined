@@ -1,4 +1,5 @@
 import { shouldLoadDeferredFrame } from "./ui/deferred-frame-policy";
+import { initAttentionSquirrel } from "./ui/attention-squirrel";
 import type { GaugeReading, Mood } from "./types";
 import { calendarData } from "./data";
 type NowReading = Pick<GaugeReading, "title" | "value" | "num" | "pos" | "ok">;
@@ -1121,72 +1122,22 @@ import { $, $$, isPresent, required, eventElement } from "./dom";
 
   /* ================================================================
      INNER SCROLL REGIONS: every one owns the wheel until its edge (the
-     page scripts read [data-scroll-owner]), shows the same pine scrollbar
-     (oct3_controls.css) and nudges down and back once when first in view.
+     page scripts read [data-scroll-owner]) and shows the same pine
+     scrollbar (oct3_controls.css). The "Scroll here" cue is the attention
+     squirrel (ui/attention-squirrel.ts), not a content nudge.
      ================================================================ */
   safe(function () {
     const SEL = ".native-scroll,.native-voices-content,.native-application-viewport,.ev-mini,.rs-lessons,.zpb-emb-site,.hf-source-model,.hf-grid,.pw-picker,.page-contents-panel";
-    const still = matchMedia("(prefers-reduced-motion: reduce)");
-    const NUDGE = 24;
-    const calm = new Map<HTMLElement, number>();
-    let poll: number | undefined;
-    function settle(el: HTMLElement) {
-      el.setAttribute("data-scroll-hinted", "");
-      calm.delete(el);
-      if (!calm.size && poll !== undefined) { clearInterval(poll); poll = undefined; }
-    }
-    function ready(el: HTMLElement) {
-      if (!el.isConnected || el.closest("[inert]") || el.scrollTop > 0) return false;
-      if (el.scrollHeight - el.clientHeight <= NUDGE) return false;
-      const r = el.getBoundingClientRect();
-      if (r.width < 40 || r.height < 40) return false;
-      const seen = Math.min(r.bottom, innerHeight) - Math.max(r.top, 0);
-      if (seen < r.height * 0.7 || r.right <= 0 || r.left >= innerWidth) return false;
-      return (el as HTMLElement & { checkVisibility?: (o: object) => boolean }).checkVisibility?.({ opacityProperty: true, visibilityProperty: true }) !== false;
-    }
-    function nudge(el: HTMLElement) {
-      settle(el);
-      el.setAttribute("data-scroll-hinting", "");
-      const t0 = performance.now(), dur = 1100;
-      let raf = 0, live = true;
-      const events = ["wheel", "touchstart", "pointerdown", "keydown"];
-      function stop() {
-        if (!live) return;
-        live = false;
-        cancelAnimationFrame(raf);
-        events.forEach(n => el.removeEventListener(n, stop));
-        setTimeout(() => el.removeAttribute("data-scroll-hinting"), 150);
-      }
-      events.forEach(n => el.addEventListener(n, stop, { passive: true }));
-      (function step(now: number) {
-        if (!live) return;
-        const p = Math.min(1, (now - t0) / dur);
-        el.scrollTop = NUDGE * Math.sin(Math.PI * p);
-        if (p < 1) raf = requestAnimationFrame(step); else { el.scrollTop = 0; stop(); }
-      })(t0);
-    }
-    function check() {
-      if (doc.hidden || still.matches) return;
-      calm.forEach((n, el) => {
-        if (!ready(el)) { calm.set(el, 0); return; }
-        // Two quiet looks in a row: the scene has stopped moving.
-        if (n >= 1) nudge(el); else calm.set(el, n + 1);
-      });
-    }
     function adopt() {
       $$(SEL).forEach(function (el) {
         if (!el.hasAttribute("data-scroll-owner")) el.setAttribute("data-scroll-owner", "");
-        if (el.hasAttribute("data-scroll-hinted") || calm.has(el)) return;
-        calm.set(el, 0);
-        // A reader who has already scrolled, pressed or tabbed here needs no hint.
-        ["wheel", "touchstart", "pointerdown", "keydown", "focusin"].forEach(n => el.addEventListener(n, () => settle(el), { passive: true, once: true }));
       });
-      if (calm.size && poll === undefined) poll = window.setInterval(check, 700);
     }
     let later: number | undefined;
     function rescan() { clearTimeout(later); later = window.setTimeout(adopt, 250); }
     adopt();
     if (doc.body && typeof MutationObserver !== "undefined") new MutationObserver(rescan).observe(doc.body, { childList: true, subtree: true });
+    initAttentionSquirrel();
   })();
 
   /* ================================================================

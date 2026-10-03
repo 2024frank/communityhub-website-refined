@@ -54,10 +54,7 @@
     scrollbar-color:#244b38 #e6ece4!important;scrollbar-width:auto!important}
 }
 
-/* ---------- 3. Scroll hint: the region nudges down and back once ---------- */
-/* The script does the nudge; this only stops snapping and smoothing from
-   fighting it, and keeps the hint off for people who ask for less motion. */
-[data-scroll-hinting]{scroll-behavior:auto!important;scroll-snap-type:none!important}
+/* ---------- 3. Scroll hint: the attention squirrel (oct3_squirrel.css) cues "Scroll here" ---------- */
 
 /* Community Voices category tabs: same underline weight and colour as the rest. */
 #main#main#main#main .zpb-cv-tab[aria-selected="true"]{color:var(--ch-pine,#244b38);border-bottom-width:3px}
