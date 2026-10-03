@@ -1,4 +1,4 @@
-import { hub_flow } from "./hub-flow";
+import { originalStory } from "./original-story";
 import { nativeStories } from "./meeting-embeds";
 import { renderButton, renderField, renderStatus } from "../lib/ui";
 /** Data Hub, Data Dashboard, Stories, and Pricing page renderers. */
@@ -226,7 +226,7 @@ export function register(H: SiteContext): void {
       true,
     );
     body += manager;
-    body += hub_flow("manager-platform", "How the Dashboard Platform Works");
+    body += originalStory("manager-platform", "How the Dashboard Platform Works");
     body += sec(
       "creator",
       "Dashboard Builder",
@@ -395,7 +395,7 @@ export function register(H: SiteContext): void {
       [
         "deck/h51c.jpg",
         "The C-Neutral exhibit taking shape at Oberlin College's Science Center",
-        "The Science Center exhibit",
+        "The exhibit taking shape",
       ] as const,
       [
         "deck/h52c.jpg",
@@ -403,11 +403,11 @@ export function register(H: SiteContext): void {
         "The exhibit case",
       ] as const,
       [
-        "deck/h53c.jpg",
-        "The geothermal model selected on the exhibit's kiosk",
-        "The geothermal model",
+        "carbon-neutral-science-center-original.jpeg",
+        "Three people at the Carbon Neutral Stories exhibit in Oberlin College’s Science Center",
+        "Carbon Neutral Stories at the Science Center",
       ] as const,
-    ], '<p class="exhibit-context" style="margin-top:18px;max-width:64ch">At Oberlin College\'s Science Center, a model of the geothermal system uses LEDs, run by ESP32 boards, to show heat moving through the wells and pipes. Oberlin students built it with Community Hub in summer 2026. People scan a QR code on the model to open the story on their phone.</p>');
+    ]) + '<p class="exhibit-context" data-story-scene="short-phone" style="margin-top:24px;max-width:80ch">At Oberlin College\'s Science Center, a model of the geothermal system uses LEDs, run by ESP32 boards, to show heat moving through the wells and pipes. Oberlin students built it with Community Hub in summer 2026. People scan a QR code on the model to open the story on their phone.</p>';
     body += sec(
       "exhibit",
       "The Science Center",

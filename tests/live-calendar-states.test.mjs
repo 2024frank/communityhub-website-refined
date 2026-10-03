@@ -15,9 +15,9 @@ before(()=>{
  visit(ast);assert.equal(pieces.length,3);
  source=ts.transpileModule(pieces.join('\n'),{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.None}}).outputText;
 });
-async function render(result,fail=false){
+async function render(result,fail=false,passive=false){
  const fallback={textContent:'Loading…',innerHTML:''};
- const box={innerHTML:'',getAttribute:key=>key==='data-city'?'cleveland':'3'};
+ const box={innerHTML:'',getAttribute:key=>key==='data-city'?'cleveland':key==='data-count'?'3':key==='data-event-preview'&&passive?'':null};
  const context={getJSON:()=>fail?Promise.reject(new Error('unavailable')):Promise.resolve(result),
   calendarData:value=>{if(!Array.isArray(value.sessions))throw Error('invalid');return value;},
   $:()=>fallback,TZ:{timeZone:'America/New_York'},clock:()=> '2:00 PM',
@@ -42,3 +42,5 @@ test('unavailable calendar gives a conditional direct source recovery link',asyn
  assert.match(fallback.innerHTML,/couldn.t load/);
  assert.match(fallback.innerHTML,/https:\/\/cleveland.communityhub.cloud\/calendar\//);
 });
+
+test('homepage calendar previews preserve content without competing clickable event links',async()=>{const now=Date.now()/1000;const {box}=await render({sessions:[{postId:123,postName:'Community event',start:now+86400,end:now+90000}]},false,true);assert.match(box.innerHTML,/Community event/);assert.match(box.innerHTML,/event-preview-row/);assert.doesNotMatch(box.innerHTML,/<a /);});

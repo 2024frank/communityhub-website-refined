@@ -40,3 +40,7 @@ The generated build, dependencies, Astro cache, generated test runtime, browser 
 Historical migration parity tests refer to an optional frozen `reference/` tree absent from the supplied archive; it has not been invented. The capture utility can reference historical comparison screenshots outside this source tree; they are not production dependencies. No secret scanner can establish the absence of every possible secret format.
 
 `SOURCE-MANIFEST.json` lists every included project file, its size, SHA-256 and ZIP assignment, plus asset-preservation and exclusion details. `SHA256SUMS` covers project files and handoff metadata other than itself. The separate archive checksum list covers both ZIPs.
+
+## October 3 saved work checkpoint
+
+Saved and pushed at the user's request to stop work. The current implementation is a work-in-progress checkpoint, not a completed QA release. The latest completed automated checks passed, but final browser review remains incomplete. A known Community Voices product-page issue remains: changing community can shift the section position and clip category controls. No fix for that report has been applied. Production has not been deployed. The existing source manifest/checksum files predate this checkpoint and are not a validation of these edits.

@@ -18,24 +18,15 @@ from lxml import html as lxml_html
 from playwright.sync_api import sync_playwright
 
 SITE = Path(__file__).resolve().parents[2] / "dist" / "index.html"
-def tabs():
-    doc = lxml_html.fromstring(SITE.read_text(encoding="utf-8"))
-    panel = doc.xpath('//article[@data-eng-panel and @aria-label="Community Voices"]')[0]
-    return json.loads(panel.xpath('.//script[@data-native-config]/text()')[0])
-
-
 class VoicesSourcesTest(unittest.TestCase):
-    def test_homepage_offers_three_source_backed_contexts(self):
-        contexts=tabs()
-        self.assertEqual([c['name'] for c in contexts],['MidTown Cleveland','Great Lakes Science Center','Oberlin'])
-        self.assertIn('image_tags=36',contexts[0]['url'])
-        self.assertEqual([c['id'] for c in contexts[0]['categories']],list(range(7,13)))
-        self.assertEqual([c['id'] for c in contexts[1]['categories']],list(range(1,7)))
-        self.assertTrue(contexts[2]['url'].startswith('https://oberlin.communityhub.cloud/'))
-        for context in contexts:
-            self.assertTrue(context['logo'].startswith('https://'))
-            self.assertNotIn('screen_tags',context['url'])
-            self.assertGreater(len(context['categories']),0)
+    def test_homepage_offers_source_backed_passive_contexts(self):
+        doc=lxml_html.fromstring(SITE.read_text(encoding="utf-8"))
+        panel=doc.xpath('//article[@data-eng-panel and @aria-label="Community Voices"]')[0]
+        labels=[' '.join(x.text_content().split()) for x in panel.xpath('.//*[contains(concat(" ",normalize-space(@class)," ")," preview-context ")]')]
+        self.assertEqual(labels,['Oberlin · Natural Oberlin','Cleveland · Our Neighbors','Cleveland · Next Generation','Cleveland · Climate Action'])
+        self.assertFalse(panel.xpath('.//*[@data-native-choice or @data-native-config]'))
+        self.assertEqual(len(panel.xpath('.//*[@data-reading-preview]')),1)
+        self.assertEqual(len(panel.xpath('.//*[@data-sp]//picture/img')),4)
 
 
 

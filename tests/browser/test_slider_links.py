@@ -21,18 +21,18 @@ class SliderLinksTest(unittest.TestCase):
         self.assertGreaterEqual(len(cards), 6)
         for card in cards:
             links = re.findall(r'<a class="pp-btn[^"]*" href="([^"]+)"', card)
-            self.assertIn(len(links), (1, 2, 3), card[:120])
+            self.assertEqual(len(links), 1, card[:120])
             for href in links:
                 page, _, anchor = href.partition("#")
                 self.assertTrue((SITE / page).exists(), href)
                 if anchor:
                     self.assertIn(f'id="{anchor}"', read(page), href)
 
-    def test_slider_keeps_original_products_and_explicit_school_example(self):
+    def test_slider_keeps_original_primary_product_destinations(self):
         home = read("index.html")
         for href in ("digital-signage.html", "phone-app.html", "web-embeddables.html",
                      "building-dashboard.html", "citywide-dashboard.html", "the-hub.html",
-                     "community-calendar.html", "community-voices.html", "education.html", "schools.html#live"):
+                     "community-calendar.html", "community-voices.html"):
             self.assertIn(f'class="pp-btn', home)
             self.assertIn(f'href="{href}"', home, href)
 

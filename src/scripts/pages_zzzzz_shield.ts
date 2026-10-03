@@ -7,6 +7,7 @@
   function connect() {
     main!.querySelectorAll<HTMLIFrameElement>("iframe").forEach(frame => {
       if (known.has(frame)) return;
+      if (frame.hasAttribute("data-passive-preview")) { known.add(frame); return; }
       known.add(frame);
       frame.classList.remove("ch-embed-shield");
       frame.classList.add("ch-live");

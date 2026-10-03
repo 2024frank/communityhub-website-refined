@@ -43,7 +43,7 @@ export function quote(
   scene?: { img: string; alt: string; cap: string },
 ): string {
   const source = TESTIMONIALS.find(item => item.who === who && item.quote === q);
-  const photo = source
+  const photo = cls.includes("quote-text-only") ? "" : source
     ? `<img class="pull-source-photo" src="assets/${source.img}" alt="${e(source.alt)}" loading="lazy">`
     : scene
       ? `<figure class="pull-source-photo pull-scene"><img src="assets/${scene.img}" alt="${e(scene.alt)}" loading="lazy"><figcaption>${e(scene.cap)}</figcaption></figure>`
@@ -150,8 +150,8 @@ export function testimonial_slider(
 }
 export function voices_sign_mode(): string {
   const cards = CV_SLIDES.map(
-    ([img, alt, q, _who, _role, c, cat], i) =>
-      `<div class="cv${i === 0 ? " is-on" : ""}"><img src="assets/${img}" alt="${e(alt)}" loading="lazy"><div class="q"><p>&ldquo;${e(q)}&rdquo;</p></div><p class="cat" style="border-color:${CV_COLOR[c]}">${cat}</p></div>`,
+    ([img, alt, q, who, role, c, cat], i) =>
+      `<div class="cv${i === 0 ? " is-on" : ""}"><img src="assets/${img}" alt="${e(alt)}" loading="lazy"><div class="q"><p>&ldquo;${e(q)}&rdquo;</p><footer class="cv-author">${e(who)}${role ? `, ${e(role)}` : ""}</footer></div><p class="cat" style="border-color:${CV_COLOR[c]}">${cat}</p></div>`,
   ).join("");
   return `<div class="voices-sign" data-voices-sign aria-label="Community Voices, shown the way it runs on a sign">${cards}</div>`;
 }

@@ -678,7 +678,11 @@ import { required, eventElement, htmlChildren } from "./dom";
         const panel = anchor.closest<HTMLElement>("[data-eng-panel]") ||
           frame.anchor?.closest<HTMLElement>("[data-eng-panel]");
         const stage = owner.querySelector<HTMLElement>(".eng-stage");
-        if (panel && stage && getComputedStyle(stage).position === "sticky") {
+        // The stage remains sticky in some narrow styles, but only the mouse
+        // desktop track has one stop per product. Mobile stops are reading
+        // scenes within the selected product, not product indices.
+        if (panel && stage && getComputedStyle(stage).position === "sticky" &&
+          matchMedia("(pointer:fine) and (min-width:901px) and (min-height:480px)").matches) {
           const index = Array.from(owner.querySelectorAll("[data-eng-panel]")).indexOf(panel);
           if (index >= 0 && matches[index]) {
             matches[index].anchor = panel;
@@ -694,7 +698,11 @@ import { required, eventElement, htmlChildren } from "./dom";
           return target;
         }
       }
-      return matches[Math.min(frame.part || 0, matches.length - 1)] || null;
+      const target = matches[Math.min(frame.part || 0, matches.length - 1)] || null;
+      // Combining a narrow product's reading scenes must not discard its
+      // identity before a later resize restores the desktop product stops.
+      if (target) target.anchor = frame.anchor || frame.scene || focus || undefined;
+      return target;
     }
     // Fonts, feeds, image loads and rotation can move stops. Preserve the
     // resting element rather than picking whichever is near its old pixels.
@@ -1230,14 +1238,15 @@ import { required, eventElement, htmlChildren } from "./dom";
   }
 })();
 
-/* Content rails expose each item through touch, arrows, or the keyboard.
-   The product rail is horizontal on desktop as well as on phones. */
+/* Example/content rails expose each item through touch, arrows, or the keyboard.
+   Product selection belongs to the vertical story and its explicit tabs. */
 (function () {
   const mobile = matchMedia("(max-width:900px)");
   const still = matchMedia("(prefers-reduced-motion: reduce)");
   document
     .querySelectorAll<HTMLElement>("[data-story-rail]")
     .forEach(function (rail) {
+      if (rail.querySelector(":scope > [data-eng-panel]")) return;
       const desktop =
         rail.classList.contains("pc-grid") ||
         rail.hasAttribute("data-rail-desktop");

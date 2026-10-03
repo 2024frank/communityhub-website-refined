@@ -1,4 +1,4 @@
-import { phoneDemo, nativeStories } from "./meeting-embeds";
+import { phoneDemo, nativeStories, nativeVoices } from "./meeting-embeds";
 /** Calendar, Community Voices, Digital Signage, Phone App, and Web Embeddables. */
 import type { SiteContext } from "../lib/site";
 import type { Pair, Triple } from "../lib/types";
@@ -269,8 +269,10 @@ export function register(H: SiteContext): void {
       media + '<h2 class="opening-caption" id="show-h">Oberlin’s saved slides, playing on a screen.</h2>',
     );
     body = body.replace('<section ', '<section id="show" ');
+    body += sec("live", "Explore", "Explore Community Voices", nativeVoices());
     body += jump([
       ["show", "On a screen"] as const,
+      ["live", "Explore live"] as const,
       ["wall", "The wall"] as const,
       ["categories", "Seven categories"] as const,
       ["related", "Works well with"] as const,
@@ -331,6 +333,7 @@ export function register(H: SiteContext): void {
       "When I see the dashboard sign in our lobby, I get that good feeling that people are doing good things",
       "Jennifer Harris",
       "Director of the Oberlin Early Childhood Center",
+      "quote-text-only",
     );
     body += H.quote(
       "Psychology and marketing teach us that what we believe other community members are doing powerfully influences our own behavior; Community Voices encourages pro-environmental and pro-community behavior",
@@ -408,13 +411,13 @@ export function register(H: SiteContext): void {
       undefined,
       true,
     );
-    const controller = nativeStories() + `<details class="native-help"><summary>Using the phone controller</summary><ol><li><b>Scan the QR code</b><p>Stand at the screen and scan the code on the poster beside it with your phone camera.</p></li><li><b>Pick a topic on your phone</b><p>Your phone shows that screen's menu. At Oberlin College's Carbon Neutral Stories screen it lists Energy, Water, Climate and more.</p></li><li><b>It plays on the big screen</b><p>The screen switches to your choice, so everyone in the room sees it.</p></li></ol></details>`;
+    const controllerIntro = `<p>Our phone app doubles as a remote, giving users the power to control digital signage by simply scanning the respective QR code on location and selecting viewable content. <a class="hand-link" href="phone-app.html">Phone App</a></p>`;
+    const controller = nativeStories() + `<details class="native-help"><summary>Using the phone controller</summary>${controllerIntro}<ol><li><b>Scan the QR code</b><p>Stand at the screen and scan the code on the poster beside it with your phone camera.</p></li><li><b>Pick a topic on your phone</b><p>Your phone shows that screen's menu. At Oberlin College's Carbon Neutral Stories screen it lists Energy, Water, Climate and more.</p></li><li><b>It plays on the big screen</b><p>The screen switches to your choice, so everyone in the room sees it.</p></li></ol></details>`;
     body += sec(
       "controller",
       "Controlled by phone",
       "Control Digital Signage",
-      `<p style="max-width:60ch;margin-bottom:22px">Our phone app doubles as a remote, giving users the power to control digital signage by simply scanning the respective QR code on location and selecting viewable content. <a class="hand-link" href="phone-app.html">Phone App</a></p>` +
-        controller,
+      controller,
     );
     const locations = place_cards([
       [

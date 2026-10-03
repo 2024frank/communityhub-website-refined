@@ -12,7 +12,7 @@ before(async () => {
 
 // Browser primitives and a deterministic clock only: all timing decisions and
 // event handlers are supplied by the production [data-story] controller.
-function gallery({ reduced = false, observer = true, initiallyVisible = true } = {}) {
+function gallery({ reduced = false, observer = true, initiallyVisible = true, reading = false, manual = false, interval = null } = {}) {
   class Element {
     children = []; attrs = new Map(); events = new Map(); hidden = false; content = '';
     classList = { values: new Set(), add(...names) { names.forEach(n => this.values.add(n)); }, remove(...names) { names.forEach(n => this.values.delete(n)); }, contains(name) { return this.values.has(name); }, toggle(name, on) { if (on) this.values.add(name); else this.values.delete(name); } };
@@ -22,6 +22,7 @@ function gallery({ reduced = false, observer = true, initiallyVisible = true } =
     getAttribute(name) { return this.attrs.get(name) ?? null; }
     contains(element) { return element === this || this.children.some(child => child.contains(element)); }
     querySelector(selector) { return this.queries?.[selector] || null; }
+    closest(selector) { return selector === '[inert]' && this.inactive ? this : null; }
     querySelectorAll(selector) { return this.lists?.[selector] || []; }
     get textContent() { return this.content.replace(/<[^>]*>/g, ''); }
     set textContent(value) { this.content = value; }
@@ -31,6 +32,9 @@ function gallery({ reduced = false, observer = true, initiallyVisible = true } =
   const box = new Element(), play = new Element(), previous = new Element(), next = new Element(), count = new Element();
   const slides = [new Element(), new Element(), new Element()];
   const dots = slides.map(() => new Element());
+  if (reading) box.setAttribute('data-reading-preview','');
+  if(interval) box.setAttribute('data-reading-interval',String(interval));
+  if (manual) box.setAttribute('data-manual-preview','');
   box.children = [...slides, ...dots, play, previous, next, count];
   box.queries = { '[data-sp-pause]': play, '[data-sp-prev]': previous, '[data-sp-next]': next, '[data-sp-count]': count };
   box.lists = { '.sp-slide': slides, '.sp-dots button': dots };
@@ -43,7 +47,8 @@ function gallery({ reduced = false, observer = true, initiallyVisible = true } =
   const setInterval = (callback, delay) => { const key = ++id; jobs.set(key, { at: now + delay, callback, interval: delay }); return key; };
   const clearTimer = key => jobs.delete(key);
   class IntersectionObserver { constructor(callback) { this.callback = callback; } observe(element) { observers.set(element, this.callback); } }
-  const window = { matchMedia: () => media, setTimeout, setInterval, clearTimeout: clearTimer, clearInterval: clearTimer };
+  const windowEvents=new Map();
+  const window = {addEventListener(type,callback){windowEvents.set(type,callback);}, matchMedia: () => media, setTimeout, setInterval, clearTimeout: clearTimer, clearInterval: clearTimer };
   if (observer) window.IntersectionObserver = IntersectionObserver;
   runInNewContext(script, { document, HTMLElement: Element, Element, Node: Element, matchMedia: () => media, performance: { now: () => now }, clearTimeout: clearTimer, clearInterval: clearTimer, IntersectionObserver, window, console: { warn(...args) { assert.fail(`Controller warning: ${args.join(' ')}`); } } });
   function advance(ms) {
@@ -59,12 +64,14 @@ function gallery({ reduced = false, observer = true, initiallyVisible = true } =
     now = end;
   }
   function visible(on, ratio = on ? 1 : 0) { observers.get(box)?.([{ isIntersecting: on, intersectionRatio: ratio }]); }
-  function focus(on, target = play) { document.activeElement = on ? target : null; box.emit(on ? 'focusin' : 'focusout', { relatedTarget: document.activeElement }); }
+  function focus(on, target = play) { document.activeElement = on ? target : null; box.emit(on ? 'focusin' : 'focusout', { relatedTarget: document.activeElement, target }); }
   function hidden(on) { document.hidden = on; document.emit('visibilitychange'); }
   function reducedMotion(on) { media.matches = on; media.emit('change'); }
   const current = () => slides.findIndex(s => !s.hidden);
   if (initiallyVisible) visible(true);
-  return { box, play, previous, next, dots, count, document, advance, visible, focus, hidden, reducedMotion, current };
+  function iframeFocus(){const iframe=new Element();slides[0].children.push(iframe);document.activeElement=iframe;windowEvents.get('blur')?.();document.activeElement=null;}
+  function productActive(on){box.inactive=!on;windowEvents.get('ch:storychange')?.();}
+  return { box, play, previous, next, dots, count, document, advance, visible, focus, hidden, reducedMotion, current, iframeFocus, productActive };
 }
 
 test('gallery explicit pause preserves the picture and remaining interval', () => {
@@ -170,3 +177,22 @@ test('gallery clearing reduced motion resumes its preserved remaining interval',
   const c = gallery(); c.advance(1200); c.reducedMotion(true); c.advance(10000); c.reducedMotion(false);
   assert.equal(c.current(), 0); c.advance(2999); assert.equal(c.current(), 0); c.advance(1); assert.equal(c.current(), 1);
 });
+
+ test('reading previews give twelve seconds and manual selection pauses until explicit resume',()=>{
+ const g=gallery({reading:true});g.advance(11999);assert.equal(g.current(),0);g.advance(1);assert.equal(g.current(),1);
+ g.next.emit('click');assert.equal(g.current(),2);g.advance(60000);assert.equal(g.current(),2);
+ g.play.emit('click');g.advance(12000);assert.equal(g.current(),0);
+ });
+ test('optional manual galleries stay paused until explicitly played',()=>{
+ const g=gallery({reading:true,manual:true});g.advance(120000);assert.equal(g.current(),0);g.next.emit('click');g.advance(120000);assert.equal(g.current(),1);
+ });
+
+test('reading preview focus latches pause until the reader explicitly resumes',()=>{const g=gallery({reading:true});g.advance(3000);g.focus(true,g.box);g.focus(false,g.box);g.advance(60000);assert.equal(g.current(),0);g.play.emit('click');g.advance(9000);assert.equal(g.current(),1);});
+test('reading preview pointer exit starts a full interval rather than instantly changing the example',()=>{const g=gallery({reading:true});g.advance(11900);g.box.emit('pointerenter');g.advance(5000);g.box.emit('pointerleave');g.advance(11999);assert.equal(g.current(),0);g.advance(1);assert.equal(g.current(),1);});
+
+test('pointer focus then Pause click pauses rather than reversing the intended action',()=>{const g=gallery({reading:true});g.advance(3000);g.focus(true,g.play);g.play.emit('click');g.focus(false,g.play);g.advance(60000);assert.equal(g.current(),0);assert.equal(g.play.getAttribute('aria-pressed'),'true');});
+test('touchstart then focus then Pause click retains pause intent',()=>{const g=gallery({reading:true});g.advance(3000);g.box.emit('touchstart',{target:g.play});g.focus(true,g.play);g.play.emit('click');g.focus(false,g.play);g.advance(60000);assert.equal(g.current(),0);assert.equal(g.play.getAttribute('aria-pressed'),'true');});
+
+test('Building preview initially rotates after18seconds and iframe focus latches pause',()=>{const g=gallery({reading:true,interval:18000});g.advance(17999);assert.equal(g.current(),0);g.advance(1);assert.equal(g.current(),1);g.iframeFocus();g.advance(120000);assert.equal(g.current(),1);assert.equal(g.play.getAttribute('aria-pressed'),'true');g.play.emit('click');g.advance(18000);assert.equal(g.current(),2);});
+
+test('inactive overlapping product previews do not rotate and regain a full reading interval',()=>{const g=gallery({reading:true});g.advance(11000);g.productActive(false);g.advance(90000);assert.equal(g.current(),0);g.productActive(true);g.advance(11999);assert.equal(g.current(),0);g.advance(1);assert.equal(g.current(),1);});

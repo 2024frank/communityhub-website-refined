@@ -77,6 +77,7 @@ import { required } from "./dom";
         e.preventDefault();
       }
     });
-    go(0);
+    const start = Number(sec.getAttribute("data-story-start") || "0");
+    go(Number.isFinite(start) ? start : 0);
   });
 })();

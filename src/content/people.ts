@@ -179,7 +179,7 @@ export function register(H: SiteContext): void {
       H.crumbs([null, "Who it's for"] as const, [null, a["name"]] as const),
       "Neighborhoods",
       "Neighborhoods",
-      "Engaged residents who can easily share information and are encouraged to participate are critical to community vibrancy and resilience. Our calendar application is a unique crowd-sourced venue that makes it easy for organizations and community members to share and promote events and announcements within organizations, neighborhoods, and whole cities.",
+      "Using our tools, organizations, neighborhoods, and cities are motivating and empowering community engagement, connection, and resilience in the face of a rapidly changing environment.",
       H.postcard("cafe-window-sign.jpg", "A Community Hub screen in the window of Slow Train Cafe, downtown Oberlin"),
     );
     body += jump([
@@ -440,7 +440,7 @@ ${stats([["36", "homes joined the two solar buyer groups"] as const, ["5,000", "
       H.crumbs([null, "Who it's for"] as const, [null, a["name"]] as const),
       "Museums and science centers",
       "Museums and science centers",
-      "The Great Lakes Science Center in Cleveland runs one, combining the museum's own sensors with Lake Erie data from the USGS and an EPA air station.",
+      "The Great Lakes Science Center in Cleveland runs an Environmental Dashboard, combining the museum's own sensors with Lake Erie data from the USGS and an EPA air station.",
       media,
     );
     body += jump([
@@ -544,8 +544,8 @@ ${tquote("Scott Volmer").replace("data-story-scene", 'data-story-scene="all"')}`
   function campuses(): void {
     const a = H.ABY["campuses"];
     const media = H.postcard(
-      "orb-dorm.jpg",
-      "A glowing Environmental Orb on the wall of an Oberlin College dorm lobby",
+      "carbon-neutral-science-center-original.jpeg",
+      "Three people at Oberlin College’s Carbon Neutral Stories exhibit in the Science Center",
     );
     let body = opening(
       H.crumbs([null, "Who it's for"] as const, [null, a["name"]] as const),

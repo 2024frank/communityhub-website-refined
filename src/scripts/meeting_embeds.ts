@@ -59,7 +59,7 @@ document.querySelectorAll<HTMLElement>('[data-native-contexts]').forEach(root =>
       const phoneScreen=document.createElement('div');phoneScreen.className='native-phone-screen';
       const phoneFrame=frame(`https://${c.community}.communityhub.cloud/digital-signage/remote/${c.remote}?webSesssionId=${session}&standalone`,c.name+' story controller','native-story-controller');phoneScreen.append(phoneFrame);phone.append(phoneScreen);
       pair.append(tv,phone);mount.append(pair);
-      const fitDevices=()=>{tvFrame.style.width='1280px';tvFrame.style.height='720px';tvFrame.style.transform=`scale(${tvScreen.clientWidth/1280})`;phoneFrame.style.width='390px';phoneFrame.style.height='780px';phoneFrame.style.transform=`scale(${phoneScreen.clientWidth/390})`;};
+      const fitDevices=()=>{tvFrame.style.width='1280px';tvFrame.style.height='720px';tvFrame.style.transform=`scale(${tvScreen.clientWidth/1280})`;phoneFrame.style.width='100%';phoneFrame.style.height='100%';phoneFrame.style.transform='none';};
       const deviceResize=new ResizeObserver(fitDevices);deviceResize.observe(tvScreen);deviceResize.observe(phoneScreen);releaseResize=()=>deviceResize.disconnect();fitDevices();
     } else {
       const viewport=document.createElement('div');viewport.className='native-application-viewport';viewport.setAttribute('data-scroll-owner','');

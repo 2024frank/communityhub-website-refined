@@ -7,8 +7,8 @@
 #main#main#main .phone-workflow .pw-tv-bezel{padding:8px 8px 12px;border-radius:9px;background:#222923;max-width:100%}
 #main#main#main .phone-workflow .pw-tv-bezel::before,
 #main#main#main .phone-workflow .pw-tv-bezel::after{content:none}
-#main#main#main .phone-workflow .pw-tv-screen{aspect-ratio:16/9;display:grid;place-items:center;overflow:hidden;background:#f4f4f2}
-#main#main#main .phone-workflow .pw-tv-screen>img{display:block;width:100%;height:100%;max-height:none;object-fit:contain;object-position:center;margin:0;border-radius:0}
+#main#main#main .phone-workflow .pw-tv-screen{aspect-ratio:16/9;position:relative;display:block;overflow:hidden;background:#f4f4f2}
+#main#main#main .phone-workflow .pw-tv-screen>img{position:absolute;inset:0;display:block;width:100%;height:100%;max-height:none;object-fit:contain;object-position:center;margin:0;border-radius:0}
 #main#main#main .phone-workflow .pw-tv figcaption{font:400 14px/1.45 var(--font-body);color:#465546;margin:12px 0 0;padding:0;max-width:72ch}
 #main#main#main .phone-workflow .pw-phone-column{min-width:0;width:100%;justify-self:center}
 #main#main#main .phone-workflow .pw-phone{position:relative;padding:14px 7px 16px;background:#222923;border-radius:25px;max-width:100%;margin:0}
@@ -30,10 +30,10 @@
 #main#main#main .phone-workflow button.pw-choice:is(:hover,[aria-pressed="true"]){background:#244b38;color:#fff}
 #main#main#main .phone-workflow button.pw-choice:focus-visible{outline:2px solid #a1cd54;outline-offset:-3px}
 #main#main#main .phone-workflow .pw-selection{margin:17px 13px 10px;font:400 14px/1.45 var(--font-body);color:#e4eddf}
-#main#main#main .phone-workflow .pw-phone-preview{margin:0 13px 16px;aspect-ratio:16/9;background:#f4f4f2;overflow:hidden;display:grid;place-items:center}
-#main#main#main .phone-workflow .pw-phone-preview>img{display:block;width:100%;height:100%;max-height:none;object-fit:contain;border-radius:0;margin:0}
+#main#main#main .phone-workflow .pw-phone-preview{position:relative;margin:0 13px 16px;aspect-ratio:16/9;background:#f4f4f2;overflow:hidden;display:grid;place-items:center}
+#main#main#main .phone-workflow .pw-phone-preview>img{position:absolute;inset:0;display:block;width:100%;height:100%;max-height:none;object-fit:contain;border-radius:0;margin:0}
 #main#main#main .phone-workflow .pw-phone-hint{font:700 14px/1.45 var(--font-body);color:var(--ch-pine,#244b38);text-align:center;margin:10px 0 0;padding:0}
-#main#main#main .phone-workflow .pw-foot{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:18px}
+#main#main#main .phone-workflow .pw-foot{display:flex;align-items:center;justify-content:flex-end;gap:16px;margin-top:18px}
 #main#main#main .phone-workflow .pw-foot>p{font:400 14px/1.45 var(--font-body);color:#465546;max-width:70ch;margin:0}
 #main#main#main .phone-workflow button.pw-replay{display:grid;place-items:center;flex:none;width:44px;height:44px;min-height:44px;border:0;border-radius:6px;background:transparent;color:var(--ch-pine,#244b38);padding:11px;margin:0;cursor:pointer;box-shadow:none}
 #main#main#main .phone-workflow .pw-replay>svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}

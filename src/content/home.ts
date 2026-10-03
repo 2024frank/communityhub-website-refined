@@ -1,5 +1,6 @@
+import { voicesPreview, buildingPreview, storiesPreview, dataHubPreview, citywidePreview, calendarPreview, previewGallery } from "./home-previews";
+import { PRODUCTS } from "./catalog";
 import { renderPlatformExplanation } from "./platform_explanation";
-import { nativeStories, nativeVoices, nativeCitywide, nativeScrollable } from "./meeting-embeds";
 /** Homepage executive summary: place, people, mission and three product chapters. */
 import type { SiteContext } from "../lib/site";
 
@@ -21,7 +22,7 @@ export function register(H: SiteContext): void {
   const hero = `<section class="hv full" aria-label="Community Hub: our place and people"><div class="hv-film" aria-label="Drone video zooming from high above down to downtown Oberlin, Ohio">
   <div class="hv-media">
     <div class="hv-stills" aria-hidden="true" data-hv-stills><i class="on" style="background-image:url(assets/hero-first-frame.jpg)"></i></div>
-    <video class="hv-vid" autoplay muted playsinline preload="metadata" poster="assets/hero-first-frame.jpg" aria-hidden="true" data-hv-vid>
+    <video class="hv-vid" muted playsinline preload="metadata" poster="assets/hero-first-frame.jpg" aria-hidden="true" data-hv-vid>
       <source src="assets/hero-ch-fwd.mp4" type="video/mp4" media="(min-width: 900px)">
       <source src="assets/hero-ch-fwd-720.mp4" type="video/mp4">
     </video>
@@ -171,24 +172,20 @@ export function register(H: SiteContext): void {
       "A screen and touch kiosk at the Great Lakes Science Center, Cleveland",
     ] as const,
     [
-      "eng-sign-oc-exhibit.jpg",
+      "carbon-neutral-science-center-original.jpeg",
       "The Carbon Neutral Stories exhibit at Oberlin College's Science Center",
     ] as const,
   ];
   const ctl_html = `<figure class="native-photo"><img src="assets/phone-person-water-display.jpg" alt="A visitor holds the phone controller beside a large display showing Water Use" loading="lazy"><figcaption>Using a phone to choose what appears on a shared display.</figcaption></figure>`;
-  const sign_media = H.story_player(
-    signs,
-    "Community Hub signs in Oberlin and Cleveland",
-    "",
-    true,
-  );
-  const emb_media = `<h4 class="calendar-place">Coming up in Cleveland</h4><div class="ev-mini calendar-brief" data-events data-city="cleveland" data-count="3"><p class="events-fallback" role="status">Loading Cleveland events…</p></div>`;
+  const installationNames = ["Dave's Market · MidTown Cleveland", "Hotel at Oberlin", "Oberlin City Schools", "Great Lakes Science Center · Workshop", "Great Lakes Science Center · Exhibit", "Oberlin College · Carbon Neutral Stories"];
+  const sign_media = previewGallery("Digital Signage", signs.map(([image, alt], index) => ({image, alt, context: installationNames[index]})));
+  const emb_media = calendarPreview("Web Embeddables");
   const live = {
-    "data-dashboard": nativeScrollable("https://oberlin.communityhub.cloud/dh-public/oc-embed?active-page=exploreData&active-data-dashboard=815", "Harkness and Co-op Building Dashboard", 1500),
-    "the-hub": H.data_views("Whole city electricity", ["heat"]),
-    "community-calendar": `<h4 class="calendar-place">Coming up in Oberlin</h4><div class="ev-mini" data-events data-count="6"><p class="events-fallback">Loading upcoming Oberlin events.</p></div><p class="mini-cap"><a href="https://oberlin.communityhub.cloud/calendar/" target="_blank" rel="noopener">Open the community calendar ${ARR}</a></p>`,
-    "community-voices": nativeVoices(),
-    stories: nativeStories(),
+    "data-dashboard": buildingPreview(),
+    "the-hub": dataHubPreview(),
+    "community-calendar": calendarPreview(),
+    "community-voices": voicesPreview(),
+    stories: storiesPreview(),
   };
   // Each product is its own panel inside the section's horizontal story rail.
   function group(
@@ -207,10 +204,10 @@ export function register(H: SiteContext): void {
       .join("");
     const controls = `<div class="eng-tabs" role="tablist" aria-label="${label}">${tabs}</div>`;
     function links(go: Links): string {
-      return go
+      return go.slice(0, 1)
         .map(
-          ([u, l], i) =>
-            `<a class="pc-a${i ? " pc-a2" : ""}" href="${u}">${e(l)} ${ARR}</a>`,
+          ([u], i) =>
+            `<a class="pc-a${i ? " pc-a2" : ""}" href="${u}">Learn more ${ARR}</a>`,
         )
         .join("");
     }
@@ -223,8 +220,8 @@ export function register(H: SiteContext): void {
           go,
           media,
         ]) => `<article class="eng-p" data-eng-panel aria-label="${name}">
-      <div class="eng-copy" data-eng-context><h3>${name}</h3>${text ? `<p>${text}</p>` : ""}${extra}<p class="eng-go">${links(go)}</p></div>
-      <div class="eng-media" data-eng-view><h3 class="eng-media-title">${name}</h3>${media}</div>
+      <div class="eng-copy" data-eng-context><div class="product-identity"><img class="product-identity-icon" src="assets/${PRODUCTS.find(product => product.name === name)?.icon || "icon-ch.png"}" alt="" width="48" height="48"><h3>${name}</h3></div>${text ? `<p>${text}</p>` : ""}${extra}<p class="eng-go">${links(go)}</p></div>
+      <div class="eng-media" data-eng-view>${media}</div>
     </article>`,
       )
       .join("");
@@ -236,12 +233,12 @@ export function register(H: SiteContext): void {
     return `<section class="eng tone-${tone}" id="${sid}" data-i="0" data-nofit style="--n:${n}" aria-labelledby="${sid}-h">
   ${snaps}
   <div class="eng-stage">
-    <div class="wrap"><div class="chapter-heading"><h2 class="h2 eng-label" id="${sid}-h">${head}</h2>${controls}</div>
+    <div class="wrap"><div class="chapter-heading"><h2 class="h2 eng-label" id="${sid}-h">${head}</h2><span class="chapter-connector" aria-hidden="true">→</span>${controls}</div>
     <div class="eng-panels story-rail" data-story-rail role="region" aria-label="${label}" tabindex="0">${panels}</div>
   </div></div>
 </section>`;
   }
-  const engage = group("engage", "To engage", "lime", "Ways we engage", [
+  const engage = group("engage", "Engage", "lime", "Ways we engage", [
     [
       "Digital Signage",
       "Easy to use interactive digital signage makes it simple for multiple stakeholders to post and update content that connects community members with both organization and location-specific and community-wide information and events",
@@ -265,7 +262,7 @@ export function register(H: SiteContext): void {
     ] as const,
   ]);
   const products =
-    group("products", "To educate", "dark", "Ways we educate", [
+    group("products", "Educate", "dark", "Ways we educate", [
       [
         "Building Dashboard",
         "Building Dashboard tracks and communicates patterns of real-time resource use in buildings in ways that engage, are easy to understand and make connections between resource conservation and resulting environmental and community benefits.",
@@ -285,7 +282,7 @@ export function register(H: SiteContext): void {
             "See the Citywide Dashboard",
           ] as const,
         ],
-        nativeCitywide(),
+        citywidePreview(),
       ] as const,
       [
         "Data Hub",
@@ -298,7 +295,7 @@ export function register(H: SiteContext): void {
       ] as const,
       [
         "Stories",
-        "Illustrated stories explain how local systems work, starting with nine from Oberlin College's Sustainable Infrastructure Program. They play on screens, phones and the web. Choose a story on the phone controller to change the display.",
+        "Illustrated stories explain how local systems work, starting with nine from Oberlin College's Sustainable Infrastructure Program. They play on screens, phones and the web.",
         "",
         [
           ["stories.html", "See Stories"] as const,
@@ -308,7 +305,7 @@ export function register(H: SiteContext): void {
     ]) +
     group(
       "motivate",
-      "To motivate and empower",
+      "Motivate and empower",
       "green",
       "Ways we motivate and empower",
       [

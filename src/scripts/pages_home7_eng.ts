@@ -53,6 +53,16 @@ Array.from(
         }
       });
     });
+    if (!stage.matches) {
+      const rail = sec.querySelector<HTMLElement>("[data-story-rail]");
+      // Measuring and restoring the reading scenes changes the snap layout.
+      // Align only after that geometry is final, otherwise the browser can
+      // snap back to the previous column and leave the selected product offscreen.
+      if (rail) rail.scrollTo({
+        left: rail.scrollLeft + panel.getBoundingClientRect().left - rail.getBoundingClientRect().left,
+        behavior: "instant",
+      });
+    }
     // Scene identity can change without changing the section's total height.
     // Ask the existing controller to publish ownership immediately.
     window.dispatchEvent(new CustomEvent("ch:fit", { detail: {} }));
@@ -111,7 +121,6 @@ Array.from(
       if (!stage.matches) {
         const rail = sec.querySelector<HTMLElement>("[data-story-rail]");
         if (rail && panels[k]) {
-          rail.scrollTo({left: panels[k].offsetLeft - panels[0].offsetLeft, behavior: "instant"});
           show(k);
           if (layoutFrame) { cancelAnimationFrame(layoutFrame); layoutFrame = 0; }
           layoutPanel();
@@ -162,8 +171,11 @@ Array.from(
   });
   function resizeProduct() {
     if (frame) { cancelAnimationFrame(frame); frame = 0; }
+    // A breakpoint can clamp scrollY before this event. The old pixel stops
+    // may then name a different section; only the published owner may restore
+    // a product, or an earlier offscreen rail can steal this resize.
+    if (!activeSection) { scheduleLayout(); return; }
     const previous = window.chStory?.current();
-    if (!activeSection && !previous?.els.includes(sec)) { scheduleLayout(); return; }
     const selected = Math.max(0, shown);
     const anchor = previous?.els.includes(sec) ? previous : { y: window.scrollY, els: [sec], part: 0 };
     // Pixel positions change at the breakpoint. Preserve the selected semantic

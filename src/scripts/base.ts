@@ -1,3 +1,4 @@
+import { shouldLoadDeferredFrame } from "./ui/deferred-frame-policy";
 import type { GaugeReading, Mood } from "./types";
 import { calendarData } from "./data";
 type NowReading = Pick<GaugeReading, "title" | "value" | "num" | "pos" | "ok">;
@@ -982,7 +983,9 @@ import { $, $$, isPresent, required, eventElement } from "./dom";
       const slides = $$(".sp-slide", root_);
       const dots = $$(".sp-dots button", root_);
       const still = matchMedia("(prefers-reduced-motion: reduce)");
-      const interval = 4200;
+      const readingPreview = root_.getAttribute("data-reading-preview") !== null;
+      const requestedInterval = Number(root_.getAttribute("data-reading-interval"));
+      const interval = readingPreview ? (requestedInterval >= 12000 ? requestedInterval : 12000) : 4200;
       let i = 0;
       let timer: number | undefined = undefined;
       let remaining = interval;
@@ -1001,7 +1004,7 @@ import { $, $$, isPresent, required, eventElement } from "./dom";
       }
       let hovered = false;
       let focused = false;
-      let paused = false;
+      let paused = root_.getAttribute("data-manual-preview") !== null;
       function tick(reset = false) {
         const now = performance.now();
         clearTimeout(timer);
@@ -1009,7 +1012,7 @@ import { $, $$, isPresent, required, eventElement } from "./dom";
         if (startedAt !== null) remaining = Math.max(0, remaining - (now - startedAt));
         startedAt = null;
         if (reset) remaining = interval;
-        if (still.matches || !inView || hovered || focused || paused || doc.hidden) return;
+        if (still.matches || !inView || hovered || focused || paused || doc.hidden || root_.closest?.("[inert]")) return;
         startedAt = now;
         timer = window.setTimeout(function () {
           go(i + 1);
@@ -1020,6 +1023,7 @@ import { $, $$, isPresent, required, eventElement } from "./dom";
       // picture or automatically advancing starts a complete new interval.
       function choose(n: number) {
         go(n);
+        if (readingPreview) { paused = true; updatePauseControl(); }
         tick(true);
       }
       const pv = $("[data-sp-prev]", root_);
@@ -1028,19 +1032,30 @@ import { $, $$, isPresent, required, eventElement } from "./dom";
       if (pv) pv.addEventListener("click", () => choose(i - 1));
       if (nx) nx.addEventListener("click", () => choose(i + 1));
       dots.forEach((d, k) => d.addEventListener("click", () => choose(k)));
+      function updatePauseControl() {
+        if (!ps) return;
+        ps.setAttribute("aria-pressed", String(paused));
+        ps.setAttribute("aria-label", readingPreview ? (paused ? "Play examples automatically" : "Pause automatic examples") : (paused ? "Play slides" : "Pause slides"));
+        ps.innerHTML = paused ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 10 7-10 7Z"/></svg>' : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14M16 5v14"/></svg>';
+      }
       if (ps) {
-        ps.addEventListener("click", function () {
-          paused = !paused;
-          ps.setAttribute("aria-pressed", String(paused));
-          ps.setAttribute("aria-label", paused ? "Play slides" : "Pause slides");
-          ps.innerHTML = paused ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 10 7-10 7Z"/></svg>' : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14M16 5v14"/></svg>';
-          tick();
+        ps.addEventListener("click", function () { paused = !paused; updatePauseControl(); tick(); });
+        updatePauseControl();
+      }
+      if (readingPreview) {
+        // Explicit interaction keeps the selected example stable after focus or
+        // pointer leaves. The visible play control is the only resume action.
+        root_.addEventListener("wheel", () => { paused = true; updatePauseControl(); tick(); }, { passive: true });
+        root_.addEventListener("touchstart", e => { if (!ps?.contains(e.target as Node)) { paused = true; updatePauseControl(); tick(); } }, { passive: true });
+        root_.addEventListener("scroll", () => { paused = true; updatePauseControl(); tick(); }, { passive: true, capture: true });
+        window.addEventListener?.("blur", () => {
+          if (root_.contains(document.activeElement)) { paused = true; updatePauseControl(); tick(); }
         });
       }
       // Independent gates prevent pointer exit from cancelling a keyboard hold.
       root_.addEventListener("pointerenter", () => { hovered = true; tick(); });
-      root_.addEventListener("pointerleave", () => { hovered = false; tick(); });
-      root_.addEventListener("focusin", () => { focused = true; tick(); });
+      root_.addEventListener("pointerleave", () => { hovered = false; tick(readingPreview); });
+      root_.addEventListener("focusin", e => { focused = true; if (readingPreview && !ps?.contains(e.target as Node)) { paused = true; updatePauseControl(); } tick(); });
       root_.addEventListener("focusout", e => {
         if (!root_.contains(e.relatedTarget instanceof Node ? e.relatedTarget : null)) {
           focused = false;
@@ -1048,12 +1063,20 @@ import { $, $$, isPresent, required, eventElement } from "./dom";
         }
       });
       doc.addEventListener("visibilitychange", () => tick());
+      if (readingPreview) {
+        window.addEventListener?.("ch:storychange", () => tick(true));
+        const owner = root_.closest?.("[data-eng-panel]");
+        if (owner && typeof MutationObserver !== "undefined") {
+          new MutationObserver(() => tick(true)).observe(owner, {attributes:true,attributeFilter:["inert"]});
+        }
+      }
       function motionChanged() {
         if (ps) ps.hidden = still.matches;
         tick();
       }
       still.addEventListener("change", motionChanged);
       go(0);
+      root_.setAttribute("data-story-ready", "");
       if ("IntersectionObserver" in window)
         new IntersectionObserver(
           function (es) {
@@ -1096,16 +1119,28 @@ import { $, $$, isPresent, required, eventElement } from "./dom";
     }
     // Third-party embeds load only once their scene is on screen. Browser lazy
     // loading fetches frames several discrete scenes away (61 MB on the home page).
-    const deferred = $$<HTMLIFrameElement>("iframe[data-defer-src]");
-    if (deferred.length && "IntersectionObserver" in window) {
-      const io = new IntersectionObserver(entries => entries.forEach(x => {
-        if (!x.isIntersecting) return;
-        const f = x.target as HTMLIFrameElement;
-        io.unobserve(f);
-        if (!f.getAttribute("src")) f.src = f.dataset.deferSrc || "";
+    const deferred = new Set($$<HTMLIFrameElement>("iframe[data-defer-src]"));
+    const loadDeferred = (f: HTMLIFrameElement) => {
+      const rect = f.getBoundingClientRect();
+      if (!shouldLoadDeferredFrame({loaded:!!f.getAttribute("src"),inactive:!!f.closest("[inert]"),visibility:getComputedStyle(f).visibility,width:rect.width,height:rect.height,top:rect.top,bottom:rect.bottom},innerHeight)) return;
+      f.src = f.dataset.deferSrc || "";
+      deferred.delete(f);
+    };
+    const activateVisible = () => deferred.forEach(loadDeferred);
+    if (deferred.size && "IntersectionObserver" in window) {
+      const io = new IntersectionObserver(entries => entries.forEach(entry => {
+        if (entry.isIntersecting) { loadDeferred(entry.target as HTMLIFrameElement); if (!deferred.has(entry.target as HTMLIFrameElement)) io.unobserve(entry.target); }
       }));
-      deferred.forEach(f => io.observe(f));
-    } else deferred.forEach(f => { f.src = f.dataset.deferSrc || ""; });
+      const owners = new Set<Element>();
+      deferred.forEach(f => {
+        io.observe(f);
+        const product=f.closest("[data-eng-panel]"), example=f.closest("[data-sp]");
+        if(product)owners.add(product);if(example)owners.add(example);
+      });
+      const observer=new MutationObserver(activateVisible);
+      owners.forEach(owner=>observer.observe(owner,{attributes:true,attributeFilter:["inert","hidden"]}));
+      window.addEventListener("ch:storychange",activateVisible);
+    } else activateVisible();
     $$(".mini[data-embed-preview]").forEach(host => {
       const frame = $<HTMLIFrameElement>("iframe", host);
       if (frame) bindPreview(host, frame);
@@ -1354,7 +1389,7 @@ import { $, $$, isPresent, required, eventElement } from "./dom";
                   Intl.DateTimeFormatOptions
                 >({ weekday: "long" }, TZ),
               );
-              return (
+              const item = (
                 '<li><a href="' +
                 city.post +
                 s.postId +
@@ -1370,6 +1405,9 @@ import { $, $$, isPresent, required, eventElement } from "./dom";
                 clock(d) +
                 "</small></span></a></li>"
               );
+              return box.getAttribute("data-event-preview") === ""
+                ? item.replace(/<a [^>]+>/, '<div class="event-preview-row">').replace('</a>', '</div>')
+                : item;
             })
             .join("") +
           '</ul><p class="events-src">Updated ' +

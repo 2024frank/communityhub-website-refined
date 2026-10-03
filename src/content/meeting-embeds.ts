@@ -12,6 +12,7 @@ export function nativeContexts(kind:string, contexts:Context[]):string {
  return `<div class="meeting-embed" data-native-contexts data-kind="${kind}">
  ${contexts.length > 1 ? `<div class="native-choices" role="group" aria-label="Choose ${kind} community">${contexts.map((c,i)=>`<button type="button" data-native-choice="${i}" aria-pressed="${i===0}">${esc(c.name)}</button>`).join('')}</div>` : ''}
  <h4 class="native-heading" data-native-heading>${first.logo?`<img src="${esc(first.logo)}" alt="" loading="lazy">`:''}<span>${esc(first.name)}</span></h4>
+ ${kind === 'stories' ? '<p class="native-controller-cue">Choose a story on the phone to change this display.</p>' : ''}
  <div data-native-mount>${kind === 'stories' ? '<div class="native-story-pair"><div class="native-tv-device"><div class="native-tv-screen"><span class="native-loading" role="status">Loading the story…</span></div></div><div class="native-phone-device"><div class="native-phone-screen"><span class="native-loading">Loading controller…</span></div></div></div>' : '<p>Loading the community application…</p>'}</div>
  <p class="native-caption"><span class="sr-only" role="status" aria-live="polite" data-native-status></span> <a data-native-open href="${esc(first.url)}" target="_blank" rel="noopener">Open full size</a></p>
  <script type="application/json" data-native-config>${JSON.stringify(contexts).replaceAll('<','\\u003c')}</script></div>`;
@@ -27,7 +28,7 @@ export const nativeCitywide = () => nativeContexts('citywide',[
  {name:'Cleveland',url:'https://cleveland.communityhub.cloud/citywide-dashboard/index?embed=1&show-menu=0'},
 ]);
 export function nativeScrollable(url:string,title:string,height:number):string {
- return `<div class="native-scroll-feature"><p class="native-scroll-help">Scroll through ${esc(title)}. At the bottom, continue scrolling to explore the next section.</p><div class="native-scroll" data-scroll-owner tabindex="0" role="region" aria-label="${esc(title)}"><div class="native-scroll-canvas"><iframe data-native-scroll-frame data-defer-src="${esc(url)}" title="${esc(title)}" width="100%" height="${height}" loading="lazy"></iframe></div></div><p class="native-caption"><a href="${esc(url)}" target="_blank" rel="noopener">Open ${esc(title)} full size</a></p></div>`;
+ return `<div class="native-scroll-feature"><h4 class="native-heading">${esc(title)}</h4><div class="native-scroll" data-scroll-owner tabindex="0" role="region" aria-label="${esc(title)}"><div class="native-scroll-canvas"><iframe data-native-scroll-frame data-defer-src="${esc(url)}" title="${esc(title)}" width="100%" height="${height}" loading="lazy"></iframe></div></div><p class="native-scroll-help">Scroll within the dashboard to explore its resource-use data.</p></div>`;
 }
 export function phoneDemo():string {
  const arrow='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg>';
@@ -44,20 +45,20 @@ export function phoneDemo():string {
       <div class="pw-menu" data-phone-menu><img src="assets/phone-workflow/oberlin-hub-menu.png" width="750" height="1334" alt="Oberlin Hub community menu, with Screen Controller at the upper left" loading="lazy"><button type="button" class="pw-controller-entry" data-phone-scan aria-label="Open Screen Controller in this demonstration" title="Open Screen Controller"><span class="pw-sr">Open Screen Controller</span></button></div>
       <div class="pw-picker" data-phone-channels data-scroll-owner role="region" aria-label="Screen Controller examples" hidden>
        <div class="pw-source-heading"><img src="assets/phone-workflow/carbon-neutral-controller.png" width="398" height="810" alt="Carbon Neutral Stories" loading="lazy"></div>
-       <p class="pw-picker-prompt">Choose an example</p>
+
        <div class="pw-choices" role="group" aria-label="Content for this example display">
         <button type="button" class="pw-choice" data-phone-channel="heating" aria-pressed="false"><img src="assets/story-ic-heating-96.png" width="36" height="36" alt=""><span>Heating &amp; Cooling</span>${arrow}</button>
         <button type="button" class="pw-choice" data-phone-channel="ajlc" aria-pressed="false"><img src="assets/story-ic-ajlc-96.png" width="36" height="36" alt=""><span>AJLC</span>${arrow}</button>
        </div>
-       <p class="pw-selection" data-phone-selection>Your choice appears on the display.</p>
+       <p class="pw-selection sr-only" aria-hidden="true" data-phone-selection>Your choice appears on the display.</p>
        <div class="pw-phone-preview" aria-hidden="true"><img data-phone-preview src="assets/phone-workflow/ajlc-electricity-recorded.png" width="1708" height="936" alt=""></div>
       </div>
      </div>
     </div>
-    <p class="pw-phone-hint" data-phone-hint>Tap Screen Controller</p>
+    <p class="pw-phone-hint sr-only" aria-hidden="true" data-phone-hint>Tap Screen Controller</p>
    </div>
   </div>
-  <div class="pw-foot"><p>Your choices change this example display.</p><button type="button" class="pw-replay" data-phone-reset aria-label="Replay phone walkthrough" title="Replay phone walkthrough"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10a8 8 0 1 1 1 8M4 4v6h6"/></svg></button></div>
+  <div class="pw-foot"><button type="button" class="pw-replay" data-phone-reset aria-label="Replay phone walkthrough" title="Replay phone walkthrough"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10a8 8 0 1 1 1 8M4 4v6h6"/></svg></button></div>
   <noscript><p>At a digital sign, scan its QR code, open Screen Controller and choose content. That content appears on the shared screen.</p></noscript>
  </div>`;
 }

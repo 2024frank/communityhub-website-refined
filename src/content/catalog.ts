@@ -106,7 +106,7 @@ export const PRODUCTS: readonly Product[] = [
   {
     "slug": "stories",
     "name": "Stories",
-    "group": "Motivate and empower",
+    "group": "Educate",
     "icon": "icon-stories-96.png",
     "short": "Animated chapters with live data",
     "desc": "",

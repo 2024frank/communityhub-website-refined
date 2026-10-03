@@ -10,18 +10,14 @@
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className = "sec-next";
-    btn.setAttribute("aria-label", "Next section");
+    btn.setAttribute("aria-label", "Continue to the next section or product");
     btn.innerHTML = arrow;
     btn.addEventListener("click", () => {
       const story = window.chStory;
       if (!story) return;
-      const from = story.current();
-      // Panels inside Engage, Educate and Motivate are stops of their own; this control skips to the next section.
-      for (let i = 0; i < 12; i++) {
-        if (!story.go(1, true)) return;
-        const now = story.current();
-        if (!now || !from || now.els[0] !== from.els[0]) return;
-      }
+      // Use exactly the same next stop as wheel and keyboard navigation. The
+      // old loop skipped the remaining products in the current chapter.
+      story.go(1, true);
     });
     host.appendChild(btn);
   }
@@ -74,12 +70,9 @@
     frame = 0;
     let on = ahead();
     btn.classList.remove("at-side", "on-card");
-    /* With no clear spot it steps aside, and with none at all it stays hidden:
-       swipe, keys and the scene itself still lead on, and nothing is covered. */
-    if (on && !free(innerWidth / 2)) {
-      if (free(innerWidth - 38)) btn.classList.add("at-side");
-      else on = false;
-    }
+    // The down control has one predictable centered location. Hide it while
+    // content occupies that strip rather than covering content or jumping sides.
+    if (on && !free(innerWidth / 2)) on = false;
     btn.classList.toggle("is-on", on);
     btn.setAttribute("aria-hidden", String(!on));
     btn.tabIndex = on ? 0 : -1;
@@ -153,10 +146,9 @@
     const r = btn.getBoundingClientRect();
     if (getComputedStyle(btn).display === "none" || r.width === 0 || r.bottom <= 0 || r.top >= innerHeight) return;
     const cx = r.left + SIZE / 2 - (parseFloat(btn.style.getPropertyValue("--sn-x")) || 0);
-    const vw = document.documentElement.clientWidth;
-    /* centre first, then the right corner, then the left corner */
+    /* A single centered control position; never compete with corner UI. */
     let spot: number | null = null;
-    for (const target of [cx, vw - 16 - SIZE / 2, 16 + SIZE / 2]) {
+    for (const target of [cx]) {
       if (!taken(scope, btn, target - SIZE / 2, r.top)) { spot = target; break; }
     }
     const x = spot === null || spot === cx ? "" : Math.round(spot - cx) + "px";
@@ -175,19 +167,11 @@
     settle = window.setTimeout(function () { sync(); settle = window.setTimeout(sync, 700); }, 450);
   }
   /* Scenes and their panels move without a scroll event, so an arrow on screen is judged again at once when it moves, and every half second otherwise. */
-  const lastTop = new WeakMap<HTMLElement, number>();
-  let tick = 0;
-  window.setInterval(function () {
-    if (document.hidden) return;
-    tick++;
-    main!.querySelectorAll<HTMLElement>(".sec-next:not([data-hv-skip])").forEach(function (btn) {
-      const r = btn.getBoundingClientRect();
-      const top = Math.round(r.top);
-      const moved = lastTop.get(btn) !== top;
-      lastTop.set(btn, top);
-      if (r.bottom > 0 && r.top < innerHeight && (moved || tick % 4 === 0)) place(btn);
-    });
-  }, 120);
+  // Layout observers coalesce through the same rAF gate. No background geometry
+  // polling or text-range scans while the visitor is reading a still scene.
+  if (window.ResizeObserver) new ResizeObserver(later).observe(main);
+  new MutationObserver(later).observe(main, { childList: true, subtree: true, characterData: true });
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) later(); });
   addEventListener("scroll", later, { passive: true });
   addEventListener("resize", later);
   addEventListener("load", later);
@@ -235,7 +219,16 @@
       seen.set(box, [Math.round(box.getBoundingClientRect().top), innerHeight, box.scrollHeight, box.querySelectorAll("li").length].join());
     });
   }
-  window.setInterval(function () { if (!document.hidden) sweep(); }, 300);
-  addEventListener("resize", function () { setTimeout(sweep, 60); });
-  sweep();
+  let pending = 0;
+  const schedule = () => {
+    if (document.hidden || pending) return;
+    pending = requestAnimationFrame(() => { pending = 0; sweep(); });
+  };
+  addEventListener("resize", schedule);
+  addEventListener("ch:storychange", schedule);
+  addEventListener("scroll", schedule, {passive:true});
+  document.addEventListener("visibilitychange", schedule);
+  new MutationObserver(schedule).observe(main, {childList:true,subtree:true});
+  if (window.ResizeObserver) new ResizeObserver(schedule).observe(main);
+  schedule();
 })();

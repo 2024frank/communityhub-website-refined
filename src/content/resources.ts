@@ -1,3 +1,4 @@
+import { communicationNetwork } from "./communication-network";
 import lessonLinks from "./lesson-links.json";
 /** Resource, research, Story of Dashboard, About, Contact, and 404 page content.
  * Facts and source URLs are preserved from the reviewed September 30 prototype.
@@ -1092,6 +1093,7 @@ export function register(H: SiteContext): void {
 </div></section>`;
     const body =
       mission +
+      `<section class="sec-pad about-network" id="community-connections"><div class="wrap">${communicationNetwork()}</div></section>` +
       timeline +
       partners +
       team +

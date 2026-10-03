@@ -12,20 +12,22 @@ test('Products how shows the original Story of Dashboard rather than the reconst
 });
 test('the replacement preserves all original slide frames and accessible quiet navigation',()=>{
  const html=pages.getPage('products').body;
- assert.match(html,/data-sb-img[^>]+assets\/sod\/01.jpg/);
+ assert.match(html,/data-sb-img[^>]+assets\/sod\/14.jpg/);
  const data=JSON.parse(html.match(/data-sb-data>(.*?)<\/script>/s)?.[1]||'[]');
  assert.equal(data.length,31);
+ assert.match(html,/data-story-start="13"/);
  assert.match(html,/data-sb-prev/);assert.match(html,/data-sb-next/);
  assert.match(html,/https:\/\/environmentaldashboard.org\/story-of-dashboard/);
  assert.match(html,/data-sb-original/);
 });
-test('the requested Products-only replacement preserves the Data Hub explanation and resource viewer',()=>{
- assert.match(pages.getPage('the-hub').body,/data-hub-flow/);
+test('both platform explanation locations use the authentic diagram and preserve resource viewer',()=>{
+ assert.match(pages.getPage('the-hub').body,/id="manager-platform"[^>]*data-original-story/);
+ assert.doesNotMatch(pages.getPage('the-hub').body,/data-hub-flow|Slide 10 platform/);
  assert.match(pages.getPage('story-of-dashboard').body,/id="storyboard"/);
 });
 test('unavailable first and last arrows retain a clear quiet endpoint state',()=>{
  const css=readFileSync('src/styles/original_story.css','utf8');
- assert.match(css,/\.sb-nav button\[aria-disabled="true"\]\{opacity:\.35;cursor:default\}/);
+ assert.match(css,/\.sb-nav button:disabled\{opacity:\.35;cursor:default\}/);
 });
 test('original slides use their reserved stage instead of the generic pager image cap',()=>{
  const css=readFileSync('src/styles/original_story.css','utf8');

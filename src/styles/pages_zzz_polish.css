@@ -104,15 +104,8 @@ html.motion #main[data-pager]>.page-intro:not(.ch-story-section)>.wrap>*{opacity
 .foot-cols a{display:inline-block;transition:color .15s ease,transform .2s var(--ease)}
 .foot-cols a:hover{transform:translateX(2px)}
 
-/* ---------------------------------------------------------------- page to page: a soft cross-fade */
-@media (prefers-reduced-motion:no-preference){
-  @view-transition{navigation:auto}
-  .hdr{view-transition-name:site-hdr}
-  ::view-transition-old(root){animation:vt-out .2s ease both}
-  ::view-transition-new(root){animation:vt-in .4s var(--ease) both}
-  @keyframes vt-out{to{opacity:0}}
-  @keyframes vt-in{from{opacity:0;transform:translateY(10px)}}
-}
+/* Ordinary cross-document navigation is deliberately immediate. The former
+   View Transition opt-in aborted in the supported preview browser. */
 @media (prefers-reduced-motion:reduce){
   html.motion #main[data-pager]>:not(.ph2)>.wrap>*{opacity:1;transform:none;transition:none}
   .hdr::after{display:none}

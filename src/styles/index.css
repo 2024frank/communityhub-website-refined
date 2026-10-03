@@ -3,7 +3,6 @@
 @import "./pages_home.css";
 @import "./pages_home6.css";
 @import "./pages_home7_eng.css";
-@import "./pages_home8_cal.css";
 @import "./pages_home9_slide.css";
 @import "./pages_people.css";
 @import "./pages_research6.css";
@@ -48,8 +47,8 @@
 
 @import "./platform_explanation.css";
 
-@import "./hub_flow_controls.css";
 
-@import "./hub_flow_source.css";
 
 @import "./original_story.css";
+
+@import "./home_previews.css";

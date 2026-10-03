@@ -41,7 +41,7 @@ class HomeNarrativeTest(unittest.TestCase):
         self.assertEqual(' '.join(page.xpath('//h1')[0].text_content().split()), source['headline'])
         self.assertEqual(' '.join(page.get_element_by_id('people').xpath('.//h2')[0].text_content().split()), 'How we solve it')
         self.assertEqual(heading_text("problem"), "Who we are")
-        for section, heading in (("engage", "To engage"), ("products", "To educate"), ("motivate", "To motivate and empower")):
+        for section, heading in (("engage", "Engage"), ("products", "Educate"), ("motivate", "Motivate and empower")):
             self.assertEqual(heading_text(section), heading)
         problem = html.tostring(page.get_element_by_id('problem'), encoding='unicode')
         self.assertIn("data-communication-sequence", self.html)
@@ -51,13 +51,14 @@ class HomeNarrativeTest(unittest.TestCase):
         self.assertNotIn('data-conn', problem)
         self.assertNotIn('data-platform-panel', problem)
 
-    def test_each_product_has_one_or_two_links(self):
+    def test_each_product_has_one_learn_more_link(self):
         # The September 30 source moved product cards into named Engage/Educate/
         # Motivate panels. Keep the same link-count invariant on that structure.
         cards = re.findall(r'<article\b[^>]*\bdata-eng-panel[^>]*>(.*?)</article>', self.html, re.S)
         self.assertGreaterEqual(len(cards), 5)
         for c in cards:
-            self.assertIn(len(re.findall(r'class="pc-a', c)), (1, 2), c[:120])
+            self.assertEqual(len(re.findall(r'class="pc-a', c)), 1, c[:120])
+            self.assertRegex(c, r'>Learn more ' )
 
     def test_leads_to_products_without_new_generic_sales_copy(self):
         self.assertIn('href="products.html"', self.html)
