@@ -59,3 +59,17 @@
  #main#main#main[data-page="index"] #motivate{--fit-img:clamp(96px,calc(100dvh - 740px),300px)}
  #main#main#main[data-page="index"] #motivate .home-preview .events-list li:nth-child(n+3){display:none}
 }
+
+/* Phone: Data Hub heat map keeps clear space above the next circle. */
+@media (max-width:700px){
+ #main#main#main[data-page="index"] #products{--fit-live:clamp(96px,calc(100dvh - 690px),300px)}
+ #main#main#main[data-page="index"] #products .eng-copy>p:not(.eng-go){font-size:15px;line-height:1.38}
+ #main#main#main[data-page="index"] #products .chapter-heading{margin-bottom:8px}
+}
+/* Phone: the Building Dashboard frame scrolls inside the page. Its right edge shows a wide, always-on bar and a fade at the
+   foot, and the frame leaves a gutter on the right where Wally's 'Scroll down' cue stands. */
+@media (max-width:700px){
+ #main#main#main[data-page="index"] .home-preview .native-scroll-feature{width:auto;max-width:calc(100% - 58px)}
+ #main#main#main[data-page="index"] .home-preview .native-scroll::-webkit-scrollbar{width:16px}
+ #main#main#main[data-page="index"] .home-preview .native-scroll::after{content:"";display:block;position:sticky;bottom:0;height:34px;margin-top:-34px;pointer-events:none;background:linear-gradient(to bottom,rgba(237,240,230,0),rgba(25,70,56,.28));z-index:3}
+}

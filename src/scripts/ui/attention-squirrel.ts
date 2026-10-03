@@ -278,7 +278,8 @@ export function initAttentionSquirrel(): Handle | undefined {
       add(el, a.text, a.side, a.kind);
     }));
     doc.querySelectorAll<HTMLElement>("[data-scroll-owner]").forEach(el => {
-      if (overflows(el)) add(el, SCROLL_TEXT, "right", "scroll");
+      // data-squirrel-off: a region whose scrolling needs no cue of its own (another cue already guides the scene).
+      if (overflows(el) && !el.hasAttribute("data-squirrel-off")) add(el, SCROLL_TEXT, "right", "scroll");
     });
     // Keep describedby in step: a hint on every live target, none on dropped ones.
     sources.forEach(s => { if (!seen.has(s.el)) unhint(s); });

@@ -373,7 +373,7 @@ export function register(H: SiteContext): void {
       ([k, name]) =>
         `<div class="zpa-topic" style="--c-tint:${STORY_TINTS[k]}"><img src="assets/story-ic-${k}.png" alt=""><b>${name}</b></div>`,
     );
-    const topic_groups = [0, 3, 6].map(offset => `<div class="story-topic-group" data-story-scene>${tiles.slice(offset, offset + 3).join("")}</div>`).join("");
+    const topic_groups = [0, 3, 6].map(offset => `<div class="story-topic-group">${tiles.slice(offset, offset + 3).join("")}</div>`).join("");
     const topics = sec(
       "topics",
       "Nine topics",
@@ -384,8 +384,12 @@ export function register(H: SiteContext): void {
     const gallery = nativeStories();
     body += `<section class="stories-opening" id="play" aria-labelledby="stories-h"><div class="wrap" data-story-scene="all"><h1 class="h1" id="stories-h">Stories</h1><p class="lede">Illustrated stories explain how local systems work. They play on screens, phones and the web.</p>${gallery}</div></section>`;
     body += topics;
-    body +=
-      '<section class="sec-pad" aria-label="Geothermal energy illustration"><div class="wrap"><img src="assets/art-geothermal-band.jpg" alt="Illustration of Oberlin College\'s district energy system: campus buildings, the central plant, solar panels and geothermal wells" style="width:100%;border-radius:20px" loading="lazy"><p style="margin-top:14px;color:var(--ink-2);max-width:64ch">We use the heating and cooling story to explain this system: the campus, the central plant, and the geothermal wells that replaced its coal boiler.</p></div></section>';
+    body += sec(
+      "energy",
+      "The energy system",
+      "The campus energy system",
+      '<img src="assets/art-geothermal-band.jpg" alt="Illustration of Oberlin College\'s district energy system: campus buildings, the central plant, solar panels and geothermal wells" style="width:100%;border-radius:20px" loading="lazy"><p class="energy-note" style="margin-top:14px;color:var(--ink-2);max-width:64ch">We use the heating and cooling story to explain this system: the campus, the central plant, and the geothermal wells that replaced its coal boiler.</p>',
+    );
     const exhibit = trio([
       [
         "deck/h51c.jpg",
@@ -402,7 +406,7 @@ export function register(H: SiteContext): void {
         "Three people at the Carbon Neutral Stories exhibit in Oberlin College’s Science Center",
         "Carbon Neutral Stories at the Science Center",
       ] as const,
-    ]) + '<p class="exhibit-context" data-story-scene="short-phone" style="margin-top:24px;max-width:80ch">At Oberlin College\'s Science Center, a model of the geothermal system uses LEDs, run by ESP32 boards, to show heat moving through the wells and pipes. Oberlin students built it with Community Hub in summer 2026. People scan a QR code on the model to open the story on their phone.</p>';
+    ]).replaceAll(" data-story-scene", "") + '<p class="exhibit-context" style="margin-top:24px;max-width:80ch">At Oberlin College\'s Science Center, a model of the geothermal system uses LEDs, run by ESP32 boards, to show heat moving through the wells and pipes. Oberlin students built it with Community Hub in summer 2026. People scan a QR code on the model to open the story on their phone.</p>';
     body += sec(
       "exhibit",
       "The Science Center",

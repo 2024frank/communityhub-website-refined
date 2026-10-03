@@ -118,3 +118,14 @@
   #main#main#main[data-page="web-embeddables"] > #examples .zpb-trio figcaption p { font-size:13px; line-height:1.35; margin:2px 0 0; }
   #main#main#main[data-page="web-embeddables"] > #examples .zpb-trio figcaption h3 { font-size:16px; margin:0; }
 }
+
+/* ---- phone-app, phone width: status line + TV + phone sit between the header and the next circle at the controller stop.
+   The replay button moves beside the phone (out of flow) and the phone column shrinks to the room left. ---- */
+@media (max-width:699px) {
+  #main#main#main[data-page="phone-app"] .phone-workflow { position:relative; --pa-avail:calc(100dvh - var(--story-hdr-h,77px) - 72px); }
+  #main#main#main[data-page="phone-app"] .phone-workflow .pw-status { font-size:15px; line-height:1.4; min-height:2.8em; margin-bottom:8px; }
+  #main#main#main[data-page="phone-app"] .phone-workflow .pw-stage { gap:12px; }
+  #main#main#main[data-page="phone-app"] .phone-workflow .pw-tv figcaption { font-size:13px; line-height:1.35; min-height:0; margin-top:6px; }
+  #main#main#main[data-page="phone-app"] .phone-workflow .pw-phone-column { width:clamp(150px, calc((var(--pa-avail) - 346px) * 0.562 + 14px), 78%); }
+  #main#main#main[data-page="phone-app"] .phone-workflow .pw-foot { position:absolute; right:0; bottom:0; margin:0; width:44px; height:44px; }
+}

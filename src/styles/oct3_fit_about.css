@@ -79,3 +79,47 @@
   #main#main#main#main[data-page="phone-app"] #qr .zpb-related{gap:0 16px}
   #main#main#main#main[data-page="phone-app"] #qr .zpb-related a{padding-block:3px}
 }
+/* Stories, desktop: the Science Center scene (heading, three photos, captions, paragraph) shares one stop, with nothing under the next circle. */
+@media (min-width:901px){
+  #main#main#main#main[data-page="stories"] #exhibit>.sec-band{padding-block:12px}
+  #main#main#main#main[data-page="stories"] #exhibit>.sec-band+*{margin-top:12px!important}
+  #main#main#main#main[data-page="stories"] #exhibit .zpa-trio img{height:clamp(150px,calc(100dvh - 350px),260px)!important}
+  #main#main#main#main[data-page="stories"] #exhibit .exhibit-context{font-size:16px;line-height:1.45;margin-top:14px!important}
+}
+/* Stories, phones and tablets: the nine topics are one compact grid in one stop, with the heading. */
+@media (max-width:900px){
+  #main#main#main#main[data-page="stories"] #topics .zpa-topics.topic-groups{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+  #main#main#main#main[data-page="stories"] #topics .story-topic-group{display:contents}
+  #main#main#main#main[data-page="stories"] #topics .zpa-topic{flex-direction:column;justify-content:flex-start;gap:8px;padding:12px 3px;text-align:center;border-radius:14px}
+  #main#main#main#main[data-page="stories"] #topics .zpa-topic b{font-size:13px;line-height:1.25;overflow-wrap:normal}
+  #main#main#main#main[data-page="stories"] #topics .zpa-topics.topic-groups{gap:8px}
+  #main#main#main#main[data-page="stories"] #topics .zpa-topic img{width:36px;height:36px}
+}
+/* Stories, phones: the first stop is heading, lede, community tabs, TV and its link; the phone controller starts below the circle zone and has the next stop to itself, so the circle never sits on a controller row. */
+@media (max-width:699px){
+  #main#main#main#main[data-page="stories"] .stories-opening>.wrap{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto auto auto minmax(0,1fr) auto;row-gap:12px;align-content:start}
+  #main#main#main#main[data-page="stories"] .stories-opening>.wrap::before{content:"";grid-column:1;grid-row:1/6;min-height:calc(100dvh - 167px);pointer-events:none}
+  #main#main#main#main[data-page="stories"] .stories-opening :is(.meeting-embed,[data-native-mount],.native-story-pair){display:contents}
+  #main#main#main#main[data-page="stories"] .stories-opening .lede{grid-column:1;grid-row:1;margin:0}
+  #main#main#main#main[data-page="stories"] .stories-opening .native-choices{grid-column:1;grid-row:2;margin:0}
+  #main#main#main#main[data-page="stories"] .stories-opening .native-tv-device{grid-column:1;grid-row:3;margin:0}
+  #main#main#main#main[data-page="stories"] .stories-opening .native-caption{grid-column:1;grid-row:4;margin:0}
+  #main#main#main#main[data-page="stories"] .stories-opening .native-phone-device{grid-column:1;grid-row:6;margin:0;justify-self:center;height:clamp(440px,calc(100dvh - 250px),691px);display:flex;box-sizing:border-box}
+  #main#main#main#main[data-page="stories"] .stories-opening .native-phone-screen{aspect-ratio:auto;flex:1 1 auto;min-height:0;height:auto}
+}
+/* Stories, phones: the Science Center heading, three photos and paragraph share one stop (two photos side by side, the third full width). */
+@media (max-width:699px){
+  #main#main#main#main[data-page="stories"] #exhibit>.sec-band{padding-block:12px}
+  #main#main#main#main[data-page="stories"] #exhibit>.sec-band+*{margin-top:12px!important}
+  #main#main#main#main[data-page="stories"] #exhibit .zpa-trio{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  #main#main#main#main[data-page="stories"] #exhibit .zpa-trio figure:last-child{grid-column:1/-1}
+  #main#main#main#main[data-page="stories"] #exhibit .zpa-trio img{height:clamp(72px,calc((100dvh - 480px) / 2.4),130px)!important;object-fit:cover!important;width:100%}
+  #main#main#main#main[data-page="stories"] #exhibit .zpa-trio figcaption{margin-top:6px;font-size:14px;line-height:1.3}
+  #main#main#main#main[data-page="stories"] #exhibit .exhibit-context{font-size:15px;line-height:1.45;margin-top:12px!important}
+}
+/* Stories: the energy-system scene (heading, illustration, note) shares one stop, with nothing under the next circle. */
+@media (min-width:901px){
+  #main#main#main#main[data-page="stories"] #energy>.sec-band{padding-block:12px}
+  #main#main#main#main[data-page="stories"] #energy>.sec-band+*{margin-top:12px!important}
+  #main#main#main#main[data-page="stories"] #energy img{max-height:calc(100dvh - 300px);object-fit:cover}
+}

@@ -93,3 +93,42 @@
  #main#main#main[data-page="data-dashboard"] #heat .dashboard-evidence-copy .zpa-stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
  #main#main#main[data-page="data-dashboard"] #heat .dashboard-evidence-scene{gap:12px}
 }
+
+/* ===== Community Voices: short viewports. The sign is too small for the category label and the quote, so the label is dropped (the quote and author stay readable). ===== */
+@media(max-height:640px) and (min-width:700px){
+ #main#main#main[data-page="community-voices"] .voices-sign .cv .cat{display:none}
+}
+@media(max-height:640px) and (min-width:700px){
+ #main#main#main[data-page="community-voices"] .voices-sign .cv .q{padding:10px 14px}
+ #main#main#main[data-page="community-voices"] .voices-sign .cv .q p{font-size:15px;line-height:1.35}
+ #main#main#main[data-page="community-voices"] .voices-sign .cv-author{font-size:13px;margin-top:4px}
+}
+
+/* ===== Data dashboard: scene titles share the section band look (Comfortaa bold, 21px padding, full-width rule). ===== */
+@media(min-width:700px){
+ /* Cleveland "Orbs" label = same band as every other section title. */
+ #main#main#main#main[data-page="data-dashboard"] .orb-product-scene--cleveland .orb-scene-label{
+  font-family:var(--font-display);font-weight:700;font-size:clamp(28px,3.2vw,43px);line-height:1.25;color:#244b38;
+  padding:21px 0;margin:0 0 12px;border-bottom:1px solid #c9d2c4;
+  border-image:linear-gradient(#c9d2c4,#c9d2c4) 0 0 1 0/0 0 1px 0/0 100vmax 0 stretch}
+ #main#main#main#main[data-page="data-dashboard"] .orb-product-scene--cleveland .orbmap iframe{
+  width:min(100%,calc((100dvh - var(--story-hdr-h,77px) - 232px)*100/68))}
+ /* Dorm chart scene repeats the section title so it reads on its own. */
+ #main#main#main#main[data-page="data-dashboard"] #heat .dashboard-evidence-scene--image-only::before{
+  content:"Building Dashboards";display:block;font-family:var(--font-display);font-weight:700;font-size:clamp(28px,3.2vw,43px);line-height:1.25;color:#244b38;
+  padding:21px 0;margin-bottom:12px;border-bottom:1px solid #c9d2c4;
+  border-image:linear-gradient(#c9d2c4,#c9d2c4) 0 0 1 0/0 0 1px 0/0 100vmax 0 stretch}
+}
+@media(min-width:901px){
+ #main#main#main#main[data-page="data-dashboard"] #heat .dashboard-evidence-scene--image-only>.dashboard-evidence-image>img{max-height:max(150px,calc(100dvh - var(--story-hdr-h,77px) - 150px - 96px))}
+}
+
+/* ===== See it live, phone: all three tabs fit the bar, and the embedded site gets a wider layout (scaled down) so its banner text clears its logo. ===== */
+@media(max-width:699px){
+ #main#main#main#main[data-page="see-it-live"] .live-frame .bar{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;padding:0 8px;overflow:hidden;align-items:center}
+ #main#main#main#main[data-page="see-it-live"] .live-frame .bar>*{min-width:0;width:auto;flex:none}
+ #main#main#main#main[data-page="see-it-live"] .live-frame .bar>a,
+ #main#main#main#main[data-page="see-it-live"] .live-frame .bar .lf-load{justify-content:center;text-align:center;font-size:12.5px;line-height:1.2;padding:6px 4px;min-height:40px;white-space:normal}
+ #main#main#main#main[data-page="see-it-live"] .live-frame .lf-body{position:relative;overflow:hidden;container-type:inline-size}
+ #main#main#main#main[data-page="see-it-live"] .live-frame .lf-body>iframe{position:absolute;top:0;left:0;max-width:none;width:calc(100cqw / .52);height:calc(100% / .52)!important;transform:scale(.52);transform-origin:0 0}
+}
