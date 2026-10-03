@@ -44,11 +44,11 @@ function previewFigure(example: Preview): string {
   </figure>`;
 }
 
-export function previewCarousel(label:string, examples:string[], interval=12000):string {
+export function previewCarousel(label:string, examples:string[], interval=12000, controls=true):string {
  const arrow=(path:string)=>`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${path}"/></svg>`;
- return `<div class="home-preview story-player story-player--quiet" data-story data-reading-preview data-reading-interval="${interval}" role="region" aria-roledescription="carousel" aria-label="${esc(label)}">
+ return `<div class="home-preview story-player story-player--quiet" data-story data-reading-preview data-reading-idle-resume data-reading-interval="${interval}" role="region" aria-roledescription="carousel" aria-label="${esc(label)}">
  <div class="sp-stage">${examples.map((example,index)=>`<div class="sp-slide" data-sp${index?' hidden':''}>${example}</div>`).join('')}</div>
- ${examples.length>1?`<div class="sp-bar"><button type="button" class="sp-nav" data-sp-prev aria-label="Previous ${esc(label)} example">${arrow('m15 5-7 7 7 7')}</button><button type="button" class="sp-nav" data-sp-next aria-label="Next ${esc(label)} example">${arrow('m9 5 7 7-7 7')}</button><button type="button" class="sp-nav sp-pause" data-sp-pause aria-pressed="false" aria-label="Pause automatic examples">${arrow('M8 5v14M16 5v14')}</button></div>`:''}
+ ${examples.length>1&&controls?`<div class="sp-bar"><button type="button" class="sp-nav" data-sp-prev aria-label="Previous ${esc(label)} example">${arrow('m15 5-7 7 7 7')}</button><button type="button" class="sp-nav" data-sp-next aria-label="Next ${esc(label)} example">${arrow('m9 5 7 7-7 7')}</button></div>`:''}
  </div>`;
 }
 export function previewGallery(label: string, examples: Preview[]): string {
@@ -59,7 +59,7 @@ export const buildingPreview=()=>previewCarousel('Building Dashboard',[
  nativeScrollable('https://oberlin.communityhub.cloud/dh-public/ops/dashboard/815','Oberlin College · Harkness',1500),
  nativeScrollable('https://oberlin.communityhub.cloud/dh-public/ops/dashboard/529','Oberlin City Schools · Elementary School',1500),
  nativeScrollable('https://oberlin.communityhub.cloud/dh-public/ops/dashboard/1001','City of Oberlin · Public Library',1500),
-],18000);
+],18000,false);
 export function passiveEmbed(url: string, title: string, context: string): string {
  return `<figure class="home-live-preview"><h4 class="preview-context">${esc(context)}</h4><div class="home-live-canvas"><iframe data-defer-src="${esc(url)}" data-passive-preview tabindex="-1" aria-hidden="true" title="${esc(title)}" loading="lazy"></iframe></div></figure>`;
 }
@@ -82,6 +82,7 @@ export const citywidePreview=()=>previewCarousel('Citywide Dashboard',[
  passiveEmbed('https://www.environmentaldashboard.org/cwd-files/dashboard.php?interval=&current_state=','Oberlin Citywide Dashboard','Oberlin · Citywide Dashboard'),
  passiveEmbed('https://cleveland.communityhub.cloud/citywide-dashboard/index?embed=1&show-menu=0','Cleveland Citywide Dashboard','Cleveland · Citywide Dashboard'),
 ]);
-export function calendarPreview(label='Community Calendar'):string {
- return previewCarousel(label,['oberlin','cleveland'].map(city=>`<div class="calendar-preview"><h4 class="preview-context">${city==='oberlin'?'Oberlin':'Cleveland'} · Community Calendar</h4><div class="ev-mini calendar-brief" data-events data-city="${city}" data-count="3" data-event-preview><p class="events-fallback" role="status">Loading upcoming events…</p></div></div>`));
+export function calendarPreview(label='Community Calendar',controls=true):string {
+ /* controls=false: the two city lists rotate on their own, like the Building Dashboard preview. */
+ return previewCarousel(label,['oberlin','cleveland'].map(city=>`<div class="calendar-preview"><h4 class="preview-context">${city==='oberlin'?'Oberlin':'Cleveland'} · Community Calendar</h4><div class="ev-mini calendar-brief" data-events data-city="${city}" data-count="3" data-event-preview><p class="events-fallback" role="status">Loading upcoming events…</p></div></div>`),12000,controls);
 }

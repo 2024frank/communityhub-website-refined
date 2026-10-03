@@ -8,45 +8,90 @@ document.querySelectorAll<HTMLElement>('[data-native-contexts]').forEach(root =>
   const open = root.querySelector<HTMLAnchorElement>('[data-native-open]')!;
   const status = root.querySelector<HTMLElement>('[data-native-status]')!;
   let active = 0, mounted = false;
-  let releaseResize: (() => void) | undefined;
+  /* Each community is built once and kept: switching back is a hide/show, not a reload. */
+  const views = new Map<number, {view: HTMLElement; open: string; status: string}>();
+  const idle = (run: () => void) => ('requestIdleCallback' in window ? (window as any).requestIdleCallback(run, {timeout: 1500}) : setTimeout(run, 200));
+  const lean = () => !!(navigator as any).connection?.saveData;
   function frame(url:string,title:string,klass:string):HTMLIFrameElement {
     const f=document.createElement('iframe'); f.src=url; f.title=title; f.className=klass;
     f.setAttribute('data-native-direct',''); f.loading='lazy'; return f;
   }
-  function show(index:number) {
-    releaseResize?.(); releaseResize=undefined;
-    active=index; mounted=true;
-    const c=config[index]; mount.replaceChildren(); heading.replaceChildren();
-    if(c.logo) {const logo=document.createElement('img');logo.src=c.logo;logo.alt='';heading.append(logo);}
-    const name=document.createElement('span');name.textContent=c.name;heading.append(name);
-    open.href=c.url;
-    root.querySelectorAll<HTMLElement>('[data-native-choice]').forEach((b,i)=>b.setAttribute('aria-pressed',String(i===index)));
-    status.textContent='';
+  /* quiet: build a community's view in the background without switching to it. */
+  function show(index:number, quiet=false) {
+    const c=config[index];
+    if(!quiet){
+      if(!mounted) mount.replaceChildren();
+      active=index; mounted=true; heading.replaceChildren();
+      if(c.logo) {const logo=document.createElement('img');logo.src=c.logo;logo.alt='';heading.append(logo);}
+      const name=document.createElement('span');name.textContent=c.name;heading.append(name);
+      root.querySelectorAll<HTMLElement>('[data-native-choice]').forEach((b,i)=>b.setAttribute('aria-pressed',String(i===index)));
+      views.forEach((v,i)=>{v.view.hidden=i!==index;});
+    }
+    const kept=views.get(index);
+    if(kept){if(!quiet){open.href=kept.open;status.textContent=kept.status;}return;}
+    const state={view:document.createElement('div'),open:c.url,status:''};
+    state.view.className='native-view';state.view.hidden=quiet;views.set(index,state);
+    if(!quiet){open.href=c.url;status.textContent='';
+      // Other communities load quietly once this one has had time to paint, so the next switch is instant.
+      if(root.dataset.kind==='voices'&&!lean())setTimeout(()=>idle(()=>config.forEach((_,i)=>{if(!views.has(i))show(i,true);})),2500);
+    }
+    mount.append(state.view);
     if(c.categories) {
-      const f=frame(c.url,c.name+' Community Voices','native-voices-screen');
-      f.tabIndex=-1;
-      const stage=document.createElement('div');stage.className='native-voices-stage';stage.append(f);
+      const stage=document.createElement('div');stage.className='native-voices-stage';
       const content=document.createElement('div');content.className='native-voices-content';content.setAttribute('data-scroll-owner','');content.tabIndex=0;content.setAttribute('role','region');content.setAttribute('aria-label',c.name+' voices and categories');
       const hint=document.createElement('p');hint.className='native-voices-hint';hint.textContent='Scroll to browse the community’s categories.';
-      const fit=()=>{
-        const phone=matchMedia('(max-width:699px)').matches;
-        const url=new URL(f.src);const portrait=url.searchParams.has('portrait-mode');
-        if(phone!==portrait){if(phone)url.searchParams.set('portrait-mode','1');else url.searchParams.delete('portrait-mode');f.src=url.href;}
-        f.style.width=phone?'100%':'1100px';f.style.height=phone?'500px':'619px';f.style.transform=phone?'none':`scale(${stage.clientWidth/1100})`;
+      /* One frame per category, kept after its first load. The previous frame stays on screen until
+         the next is ready, and a frame already loaded swaps in at once instead of reloading. */
+      const phoneNow=()=>matchMedia('(max-width:699px)').matches;
+      const frames=new Map<number,HTMLIFrameElement>();
+      let wanted=0, warming=false;
+      const urlFor=(id:number)=>{const url=new URL(c.url);if(id)url.searchParams.set('categories',String(id));else url.searchParams.delete('categories');if(phoneNow())url.searchParams.set('portrait-mode','1');return url.href;};
+      const swap=(fr:HTMLIFrameElement)=>{frames.forEach(x=>x.classList.toggle('is-front',x===fr));stage.removeAttribute('data-loading');};
+      const queue=c.categories.map(x=>x.id);
+      const pump=()=>{
+        const id=queue.shift();if(id===undefined)return;
+        const fr=ensure(id);
+        if(fr.dataset.ready)pump();else fr.addEventListener('load',()=>idle(pump),{once:true});
       };
+      function ensure(id:number):HTMLIFrameElement {
+        const have=frames.get(id);if(have)return have;
+        const fr=frame(urlFor(id),c.name+' Community Voices','native-voices-screen');
+        fr.tabIndex=-1;fr.loading='eager';fr.dataset.category=String(id);
+        fr.addEventListener('load',()=>{
+          fr.dataset.ready='1';
+          if(wanted===id)swap(fr);
+          if(!warming&&!lean()){warming=true;idle(pump);}
+        });
+        frames.set(id,fr);stage.append(fr);fit();return fr;
+      }
+      function fit() {
+        const phone=phoneNow(), width=stage.clientWidth;
+        if(!width&&!phone)return;
+        frames.forEach((fr,id)=>{
+          const url=new URL(fr.src);
+          if(phone!==url.searchParams.has('portrait-mode')){fr.dataset.ready='';fr.src=urlFor(id);}
+          fr.style.width=phone?'100%':'1100px';fr.style.height=phone?'500px':'619px';fr.style.transform=phone?'none':`scale(${width/1100})`;
+        });
+      }
       const categories=document.createElement('div');categories.className='native-categories';categories.setAttribute('role','group');categories.setAttribute('aria-label',c.name+' voice categories');
       const choices=[{id:0,name:'All voices',icon:''},...c.categories];
       choices.forEach(cat=>{
         const button=document.createElement('button');button.type='button';button.setAttribute('aria-pressed',String(cat.id===0));
         if(cat.icon){const image=document.createElement('img');image.src=cat.icon;image.alt='';image.loading='lazy';button.append(image);}
         const label=document.createElement('span');label.textContent=cat.name;button.append(label);
+        /* Hover, focus and the start of a press all begin loading before the click lands. */
+        ['pointerenter','focus','pointerdown','touchstart'].forEach(type=>button.addEventListener(type,()=>{if(!lean())ensure(cat.id);},{passive:true}));
         button.addEventListener('click',()=>{
-          const url=new URL(f.src);if(cat.id)url.searchParams.set('categories',String(cat.id));else url.searchParams.delete('categories');
-          f.src=url.href;open.href=url.href;
+          wanted=cat.id;
+          const fr=ensure(cat.id);
+          state.open=fr.src;open.href=fr.src;
           categories.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));
-          status.textContent=cat.name+' · '+c.name;
+          state.status=status.textContent=cat.name+' · '+c.name;
+          if(fr.dataset.ready)swap(fr);else stage.setAttribute('data-loading','');
         });categories.append(button);
-      });content.append(stage,categories);mount.append(hint,content);const resize=new ResizeObserver(fit);resize.observe(stage);releaseResize=()=>resize.disconnect();fit();
+      });content.append(stage,categories);state.view.append(hint,content);
+      new ResizeObserver(fit).observe(stage);
+      const first=ensure(0);first.classList.add('is-front');
     } else if(c.display && c.remote && c.community) {
       const session=crypto.randomUUID();
       const display=new URL('https://config.communityhub.cloud/digital-signage/web-view/web-session');
@@ -58,16 +103,16 @@ document.querySelectorAll<HTMLElement>('[data-native-contexts]').forEach(root =>
       const phone=document.createElement('div');phone.className='native-phone-device';
       const phoneScreen=document.createElement('div');phoneScreen.className='native-phone-screen';
       const phoneFrame=frame(`https://${c.community}.communityhub.cloud/digital-signage/remote/${c.remote}?webSesssionId=${session}&standalone`,c.name+' story controller','native-story-controller');phoneScreen.append(phoneFrame);phone.append(phoneScreen);
-      pair.append(tv,phone);mount.append(pair);
+      pair.append(tv,phone);state.view.append(pair);
       const fitDevices=()=>{tvFrame.style.width='1280px';tvFrame.style.height='720px';tvFrame.style.transform=`scale(${tvScreen.clientWidth/1280})`;phoneFrame.style.width='100%';phoneFrame.style.height='100%';phoneFrame.style.transform='none';};
-      const deviceResize=new ResizeObserver(fitDevices);deviceResize.observe(tvScreen);deviceResize.observe(phoneScreen);releaseResize=()=>deviceResize.disconnect();fitDevices();
+      const deviceResize=new ResizeObserver(fitDevices);deviceResize.observe(tvScreen);deviceResize.observe(phoneScreen);fitDevices();
     } else {
       const viewport=document.createElement('div');viewport.className='native-application-viewport';viewport.setAttribute('data-scroll-owner','');
-      const f=frame(c.embedUrl || c.url,c.name+' '+root.dataset.kind,'native-application');viewport.append(f);mount.append(viewport);
+      const f=frame(c.embedUrl || c.url,c.name+' '+root.dataset.kind,'native-application');viewport.append(f);state.view.append(viewport);
       if(root.dataset.kind==='voices') {
         f.dataset.contentHeight='850';
         const fit=()=>{const scale=Math.min(1,viewport.clientWidth/1100); f.style.width='1100px';f.style.height=f.dataset.contentHeight+'px';f.style.transform=`scale(${scale})`;viewport.style.height=Math.min(500,Number(f.dataset.contentHeight)*scale)+'px';};
-        const resize=new ResizeObserver(fit);resize.observe(viewport);releaseResize=()=>resize.disconnect();fit();
+        const resize=new ResizeObserver(fit);resize.observe(viewport);fit();
       }
     }
   }
@@ -83,7 +128,7 @@ document.querySelectorAll<HTMLElement>('[data-native-contexts]').forEach(root =>
   if(panel)new MutationObserver(maybeMount).observe(panel,{attributes:true,attributeFilter:['inert']});
   // Resize messages are accepted only from the active source frame and its origin.
   window.addEventListener('message',event=>{
-    const f=mount.querySelector<HTMLIFrameElement>('.native-application');
+    const f=[...mount.querySelectorAll<HTMLIFrameElement>('.native-application')].find(x=>x.contentWindow===event.source);
     if(!f||event.source!==f.contentWindow||event.origin!==new URL(f.src).origin) return;
     const d=event.data;
     if(d?.messageType==='content-resize' && Number.isFinite(Number(d.height))) {

@@ -63,3 +63,11 @@
 #main#main#main[data-page="phone-app"] .phone-workflow .pw-tv figcaption{min-height:41px;margin-top:8px}
 #main#main#main[data-page="phone-app"] .phone-workflow .pw-foot{margin-top:6px}
 @media(max-width:699px){#main#main#main[data-page="phone-app"] .phone-workflow .pw-stage{grid-template-columns:minmax(0,1fr);gap:22px}}
+
+/* Decision 24: the controller is exactly as tall as the screen it drives. The glass keeps its
+   750:1334 ratio, so the column width is solved from the stage width (the TV caps at 650px). */
+@media(min-width:700px){
+/* The container is the wrapper, not the grid itself: cqw on the container resolves against an ancestor, which broke the 700-890px widths. */
+#main#main#main[data-page="phone-app"] .phone-workflow{container-type:inline-size}
+#main#main#main[data-page="phone-app"] .phone-workflow .pw-stage{grid-template-columns:minmax(0,1fr) min(209px,calc(24.02cqw - 5.17px))}
+}

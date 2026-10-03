@@ -1021,9 +1021,24 @@ import { $, $$, isPresent, required, eventElement } from "./dom";
       }
       // Holds preserve the current picture's remaining time. Only choosing a
       // picture or automatically advancing starts a complete new interval.
+      // Previews without a visible pause button never latch forever: after a
+      // quiet spell (no pointer, focus, wheel or touch) they resume rotating.
+      const idleResume = root_.getAttribute("data-reading-idle-resume") !== null && root_.getAttribute("data-manual-preview") === null;
+      let idleTimer: number | undefined = undefined;
+      function hold() {
+        paused = true;
+        updatePauseControl();
+        if (!idleResume) return;
+        clearTimeout(idleTimer);
+        idleTimer = window.setTimeout(function () {
+          if (hovered || focused) { hold(); return; }
+          paused = false;
+          tick(true);
+        }, 20000);
+      }
       function choose(n: number) {
         go(n);
-        if (readingPreview) { paused = true; updatePauseControl(); }
+        if (readingPreview) hold();
         tick(true);
       }
       const pv = $("[data-sp-prev]", root_);
@@ -1044,18 +1059,30 @@ import { $, $$, isPresent, required, eventElement } from "./dom";
       }
       if (readingPreview) {
         // Explicit interaction keeps the selected example stable after focus or
-        // pointer leaves. The visible play control is the only resume action.
-        root_.addEventListener("wheel", () => { paused = true; updatePauseControl(); tick(); }, { passive: true });
-        root_.addEventListener("touchstart", e => { if (!ps?.contains(e.target as Node)) { paused = true; updatePauseControl(); tick(); } }, { passive: true });
-        root_.addEventListener("scroll", () => { paused = true; updatePauseControl(); tick(); }, { passive: true, capture: true });
+        // pointer leaves. A visible play control (when present) is the resume
+        // action; controls-free previews resume after twenty quiet seconds.
+        root_.addEventListener("wheel", () => { hold(); tick(); }, { passive: true });
+        root_.addEventListener("touchstart", e => { if (!ps?.contains(e.target as Node)) { hold(); tick(); } }, { passive: true });
+        root_.addEventListener("scroll", e => { if ((e.target as HTMLElement)?.hasAttribute?.("data-scroll-hinting")) return; hold(); tick(); }, { passive: true, capture: true });
         window.addEventListener?.("blur", () => {
-          if (root_.contains(document.activeElement)) { paused = true; updatePauseControl(); tick(); }
+          if (root_.contains(document.activeElement)) { hold(); tick(); }
+        });
+      }
+      if (!pv && !nx) {
+        // Controls-free preview: arrow keys still step through the examples.
+        root_.addEventListener("keydown", e => {
+          const key = (e as KeyboardEvent).key;
+          if (key !== "ArrowLeft" && key !== "ArrowRight") return;
+          choose(key === "ArrowLeft" ? i - 1 : i + 1);
+          // The slide that held focus is now hidden; keep the keyboard in the carousel.
+          const next = slides[i]?.querySelector?.<HTMLElement>('[tabindex="0"]');
+          next?.focus?.({ preventScroll: true });
         });
       }
       // Independent gates prevent pointer exit from cancelling a keyboard hold.
       root_.addEventListener("pointerenter", () => { hovered = true; tick(); });
       root_.addEventListener("pointerleave", () => { hovered = false; tick(readingPreview); });
-      root_.addEventListener("focusin", e => { focused = true; if (readingPreview && !ps?.contains(e.target as Node)) { paused = true; updatePauseControl(); } tick(); });
+      root_.addEventListener("focusin", e => { focused = true; if (readingPreview && !ps?.contains(e.target as Node)) hold(); tick(); });
       root_.addEventListener("focusout", e => {
         if (!root_.contains(e.relatedTarget instanceof Node ? e.relatedTarget : null)) {
           focused = false;
@@ -1090,6 +1117,76 @@ import { $, $$, isPresent, required, eventElement } from "./dom";
       else inView = true;
       motionChanged();
     });
+  })();
+
+  /* ================================================================
+     INNER SCROLL REGIONS: every one owns the wheel until its edge (the
+     page scripts read [data-scroll-owner]), shows the same pine scrollbar
+     (oct3_controls.css) and nudges down and back once when first in view.
+     ================================================================ */
+  safe(function () {
+    const SEL = ".native-scroll,.native-voices-content,.native-application-viewport,.ev-mini,.rs-lessons,.zpb-emb-site,.hf-source-model,.hf-grid,.pw-picker,.page-contents-panel";
+    const still = matchMedia("(prefers-reduced-motion: reduce)");
+    const NUDGE = 24;
+    const calm = new Map<HTMLElement, number>();
+    let poll: number | undefined;
+    function settle(el: HTMLElement) {
+      el.setAttribute("data-scroll-hinted", "");
+      calm.delete(el);
+      if (!calm.size && poll !== undefined) { clearInterval(poll); poll = undefined; }
+    }
+    function ready(el: HTMLElement) {
+      if (!el.isConnected || el.closest("[inert]") || el.scrollTop > 0) return false;
+      if (el.scrollHeight - el.clientHeight <= NUDGE) return false;
+      const r = el.getBoundingClientRect();
+      if (r.width < 40 || r.height < 40) return false;
+      const seen = Math.min(r.bottom, innerHeight) - Math.max(r.top, 0);
+      if (seen < r.height * 0.7 || r.right <= 0 || r.left >= innerWidth) return false;
+      return (el as HTMLElement & { checkVisibility?: (o: object) => boolean }).checkVisibility?.({ opacityProperty: true, visibilityProperty: true }) !== false;
+    }
+    function nudge(el: HTMLElement) {
+      settle(el);
+      el.setAttribute("data-scroll-hinting", "");
+      const t0 = performance.now(), dur = 1100;
+      let raf = 0, live = true;
+      const events = ["wheel", "touchstart", "pointerdown", "keydown"];
+      function stop() {
+        if (!live) return;
+        live = false;
+        cancelAnimationFrame(raf);
+        events.forEach(n => el.removeEventListener(n, stop));
+        setTimeout(() => el.removeAttribute("data-scroll-hinting"), 150);
+      }
+      events.forEach(n => el.addEventListener(n, stop, { passive: true }));
+      (function step(now: number) {
+        if (!live) return;
+        const p = Math.min(1, (now - t0) / dur);
+        el.scrollTop = NUDGE * Math.sin(Math.PI * p);
+        if (p < 1) raf = requestAnimationFrame(step); else { el.scrollTop = 0; stop(); }
+      })(t0);
+    }
+    function check() {
+      if (doc.hidden || still.matches) return;
+      calm.forEach((n, el) => {
+        if (!ready(el)) { calm.set(el, 0); return; }
+        // Two quiet looks in a row: the scene has stopped moving.
+        if (n >= 1) nudge(el); else calm.set(el, n + 1);
+      });
+    }
+    function adopt() {
+      $$(SEL).forEach(function (el) {
+        if (!el.hasAttribute("data-scroll-owner")) el.setAttribute("data-scroll-owner", "");
+        if (el.hasAttribute("data-scroll-hinted") || calm.has(el)) return;
+        calm.set(el, 0);
+        // A reader who has already scrolled, pressed or tabbed here needs no hint.
+        ["wheel", "touchstart", "pointerdown", "keydown", "focusin"].forEach(n => el.addEventListener(n, () => settle(el), { passive: true, once: true }));
+      });
+      if (calm.size && poll === undefined) poll = window.setInterval(check, 700);
+    }
+    let later: number | undefined;
+    function rescan() { clearTimeout(later); later = window.setTimeout(adopt, 250); }
+    adopt();
+    if (doc.body && typeof MutationObserver !== "undefined") new MutationObserver(rescan).observe(doc.body, { childList: true, subtree: true });
   })();
 
   /* ================================================================

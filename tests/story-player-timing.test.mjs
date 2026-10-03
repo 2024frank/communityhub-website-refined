@@ -12,7 +12,7 @@ before(async () => {
 
 // Browser primitives and a deterministic clock only: all timing decisions and
 // event handlers are supplied by the production [data-story] controller.
-function gallery({ reduced = false, observer = true, initiallyVisible = true, reading = false, manual = false, interval = null } = {}) {
+function gallery({ reduced = false, observer = true, initiallyVisible = true, reading = false, manual = false, interval = null, bare = false } = {}) {
   class Element {
     children = []; attrs = new Map(); events = new Map(); hidden = false; content = '';
     classList = { values: new Set(), add(...names) { names.forEach(n => this.values.add(n)); }, remove(...names) { names.forEach(n => this.values.delete(n)); }, contains(name) { return this.values.has(name); }, toggle(name, on) { if (on) this.values.add(name); else this.values.delete(name); } };
@@ -37,6 +37,7 @@ function gallery({ reduced = false, observer = true, initiallyVisible = true, re
   if (manual) box.setAttribute('data-manual-preview','');
   box.children = [...slides, ...dots, play, previous, next, count];
   box.queries = { '[data-sp-pause]': play, '[data-sp-prev]': previous, '[data-sp-next]': next, '[data-sp-count]': count };
+  if (bare) { box.setAttribute('data-reading-idle-resume',''); box.queries = { '[data-sp-count]': count }; }
   box.lists = { '.sp-slide': slides, '.sp-dots button': dots };
   play.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14M16 5v14"/></svg>';
   const document = new Element(); document.hidden = false; document.activeElement = null; document.documentElement = new Element(); document.lists = { '[data-story]': [box] };
@@ -196,3 +197,30 @@ test('touchstart then focus then Pause click retains pause intent',()=>{const g=
 test('Building preview initially rotates after18seconds and iframe focus latches pause',()=>{const g=gallery({reading:true,interval:18000});g.advance(17999);assert.equal(g.current(),0);g.advance(1);assert.equal(g.current(),1);g.iframeFocus();g.advance(120000);assert.equal(g.current(),1);assert.equal(g.play.getAttribute('aria-pressed'),'true');g.play.emit('click');g.advance(18000);assert.equal(g.current(),2);});
 
 test('inactive overlapping product previews do not rotate and regain a full reading interval',()=>{const g=gallery({reading:true});g.advance(11000);g.productActive(false);g.advance(90000);assert.equal(g.current(),0);g.productActive(true);g.advance(11999);assert.equal(g.current(),0);g.advance(1);assert.equal(g.current(),1);});
+
+test('controls-free preview resumes after twenty quiet seconds instead of latching',()=>{
+ const g=gallery({reading:true,bare:true,interval:18000});g.advance(18000);assert.equal(g.current(),1);
+ g.box.emit('wheel');g.advance(19999);assert.equal(g.current(),1);
+ g.advance(1);g.advance(17999);assert.equal(g.current(),1);g.advance(1);assert.equal(g.current(),2);
+});
+test('controls-free preview keeps holding while the pointer is over it, then resumes after the quiet spell',()=>{
+ const g=gallery({reading:true,bare:true,interval:18000});g.box.emit('pointerenter');g.box.emit('wheel');g.advance(65000);assert.equal(g.current(),0);
+ g.box.emit('pointerleave');g.advance(18000);assert.equal(g.current(),0);g.advance(14999);assert.equal(g.current(),0);g.advance(1);assert.equal(g.current(),1);
+});
+test('controls-free preview steps with the arrow keys and restarts its full interval',()=>{
+ const g=gallery({reading:true,bare:true,interval:18000});
+ g.box.emit('keydown',{key:'ArrowRight'});assert.equal(g.current(),1);
+ g.box.emit('keydown',{key:'ArrowLeft'});g.box.emit('keydown',{key:'ArrowLeft'});assert.equal(g.current(),2);
+ g.box.emit('keydown',{key:'Enter'});assert.equal(g.current(),2);
+});
+test('a scroll nudge is not an interaction: the preview keeps its schedule',()=>{
+ const g=gallery({reading:true,bare:true,interval:18000});const region={hasAttribute:n=>n==='data-scroll-hinting'};
+ g.box.emit('scroll',{target:region});g.advance(18000);assert.equal(g.current(),1);
+});
+test('home previews carry no pause button; the Building preview has no controls at all',async()=>{
+ const { readFile } = await import('node:fs/promises');
+ const src = await readFile(new URL('../src/content/home-previews.ts', import.meta.url), 'utf8');
+ assert.doesNotMatch(src, /data-sp-pause|sp-pause/);
+ assert.match(src, /buildingPreview=\(\)=>previewCarousel\('Building Dashboard'[\s\S]*?\],18000,false\);/);
+ assert.match(src, /data-reading-idle-resume/);
+});

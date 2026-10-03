@@ -9,7 +9,7 @@ before(async()=>{
  home=site.getPage('index').body;
 });
 test('final chapter headings omit To and connect to their related submenu',()=>{
- for(const label of ['Engage','Educate','Motivate and empower']) assert.ok(home.includes(`>${label}</h2>`));
+ for(const label of ['Engage','Educate','Motivate and Empower']) assert.ok(home.includes(`>${label}</h2>`));
  assert.equal((home.match(/class="chapter-connector"/g)||[]).length,3);
 });
 test('each homepage product has one Learn more immediately under explanatory copy',()=>{

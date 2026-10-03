@@ -29,7 +29,7 @@ body{color:var(--ch-ink);background:var(--ch-field)}
 #main#main#main[data-page="index"]>.hv .hv-h .hv-l{font:inherit;white-space:normal;max-width:none}
 #main#main#main[data-page="index"]>.hv .hv-h em{color:white;font-style:normal}
 #main#main#main[data-page="index"]>.hv .hv-scrim{background:linear-gradient(90deg,#12271ded,#12271d70 60%,#12271d12),linear-gradient(0deg,#12271da6,transparent 65%)}
-#main#main#main[data-page="index"]>.hv .hv-next{display:inline-flex!important;left:var(--ch-gutter);right:auto;bottom:28px;min-height:48px;min-width:150px;z-index:5;background:#a1cd54;color:#243a24;border:0;border-radius:6px;font:700 16px/1.4 var(--font-body)}
+#main#main#main[data-page="index"]>.hv .hv-next{display:inline-flex!important;align-items:center;justify-content:center;text-decoration:none;left:var(--ch-gutter);right:auto;bottom:28px;min-height:48px;min-width:150px;z-index:5;background:#a1cd54;color:#243a24;border:0;border-radius:6px;font:700 16px/1.4 var(--font-body)}
 #main#main#main[data-page="index"]>.hv .hv-skip .sec-next{left:50%;right:auto;bottom:25px;transform:translateX(-50%);width:48px;height:48px;min-width:48px;max-width:48px;background:transparent;border:1px solid #ffffff90;box-shadow:none}
 /* Testimonials: complete photographs, consistent reading measure, controls below. */
 #main#main#main[data-page="index"] #people{background:var(--ch-field)!important;color:var(--ch-ink);padding-block:36px 62px!important}
@@ -581,3 +581,12 @@ html.motion #main#main#main[data-pager]>.ch-story-section.is-in:not(.hub-flow) [
 /* Hidden recovery controls still participate in flex layout; never let their
    text collapse into a tall column and steal the application's viewport. */
 #main#main#main .live-frame .bar .lf-load{flex:0 0 auto;white-space:nowrap;overflow-wrap:normal;max-width:none;min-height:44px;padding-block:0}
+
+/* Decision 24: on desktop the phone controller is exactly as tall as the screen it drives.
+   Both devices share one top-and-bottom bezel total (17px), so screen and controller match. */
+@media(min-width:700px){
+#main#main#main .native-story-pair{align-items:stretch}
+#main#main#main .native-phone-device{box-sizing:border-box;display:flex;border-width:7px;border-top-width:8px;border-bottom-width:9px;border-radius:22px}
+#main#main#main .native-phone-device::before{top:-6px;height:3px;left:calc(50% - 17px);width:34px}
+#main#main#main .native-phone-screen{aspect-ratio:auto;flex:1 1 auto;min-width:0;border-radius:8px}
+}

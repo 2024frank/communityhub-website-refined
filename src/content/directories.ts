@@ -11,7 +11,7 @@ export function register(H: SiteContext): void {
   const column = ([title, cards, more]: Column): string =>
     `<div class="product-category" data-story-scene><h2>${title}</h2><ul>${cards.map(card).join("")}</ul>${more ? `<a class="product-how-link" href="${more[0]}">${more[1]} ${H.ARR}</a>` : ""}</div>`;
   const directory = (slug: string, title: string, lede: string, desc: string, columns: readonly Column[]): void => {
-    const body = `<section class="product-directory" aria-labelledby="${slug}-h"><div class="wrap" data-story-scene="all">
+    const body = `<section class="product-directory" aria-labelledby="${slug}-h"><div class="wrap" data-story-scene="desktop">
     ${H.crumbs([null, title] as const)}<h1 class="h1" id="${slug}-h">${title}</h1><p class="lede">${lede}</p>
     <div class="product-directory-grid${columns.length === 2 ? " dir-2" : ""}">${columns.map(column).join("")}</div>
   </div></section>` + H.cta_band("Contact Us", "");

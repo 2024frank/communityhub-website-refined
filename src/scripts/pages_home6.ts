@@ -1,6 +1,6 @@
 import type { StoryFrame, StoryTouch } from "./types";
 import { WheelGesture } from "./ui/wheel-gesture";
-import { productBoundary } from "./ui/product-navigation";
+import { productBoundary, productHasMore } from "./ui/product-navigation";
 import { mayAutoAdvanceHero } from "./ui/hero-policy";
 import { required, eventElement, htmlChildren } from "./dom";
 /* v6 home: problem line over the drone zoom, connection diagram, scaled live embeds */
@@ -134,7 +134,7 @@ import { required, eventElement, htmlChildren } from "./dom";
     /* Play forward once, hold briefly, then reveal the people below the final frame.
        The film and people remain one semantic opening section. */
     const btn = hv.querySelector<HTMLElement>("[data-hv-next]");
-    if (btn) btn.addEventListener("click", finishAtPeople);
+    if (btn) btn.addEventListener("click", function (e) { e.preventDefault(); finishAtPeople(); });
     if (location.hash === "#people") queueMicrotask(finishAtPeople);
     window.addEventListener("hashchange", () => { if (location.hash === "#people") finishAtPeople(); });
     v.addEventListener("ended", function () {
@@ -515,6 +515,7 @@ import { required, eventElement, htmlChildren } from "./dom";
      the end of the block's content (not its bottom padding), the stops are
      spaced evenly so no gesture moves a few pixels, and each one snaps to the top
      of a nearby heading, paragraph, card or figure so no stop bisects text. */
+  const NEXT_ROOM = 60; // px the floating next control keeps free at the screen bottom
   const UNITS = "h2,h3,h4,p,li,figure,blockquote,details,article,table,img,iframe,video,.card,[class*=card]";
   // A section that overflows its screen by less than a quarter screen starts at
   // its first line of content instead of its top padding, so it needs no tail stop.
@@ -557,11 +558,19 @@ import { required, eventElement, htmlChildren } from "./dom";
       return spaced(ys);
     }
     // Content that already fits, or overflows by a few pixels of padding, needs no further stop.
-    if (bottom && bottom <= start + window.innerHeight + 8) return ys;
+    // It still needs a short tail stop when part of it would sit under the next control.
+    const zone = start + window.innerHeight - NEXT_ROOM + 4;
+    const centre = window.innerWidth / 2;
+    const covered = bottom > zone && units.some(el => {
+      const r = el.getBoundingClientRect();
+      return absTop(el) + el.offsetHeight > zone && r.left < centre + 24 && r.right > centre - 24;
+    });
+    if (bottom && bottom <= start + window.innerHeight + 8 && !covered) return ys;
     // The owner's own bottom is the furthest any stop may reach, so the next section
     // never shares the screen with a tail.
     const limit = end;
-    if (bottom) end = Math.max(start, Math.min(end, Math.round(bottom + 24 - window.innerHeight)));
+    // 60px: the down control keeps the screen bottom free of the last lines of a long scene.
+    if (bottom) end = Math.max(start, Math.min(end, Math.round(bottom + 24 + 60 - window.innerHeight)));
     if (end - start <= 16) return ys;
     const step = Math.max(1, room - 64);
     const count = Math.ceil((end - start) / step);
@@ -647,7 +656,13 @@ import { required, eventElement, htmlChildren } from "./dom";
         let part = 0;
         scenes.forEach((scene, sceneIndex) => {
           const start = sceneIndex === 0 ? join(i === 0 ? 0 : lead(scene, absTop(s) - inset, room, inset, s), s, room) : lead(scene, absTop(scene) - inset, room, inset);
-          const end = Math.max(start, absTop(scene) + scene.offsetHeight - window.innerHeight);
+          /* The next control floats over the screen bottom, so a scene's last stop clears it:
+             the final scene by the section's own padding, earlier ones by the reserve (the
+             following scenes are hidden meanwhile, so nothing else shows beneath). */
+          const sceneBottom = absTop(scene) + scene.offsetHeight;
+          const last = sceneIndex === scenes.length - 1;
+          const reach = last ? Math.min(sceneBottom + NEXT_ROOM, absTop(s) + s.offsetHeight) : sceneBottom + NEXT_ROOM;
+          const end = Math.max(start, reach - window.innerHeight);
           add(start, s, part++, scene);
           splitAt(scene, start, end, room, inset).forEach((y, n) => add(y, s, part++, scene, n + 1));
         });
@@ -807,7 +822,14 @@ import { required, eventElement, htmlChildren } from "./dom";
     const f = frameForElement(t, frames());
     if (f && Math.abs(f.y - window.scrollY) > 1) cutTo(f.y);
   });
-  window.chStory = { frames: frames, go: go, current: current };
+  // The same test go(1) applies, without moving: stops that share one position
+  // (product tabs) still count, so the next control matches what a swipe would do.
+  function hasNext() {
+    const y = window.scrollY;
+    if (frames().some(f => f.y > y + NEAR)) return true;
+    return productHasMore(current()?.els[0], 1);
+  }
+  window.chStory = { frames: frames, go: go, current: current, hasNext: hasNext };
   window.addEventListener(
     "scroll",
     function () {

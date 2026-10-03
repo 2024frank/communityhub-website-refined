@@ -44,3 +44,10 @@ Historical migration parity tests refer to an optional frozen `reference/` tree 
 ## October 3 saved work checkpoint
 
 Saved and pushed at the user's request to stop work. The current implementation is a work-in-progress checkpoint, not a completed QA release. The latest completed automated checks passed, but final browser review remains incomplete. A known Community Voices product-page issue remains: changing community can shift the section position and clip category controls. No fix for that report has been applied. Production has not been deployed. The existing source manifest/checksum files predate this checkpoint and are not a validation of these edits.
+
+## October 3 Kwaku review fixes
+- Next circle: `chStory.hasNext()` (new, `pages_home6.ts`) is the one test for "is there a next screen"; the circle uses it, so it stays on the Community Voices preview stop (product tabs share a position) and on the last content scene (it cues the footer, then hides there).
+- Overlap: every scene's last stop now reserves the circle's 60px (`NEXT_ROOM`), and a scene that fits but has content under the circle gets a short tail stop (`splitAt`). Intermediate stops can still have the circle over a line that the next stop re-shows by design.
+- Home: Calendar preview has no Previous/Next (`calendarPreview(label, false)`); hero Explore is a link (`a.hv-next`), kept clear of the circle; the opening after Explore fits one phone screen (headline band, photo and controls, no tail at y=58); /who-its-for shows one section heading on the first phone screen (`directories.ts`).
+- Not changed: /digital-signage has no TV mock-up; the 650px TV cap on /phone-app is intentional.
+- Dev server note: Vite served stale CSS after edits; touching `src/styles/index.css` and reloading refreshed it.

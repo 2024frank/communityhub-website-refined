@@ -2,6 +2,10 @@
 export function availableToolRoom(height: number, top: number, reserve: number): number {
   return Math.max(80, Math.min(680, Math.floor(height - top - reserve)));
 }
+/** Where the tool sits when its section fills the screen below the sticky header. The tool's offset inside its section is layout, so this never depends on the scroll position. */
+export function settledToolTop(headerHeight: number, sectionTop: number, toolTop: number): number {
+  return Math.max(0, headerHeight) + (toolTop - sectionTop);
+}
 /** Keep the whole landscape story and its actual category controls together. */
 export function availableVoicesStage(room: number, categories: number): number {
   return Math.max(240, Math.floor(room - categories - 10));
@@ -15,8 +19,15 @@ export function fitViewportTools(): void {
     queued = 0;
     main.querySelectorAll<HTMLElement>(selector).forEach(target => {
       if (target.closest('[inert]') || getComputedStyle(target).visibility === 'hidden') return;
-      const top = target.getBoundingClientRect().top;
-      if (top < 0 || top >= innerHeight) return;
+      // Measure from the section, not the viewport: a scroll-dependent room resized the
+      // scene (and clipped the categories) each time a community remount re-ran this.
+      const section = target.closest('section');
+      const header = document.querySelector<HTMLElement>('.hdr');
+      const targetTop = target.getBoundingClientRect().top;
+      const top = section
+        ? settledToolTop(header?.getBoundingClientRect().height ?? 0, section.getBoundingClientRect().top, targetTop)
+        : targetTop;
+      if (!section && (top < 0 || top >= innerHeight)) return;
       const reserve = target.classList.contains('native-voices-content') ? 92 : 108;
       const value = `${availableToolRoom(innerHeight, top, reserve)}px`;
       if (target.style.getPropertyValue('--viewport-tool-room') !== value)

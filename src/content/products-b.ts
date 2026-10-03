@@ -97,12 +97,12 @@ export function register(H: SiteContext): void {
     const list_html = `<ol class="zpb-steps" data-story-scene>${li}</ol>`;
     if (media_html) {
       const media = `<figure class="zpb-stepper-media is-live" style="margin:0" data-story-scene>${media_html}</figure>`;
-      return `<div class="zpb-stepper" data-zpb-stepper data-zpb-step-ms="${step_ms}" aria-label="${e(aria_label)}">${media}${list_html}</div>`;
+      return `<div class="zpb-stepper" data-zpb-stepper data-zpb-step-ms="${step_ms}" aria-label="${e(aria_label)}">${list_html}${media}</div>`;
     }
     if (media_img) {
       const media = `<figure class="zpb-stepper-media has-caption" style="margin:0" data-story-scene><img src="assets/${media_img}" alt="${e(media_alt)}" loading="lazy"><figcaption>${e(media_alt)}</figcaption></figure>`;
-      const content = media_img === "eng-ctl-sip.jpg" ? list_html + media : media + list_html;
-      return `<div class="zpb-stepper" data-zpb-stepper data-zpb-step-ms="${step_ms}" aria-label="${e(aria_label)}">${content}</div>`;
+      // Text first, image second: text left, image right on desktop, copy before image when stacked.
+      return `<div class="zpb-stepper" data-zpb-stepper data-zpb-step-ms="${step_ms}" aria-label="${e(aria_label)}">${list_html + media}</div>`;
     }
     return `<div class="zpb-stepper" data-zpb-stepper data-zpb-step-ms="${step_ms}" aria-label="${e(aria_label)}" style="display:block">${list_html}</div>`;
   }
@@ -367,12 +367,26 @@ export function register(H: SiteContext): void {
       media,
     );
     body += jump([
+      ["shows", "What plays"] as const,
       ["multileveled", "Multileveled"] as const,
       ["loop", "Dave's Market"] as const,
-      ["controller", "Controlled by phone"] as const,
-      ["locations", "Where the screens are"] as const,
+      ["managed", "Managing content"] as const,
+      ["controller", "Phone control"] as const,
+      ["examples", "Controllers"] as const,
+      ["locations", "Oberlin"] as const,
+      ["campus", "Cleveland and campus"] as const,
       ["related", "Works well with"] as const,
     ]);
+    // What plays on the screens: one line per application, in the source's own words (catalog "short").
+    const shows_items = ["building-dashboard", "citywide-dashboard", "community-calendar", "community-voices", "stories"]
+      .map((slug) => {
+        const sp = H.PBY[slug];
+        const line = String(sp["short"]);
+        return `<li><a href="${slug}.html">${H.picon(sp)}<span><b>${sp["name"]}</b><span>${line.charAt(0).toUpperCase()}${line.slice(1)}</span></span></a></li>`;
+      })
+      .join("");
+    const shows = `<div class="ds-shows"><ul class="ds-shows-list" data-story-scene>${shows_items}</ul><figure class="ds-shows-photo" data-story-scene><img src="assets/carbon-neutral-science-center-original.jpeg" alt="Three people at the Carbon Neutral Stories exhibit in Oberlin College's Science Center" loading="lazy"><figcaption>The Carbon Neutral Stories exhibit in Oberlin College's Science Center.</figcaption></figure></div>`;
+    body += sec("shows", "What plays on the screens", "What plays on the screens", shows);
     const multi =
       '<div class="stanza-row c2"><div class="stanza" data-story-scene style="background:var(--leaf-tint)"><img class="stanza-photo is-screen" src="assets/sign-farmers-market.jpg" alt="A digital sign showing the Oberlin Farmers Market event, posted from the Community Calendar" loading="lazy"><h3>Events on the screen</h3><p>All events or job opportunities posted to Community Calendar and Jobs Board are auto formatted and added to live digital signage sequences upon their approval</p></div><div class="stanza" data-story-scene style="background:var(--sky-2)"><img class="stanza-photo" src="assets/kids-citywide-screen.jpg" alt="Elementary students gathered in front of a Citywide Dashboard screen in a school hallway" loading="lazy"><h3>Shared community content</h3><p>Screens throughout a community can display shared content, while also hosting location specific material unique to a handful of or single display</p></div></div>';
     body += sec(
@@ -411,34 +425,109 @@ export function register(H: SiteContext): void {
       undefined,
       true,
     );
+    const managed_steps = stepper(
+      [
+        [
+          "Post to the calendar or jobs board",
+          "Organizations and community members share events, announcements and job opportunities on the Community Calendar and Jobs Board.",
+        ] as const,
+        [
+          "Approve it",
+          "All events or job opportunities posted to Community Calendar and Jobs Board are auto formatted and added to live digital signage sequences upon their approval.",
+        ] as const,
+        [
+          "Each screen keeps its own sequence",
+          "Each Digital Signage display can have its own unique sequence, content featured dependent on location.",
+        ] as const,
+      ],
+      "eng-midtown-events.jpg",
+      "The MidTown Community Calendar, with a Post to Calendar button and tabs for events, announcements and volunteer opportunities",
+      undefined,
+      "How content reaches the screens",
+    );
+    body += sec(
+      "managed",
+      "Managing content",
+      "Managing content",
+      managed_steps,
+      "Easy to use interactive digital signage makes it simple for multiple stakeholders to post and update content",
+    );
     const controllerIntro = `<p>Our phone app doubles as a remote, giving users the power to control digital signage by simply scanning the respective QR code on location and selecting viewable content. <a class="hand-link" href="phone-app.html">Phone App</a></p>`;
     const controller = nativeStories() + `<details class="native-help"><summary>Using the phone controller</summary>${controllerIntro}<ol><li><b>Scan the QR code</b><p>Stand at the screen and scan the code on the poster beside it with your phone camera.</p></li><li><b>Pick a topic on your phone</b><p>Your phone shows that screen's menu. At Oberlin College's Carbon Neutral Stories screen it lists Energy, Water, Climate and more.</p></li><li><b>It plays on the big screen</b><p>The screen switches to your choice, so everyone in the room sees it.</p></li></ol></details>`;
     body += sec(
       "controller",
       "Controlled by phone",
-      "Control Digital Signage",
+      "Try the controller. It works!",
       controller,
     );
+    const ctls = [
+      [
+        "eng-ctl-midtown.jpg",
+        "The MidTown Community Dashboard Screen Controller on a phone, listing Community Calendar, Jobs Board, Community Voices and more",
+        "MidTown Cleveland",
+        "Visitors pick what the MidTown screen shows from the controller on their own phone.",
+      ],
+      [
+        "eng-ctl-story.jpg",
+        "Hands holding a phone showing the Carbon Neutral Stories controller with topics from Heating and Cooling to Live Data",
+        "Carbon Neutral Stories",
+        "At Oberlin College, the phone chooses which Carbon Neutral Stories topic appears on the exhibit screen.",
+      ],
+      [
+        "eng-ctl-exhibit.jpg",
+        "The exhibit case controller on a phone, headed Select an Exhibit Case Feature, listing lights, a lava lamp, a hair dryer, a mini-fridge heat pump, the meters and data system and the geothermal model",
+        "Exhibit case",
+        "At the Science Center exhibit case, the phone selects a feature: the lights, a lava lamp, a hair dryer, a mini-fridge heat pump, the meters and data system, or the geothermal model.",
+      ],
+    ] as const;
+    const examples = `<div class="ds-ctls">${ctls
+      .map(
+        ([img, alt, t, d]) =>
+          `<figure data-story-scene><img src="assets/${img}" alt="${e(alt)}" loading="lazy"><figcaption><h3>${t}</h3><p>${d}</p></figcaption></figure>`,
+      )
+      .join("")}</div>`;
+    body += sec("examples", "Controllers in use", "Controllers in use", examples);
     const locations = place_cards([
       [
         "oberlin-aerial.jpg",
         "Aerial view of Oberlin, Ohio",
         "Oberlin, Ohio",
-        "24 interactive screens run in Oberlin's City Schools, the public library, a food pantry, downtown businesses, City Hall, the Fire Station, a retirement community and churches (24 interactive signs, per Community Hub's May 2026 partner list).",
+        "24 interactive screens run in Oberlin's City Schools, the public library, a food pantry, downtown businesses, City Hall, the Fire Station, a retirement community and churches.",
       ] as const,
       [
-        "eng-sign-daves.jpg",
-        "A Digital Signage screen inside Dave's MidTown Market",
-        "MidTown Cleveland",
-        "Four screens run at Dave's MidTown Market, MidTown Inc's office, Fatima Family Center and Willson Tower Apartments.",
+        "cafe-window-sign.jpg",
+        "A Community Hub screen in the window of Slow Train Cafe, downtown Oberlin",
+        "Slow Train Cafe",
+        "A Community Hub screen in the window of Slow Train Cafe, downtown Oberlin.",
       ] as const,
     ]);
+    body += sec("locations", "Oberlin, Ohio", "Where the screens are: Oberlin", locations);
+    const campus = place_cards([
+      [
+        "glsc-exhibit.jpg",
+        "A screen and touch kiosk at the Great Lakes Science Center, Cleveland",
+        "Great Lakes Science Center",
+        "A screen and touch kiosk at the Great Lakes Science Center, Cleveland.",
+      ] as const,
+      [
+        "glsc-workshop.jpg",
+        "Students and staff pose in front of a dashboard screen and a touch tablet at the Great Lakes Science Center",
+        "Great Lakes Science Center workshop",
+        "Students and staff in front of a dashboard screen and a touch tablet.",
+      ] as const,
+      [
+        "eng-sign-oc-exhibit.jpg",
+        "Three people at the Carbon Neutral Stories exhibit in Oberlin College's Science Center",
+        "Oberlin College",
+        "The Carbon Neutral Stories exhibit in the Science Center. Oberlin College has 12 signs on campus.",
+      ] as const,
+    ]).replace('class="place-cards"', 'class="place-cards is-three"');
     body += sec(
-      "locations",
-      "Where the screens are",
-      "Where the screens are",
-      locations + related_group("What plays on the screen", ["community-calendar", "community-voices", "phone-app"]),
-      undefined,
+      "campus",
+      "Cleveland and campus",
+      "Where the screens are: Cleveland and campus",
+      campus + related_group("Works well with", ["phone-app", "web-embeddables", "community-calendar"]),
+      "In MidTown, four screens run at Dave's MidTown Market, MidTown Inc's office, Fatima Family Center and Willson Tower Apartments.",
       undefined,
       true,
     );
@@ -498,13 +587,13 @@ export function register(H: SiteContext): void {
     body += sec(
       "controller",
       "Try it",
-      "Control Digital Signage",
+      "Try the controller. It works!",
       controller,
       "",
       undefined,
       true,
     ).replace('<section ', '<section data-stable-start ');
-    const qr = `<div class="product-evidence" data-story-scene="desktop"><div class="product-evidence-media" data-story-scene>${media}</div><div class="product-evidence-copy" id="what" aria-labelledby="what-h" data-story-scene><h3 id="what-h">What it does</h3>${what}<div class="phone-related-links">${related_group("What the app opens", ["digital-signage", "community-calendar", "community-voices", "stories"])}</div></div></div>`;
+    const qr = `<div class="product-evidence" data-story-scene="desktop"><div class="product-evidence-copy" id="what" aria-labelledby="what-h" data-story-scene><h3 id="what-h">What it does</h3>${what}<div class="phone-related-links">${related_group("What the app opens", ["digital-signage", "community-calendar", "community-voices", "stories"])}</div></div><div class="product-evidence-media" data-story-scene>${media}</div></div>`;
     body += sec("qr", "QR posters", "Phone App & Screen Controller", qr);
     body += H.cta_band("Contact Us", "");
     H.write_page(

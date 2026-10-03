@@ -124,12 +124,12 @@ class UIFoundationTests(unittest.TestCase):
         self.page.set_viewport_size({'width':375,'height':667})
         self.page.goto(self.site.url+'contact.html',wait_until='domcontentloaded')
         self.page.wait_for_function('window.chStory && window.chStory.frames().length')
+        # A screen with a next one (the footer counts) shows the circle; the footer screen hides it.
+        expect(self.page.locator('.page-next')).to_have_attribute('aria-hidden','false')
+        expect(self.page.get_by_role('button',name='Next section',exact=True)).to_have_count(1)
+        self.page.evaluate("window.scrollTo(0, document.documentElement.scrollHeight)")
         expect(self.page.locator('.page-next')).to_have_attribute('aria-hidden','true')
         expect(self.page.get_by_role('button',name='Next section',exact=True)).to_have_count(0)
-        self.page.mouse.move(180,500)
-        self.page.mouse.wheel(0,650)
-        expect(self.page.locator('.page-next')).to_have_attribute('aria-hidden','false')
-        self.page.get_by_role('button',name='Next section',exact=True).click()
 
     def async_fixture(self, timeout=15000):
         self.page.set_content('<div id="status" role="status" aria-live="polite"><p data-ui-message></p></div><div id="content" hidden></div><button id="retry" hidden>Try again</button>')

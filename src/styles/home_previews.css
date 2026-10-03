@@ -13,11 +13,10 @@
 #main#main#main .home-preview .sp-stage{height:auto;aspect-ratio:auto;display:grid;overflow:visible;max-height:none!important;margin:0!important}
 #main#main#main .home-preview .sp-slide{position:relative!important;inset:auto;display:block;grid-area:1/1;opacity:1;transform:none;padding:0}
 #main#main#main .home-preview .sp-slide[hidden]{display:none!important}
-#main#main#main .home-preview .sp-slide>figure>picture>img{display:block;width:100%;height:auto!important;max-height:min(50dvh,520px);object-fit:contain!important;object-position:center;background:transparent;border-radius:var(--preview-radius)}
+#main#main#main .home-preview .sp-slide>figure>picture>img{display:block;width:auto;max-width:100%;height:auto!important;max-height:min(50dvh,520px);object-fit:contain!important;object-position:left center;background:transparent;border-radius:var(--preview-radius)}
 #main#main#main .home-preview .sp-cap{position:static!important;inset:auto;color:var(--ch-ink);background:none;display:flex;align-items:center;gap:10px;min-height:38px;padding:12px 0 0;margin:0;font:400 var(--preview-caption)/1.45 var(--font-body);text-align:left;opacity:1;visibility:visible}
 #main#main#main .home-preview .preview-logo{width:40px;height:30px!important;max-height:30px;object-fit:contain;flex:none}
-#main#main#main .home-preview .sp-bar{position:absolute;inset:auto 0 0;display:flex!important;justify-content:center;align-items:center;gap:12px;height:44px;padding:0;background:none;opacity:0;pointer-events:none;transition:opacity .15s ease}
-#main#main#main .home-preview:is(:hover,:focus-within) .sp-bar{opacity:1;pointer-events:auto}
+#main#main#main .home-preview .sp-bar{position:absolute;inset:auto 0 0;display:flex!important;justify-content:center;align-items:center;gap:12px;height:44px;padding:0;background:none;opacity:1;pointer-events:auto}
 #main#main#main .home-preview .sp-nav{position:static;inset:auto;transform:none;margin:0;display:grid;place-items:center;width:var(--control-size);height:var(--control-size);min-width:var(--control-size);padding:11px;border:var(--control-outline) solid currentColor;border-radius:50%;color:var(--ch-pine);background:transparent;cursor:pointer}
 #main#main#main .home-preview .sp-nav:hover{background:#e1e9d8}
 #main#main#main .home-preview .sp-nav svg{width:22px;height:22px;stroke:currentColor;stroke-width:var(--control-stroke);fill:none;stroke-linecap:round;stroke-linejoin:round}
@@ -28,9 +27,7 @@
 #main#main#main .sec-next{border:var(--control-outline) solid currentColor!important;border-radius:50%!important;width:44px;height:44px;min-width:44px;padding:10px;background:transparent}
 #main#main#main .sec-next svg{stroke-width:var(--control-stroke)}
 @media(max-width:1100px){#main#main#main[data-page="index"] .chapter-heading{flex-wrap:wrap}#main#main#main[data-page="index"] .eng-tabs{margin-left:0;justify-content:flex-start}}
-@media(max-width:900px){#main#main#main[data-page="index"] .chapter-connector{display:none}#main#main#main[data-page="index"] .product-identity{margin-bottom:16px;gap:12px}#main#main#main[data-page="index"] .product-identity-icon{width:36px;height:36px}#main#main#main .home-preview .sp-slide>figure>picture>img{max-height:none}#main#main#main .home-live-canvas{aspect-ratio:4/3}}
-@media(hover:none){#main#main#main .home-preview .sp-bar{opacity:1;pointer-events:auto}}
-@media(prefers-reduced-motion:reduce){#main#main#main .home-preview .sp-bar{transition:none}}
+@media(max-width:900px){#main#main#main[data-page="index"] .product-identity{margin-bottom:16px;gap:12px}#main#main#main[data-page="index"] .product-identity-icon{width:36px;height:36px}#main#main#main .home-preview .sp-slide>figure>picture>img{width:100%;max-height:none}#main#main#main .home-live-canvas{aspect-ratio:4/3}}
 
 #main#main#main .home-preview .preview-context{display:flex;align-items:center;gap:12px;margin:0 0 12px;font:700 18px/1.4 var(--font-body);color:var(--ch-pine);text-align:left}
 /* Restored participant network belongs to About, distinct from the platform deck. */
@@ -58,8 +55,8 @@
 #main#main#main .native-controller-cue{font:400 16px/1.5 var(--font-body);margin:8px 0 12px;color:var(--ch-ink);max-width:60ch}
 
 #main#main#main .sec-next path{stroke-width:var(--control-stroke)}
-#main#main#main .preview-readable-text{display:none}
-@media(max-width:699px){#main#main#main .preview-readable-text{display:block;font:400 17px/1.5 var(--font-body);margin-top:14px;color:var(--ch-ink);max-width:50ch}}
+#main#main#main .preview-readable-text{display:block;font:400 var(--preview-caption)/1.45 var(--font-body);margin:12px 0 0;color:var(--ch-ink);max-width:60ch;text-align:left}
+@media(max-width:699px){#main#main#main .preview-readable-text{font-size:17px;line-height:1.5;margin-top:14px}}
 
 #main#main#main .preview-readable-quote{display:none}
 @media(max-width:699px){
@@ -96,3 +93,15 @@
 
 body>.page-next{border:var(--control-outline) solid currentColor;border-radius:50%;padding:10px}
 body>.page-next path{stroke-width:var(--control-stroke)}
+
+/* Building Dashboard keeps its own scroll; a permanent, high-contrast bar says so. */
+#main#main#main .native-scroll{scrollbar-color:auto;scrollbar-width:auto}
+#main#main#main .native-scroll::-webkit-scrollbar{width:14px}
+#main#main#main .native-scroll::-webkit-scrollbar-track{background:#e6ece4}
+#main#main#main .native-scroll::-webkit-scrollbar-thumb{background:var(--ch-pine);border-radius:7px;border:3px solid #e6ece4}
+
+/* Decision 3: slide arrows are always visible on the passive homepage, never hover-only. */
+#main#main#main .home-preview.story-player .sp-nav{opacity:1}
+
+/* Decision 8: the Building Dashboard title sits exactly where every other preview title sits. */
+#main#main#main .home-preview .native-heading{margin:0 0 12px;font:700 18px/1.4 var(--font-body);color:var(--ch-pine);text-align:left}

@@ -32,7 +32,7 @@ export function register(H: SiteContext): void {
     <h1 class="hv-h"><span class="hv-premise">It has never been more important</span> <span class="hv-l">to <em>act locally</em> while <em>thinking globally</em></span></h1>
   </div>
   <div class="hv-skip"><span class="hv-prog" aria-hidden="true"><i data-hv-prog></i></span><button class="sec-next" type="button" data-hv-skip aria-label="Skip the video"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><path d="M5 9l7 7 7-7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
-  <button class="hv-next" type="button" data-hv-next aria-label="Explore Community Hub">Explore</button>
+  <a class="hv-next" href="#people" data-hv-next aria-label="Explore Community Hub">Explore</a>
 </div></section>`;
   function person(t: Testimonial, go: Links): string {
     const btns = go.slice(0, 1)
@@ -176,14 +176,18 @@ export function register(H: SiteContext): void {
       "The Carbon Neutral Stories exhibit at Oberlin College's Science Center",
     ] as const,
   ];
-  const ctl_html = `<figure class="native-photo"><img src="assets/phone-person-water-display.jpg" alt="A visitor holds the phone controller beside a large display showing Water Use" loading="lazy"><figcaption>Using a phone to choose what appears on a shared display.</figcaption></figure>`;
+  const ctl_html = previewGallery("Phone App", [
+    {image: "phone-person-water-display.jpg", alt: "A visitor holds the phone controller beside a large display showing Water Use", context: "Phone App · Choosing what appears on a shared display", readableText: "Using a phone to choose what appears on a shared display."},
+    {image: "eng-ctl-midtown.jpg", alt: "The MidTown Community Dashboard Screen Controller on a phone, listing Community Calendar, Jobs Board, Community Voices and more", context: "Phone App · MidTown Cleveland controller", readableText: "Visitors pick what the MidTown screen shows from the controller on their own phone."},
+    {image: "eng-ctl-story.jpg", alt: "Hands holding a phone showing the Carbon Neutral Stories controller with topics from Heating and Cooling to Live Data", context: "Phone App · Carbon Neutral Stories controller", readableText: "At Oberlin College, the phone chooses which Carbon Neutral Stories topic appears on the exhibit screen."},
+  ]);
   const installationNames = ["Dave's Market · MidTown Cleveland", "Hotel at Oberlin", "Oberlin City Schools", "Great Lakes Science Center · Workshop", "Great Lakes Science Center · Exhibit", "Oberlin College · Carbon Neutral Stories"];
-  const sign_media = previewGallery("Digital Signage", signs.map(([image, alt], index) => ({image, alt, context: installationNames[index]})));
+  const sign_media = previewGallery("Digital Signage", signs.map(([image, alt], index) => ({image, alt, context: installationNames[index], readableText: alt})));
   const emb_media = calendarPreview("Web Embeddables");
   const live = {
     "data-dashboard": buildingPreview(),
     "the-hub": dataHubPreview(),
-    "community-calendar": calendarPreview(),
+    "community-calendar": calendarPreview("Community Calendar", false),
     "community-voices": voicesPreview(),
     stories: storiesPreview(),
   };
@@ -305,7 +309,7 @@ export function register(H: SiteContext): void {
     ]) +
     group(
       "motivate",
-      "Motivate and empower",
+      "Motivate and Empower",
       "green",
       "Ways we motivate and empower",
       [

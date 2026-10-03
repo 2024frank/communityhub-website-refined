@@ -60,3 +60,10 @@ Cached pre-update HTML and screenshots captured during an unfinished resize were
 ## Source handoff
 
 Both ZIPs merge into the same `community-hub-source/` folder. The media ZIP is unchanged from the prior handoff. Run `python3 verify-source.py` on the clean merged extraction before installing dependencies, then use Node 22.12 or newer with `npm ci`, `npm run check`, `npm run build` and `npm run preview -- --port 4327`. See `README.md`, `HANDOFF.md` and the maintainer guide for complete instructions.
+
+## October 3 Kwaku review fixes
+- Verified in the browser (390x844 and 1440x900, one overlap scan per frame over 35 phone pages and the 6 desktop pages named in the review): last frame of every scene is clear of the circle; remaining hits are first or middle frames that the next stop re-shows (for example /products s0 at 1440, /pricing s5 at 390).
+- Home 390: circle on at every stop through Community Voices, off on the footer; Calendar preview has 0 `.sp-nav`; Explore is `A.hv-next` (724-772) above the circle (790-834); the post-Explore opening ends at 844 with controls at 739-783 and stops at 0 and 767.
+- /who-its-for 390: first screen has the page title and "Communities" only. Contact, /pricing, /who-its-for: circle on at the last content frame, off at the footer.
+- Automated: build 38 pages OK; `node --test tests/*.test.mjs` 237 pass, 0 fail; `npm run -s test:contracts` 11 OK.
+- Remaining: `tests/browser/test_ui_foundation.py` was updated for the visible contact circle but not run (needs Playwright); /digital-signage TV finding not reproduced.

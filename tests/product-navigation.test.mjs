@@ -7,7 +7,7 @@ let api;
 before(() => {
   const source=readFileSync('src/scripts/ui/product-navigation.ts','utf8').replace(/export /g,'');
   const code=ts.transpileModule(source,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.None}}).outputText;
-  api=runInNewContext(`${code}\n({registerProductNavigation, productBoundary})`);
+  api=runInNewContext(`${code}\n({registerProductNavigation, productBoundary, productHasMore})`);
 });
 function rail(count, initial=0) {
   const section={}; let index=initial, enabled=true;
@@ -42,4 +42,15 @@ test('a new forward visit starts at the first product and backward visit at the 
   const r=rail(4,2);
   api.productBoundary({},r.section,1); assert.equal(r.index(),0);
   api.productBoundary({},r.section,-1); assert.equal(r.index(),3);
+});
+test('productHasMore reads the rail without moving it',()=>{
+  const rails=rail(3,1);
+  assert.equal(api.productHasMore(rails.section,1),true);
+  assert.equal(api.productHasMore(rails.section,-1),true);
+  assert.equal(rails.index(),1);
+  const end=rail(2,1);
+  assert.equal(api.productHasMore(end.section,1),false);
+  end.disable();
+  assert.equal(api.productHasMore(end.section,-1),false);
+  assert.equal(api.productHasMore(undefined,1),false);
 });

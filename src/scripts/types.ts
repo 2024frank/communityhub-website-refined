@@ -25,6 +25,8 @@ export interface StoryController {
   frames(): StoryFrame[];
   go(direction: number, advance?: boolean): boolean;
   current(): StoryFrame | null;
+  /** True when go(1) would move: a later stop, or another product in the selected product rail. Never moves anything. */
+  hasNext(): boolean;
 }
 export interface StoryMotion {
   target: StoryFrame;

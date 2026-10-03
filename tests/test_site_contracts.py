@@ -168,7 +168,7 @@ class SiteContractsTests(unittest.TestCase):
 
     def test_home_hero_retains_skip_and_forward_only_video(self):
         home = self.pages['index.html']
-        self.assertEqual(len(home.xpath('//button[@data-hv-next]')), 1)
+        self.assertEqual(len(home.xpath('//a[@data-hv-next]')), 1)
         videos = home.xpath('//video[@data-hv-vid]')
         self.assertEqual(len(videos), 1)
         self.assertNotIn('loop', videos[0].attrib)
