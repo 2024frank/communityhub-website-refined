@@ -39,7 +39,7 @@ export const MAX_PER_PAGE = 2;
 /** Longest a cue stays on screen before it steps aside for good. */
 export const MAX_SHOW_MS = 8000;
 // Versioned: a change to when hints count as done starts every visitor fresh.
-export const STORE_KEY = "ch-squirrel-done-2";
+export const STORE_KEY = "ch-squirrel-done-3";
 
 /** Share of the target rectangle that lies inside the viewport, below `topInset` (the sticky header). */
 export function visibleRatio(r: Rect, vw: number, vh: number, topInset = 0): number {
@@ -656,8 +656,9 @@ export function initAttentionSquirrel(): Handle | undefined {
     }
     if (d.kind === "keep" && shownSrc) {
       // A cue with data-squirrel-for (ms) hands over to the next one after that long on screen;
-      // any other cue steps aside after MAX_SHOW_MS so it guides without nagging.
-      const forMs = Number(shownSrc.el.getAttribute("data-squirrel-for")) || MAX_SHOW_MS;
+      // any other cue steps aside after MAX_SHOW_MS so it guides without nagging. A scroll cue
+      // stays beside its region until the visitor scrolls it or the region leaves view.
+      const forMs = Number(shownSrc.el.getAttribute("data-squirrel-for")) || (shownSrc.kind === "scroll" ? Infinity : MAX_SHOW_MS);
       if (now - shownAt >= forMs) {
         if (shownSrc.el.hasAttribute("data-squirrel-for")) lastActivity = now - IDLE_MS;
         if (shownSrc.kind === "scroll") { rested.add(shownSrc.id); hide("rest"); return; }
