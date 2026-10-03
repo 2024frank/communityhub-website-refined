@@ -271,7 +271,7 @@ export function data_views(label = "Live views of Oberlin's data", keys?: readon
     const body =
       v.src !== undefined
         ? `<div class="dv-chart" data-dv-${v.key}="${v.src}"><p class="dv-wait">Loading live data</p></div>`
-        : `<div class="mini" data-mini style="--w:1280;--h:800;background-image:url(assets/${v.shot})"><iframe src="${v.live}" title="${e(v.title)}" loading="lazy" width="1280" height="800" tabindex="-1"></iframe></div>`;
+        : `<div class="mini" data-mini style="--w:1280;--h:800;background-image:url(assets/${v.shot})"><iframe data-defer-src="${v.live}" title="${e(v.title)}" loading="lazy" width="1280" height="800" tabindex="-1"></iframe></div>`;
     views += `<div class="dv-view${on ? " is-on" : ""}" ${keys?.length === 1 ? `role="region" aria-label="${e(v.title)}"` : `role="tabpanel" aria-labelledby="dvt-${v.key}"`} id="dvp-${v.key}">${org_link(v.live, "dv-source")}<div class="dv-frame">${body}</div><div class="dv-note" id="dv-note-${v.key}" hidden><p><b>${v.tab}</b>${e(v.note)}</p></div><p class="dv-cap">Live: ${e(v.title)}. <a href="${v.live}" target="_blank" rel="noopener">Open the live chart ${ARR}</a> <button type="button" class="dv-help" data-dv-help aria-expanded="false" aria-controls="dv-note-${v.key}">What does this show?</button></p></div>`;
   }
   return `<div class="dv" data-dv aria-label="${e(label)}">${keys?.length === 1 ? "" : `<div class="dv-tabs" role="tablist" aria-label="${e(label)}">${tabs}</div>`}<div class="dv-stage">${views}</div></div>`;

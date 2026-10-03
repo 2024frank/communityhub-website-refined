@@ -546,6 +546,8 @@ import { $, $$, isPresent, required, eventElement } from "./dom";
     let interacted = false;
     let tourTimer: number | undefined = undefined;
     let tourLeft = 0;
+    let startT: number | undefined = undefined;
+    let startIo: IntersectionObserver | undefined = undefined;
     const STEP = 3200;
     root.style.setProperty("--zpb-emb-step", STEP + "ms");
     function stopTour() {
@@ -561,8 +563,10 @@ import { $, $$, isPresent, required, eventElement } from "./dom";
       let i = keys.indexOf(state.preset);
       applyPreset(keys[(i + 1) % keys.length]);
       tourLeft--;
-      if (tourLeft <= 0) stopTour();
-      else {
+      if (tourLeft <= 0) {
+        stopTour();
+        if (startIo) startIo.disconnect();
+      } else {
         root.classList.remove("is-touring");
         void root.offsetWidth;
         root.classList.add("is-touring");
@@ -578,6 +582,8 @@ import { $, $$, isPresent, required, eventElement } from "./dom";
     }
     function userAct() {
       interacted = true;
+      clearTimeout(startT);
+      if (startIo) startIo.disconnect();
       if (touring) stopTour();
     }
     root.addEventListener("pointerdown", userAct);
@@ -1145,14 +1151,23 @@ import { $, $$, isPresent, required, eventElement } from "./dom";
 
     applyPreset(state.preset, true);
     if (!reduce && "IntersectionObserver" in window) {
-      const startIo = new IntersectionObserver(
+      startIo = new IntersectionObserver(
         function (es) {
           es.forEach(function (en) {
-            if (en.isIntersecting && !toured && !interacted) {
-              startIo.disconnect();
-              window.setTimeout(function () {
-                if (!interacted && !toured) startTour();
-              }, 900);
+            if (en.isIntersecting) {
+              if (!toured && !touring && !interacted) {
+                clearTimeout(startT);
+                startT = window.setTimeout(function () {
+                  if (!interacted && !toured && !touring) startTour();
+                }, 900);
+              }
+            } else {
+              // Scene left: cancel a pending start, and rewind a running tour so it replays on return.
+              clearTimeout(startT);
+              if (touring) {
+                stopTour();
+                toured = false;
+              }
             }
           });
         },

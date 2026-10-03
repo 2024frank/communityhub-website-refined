@@ -1,4 +1,6 @@
 import type { Context } from '../content/meeting-embeds';
+import { reportedEmbedHeight } from './ui/embed-scroll';
+import { freshDocumentUrl } from './ui/fresh-document-url';
 
 // Only the selected context is mounted. Paired native story frames share a private web session.
 document.querySelectorAll<HTMLElement>('[data-native-contexts]').forEach(root => {
@@ -13,7 +15,7 @@ document.querySelectorAll<HTMLElement>('[data-native-contexts]').forEach(root =>
   const idle = (run: () => void) => ('requestIdleCallback' in window ? (window as any).requestIdleCallback(run, {timeout: 1500}) : setTimeout(run, 200));
   const lean = () => !!(navigator as any).connection?.saveData;
   function frame(url:string,title:string,klass:string):HTMLIFrameElement {
-    const f=document.createElement('iframe'); f.src=url; f.title=title; f.className=klass;
+    const f=document.createElement('iframe'); f.src=freshDocumentUrl(url); f.title=title; f.className=klass;
     f.setAttribute('data-native-direct',''); f.loading='lazy'; return f;
   }
   /* quiet: build a community's view in the background without switching to it. */
@@ -69,7 +71,7 @@ document.querySelectorAll<HTMLElement>('[data-native-contexts]').forEach(root =>
         if(!width&&!phone)return;
         frames.forEach((fr,id)=>{
           const url=new URL(fr.src);
-          if(phone!==url.searchParams.has('portrait-mode')){fr.dataset.ready='';fr.src=urlFor(id);}
+          if(phone!==url.searchParams.has('portrait-mode')){fr.dataset.ready='';fr.src=freshDocumentUrl(urlFor(id));}
           fr.style.width=phone?'100%':'1100px';fr.style.height=phone?'500px':'619px';fr.style.transform=phone?'none':`scale(${width/1100})`;
         });
       }
@@ -107,11 +109,11 @@ document.querySelectorAll<HTMLElement>('[data-native-contexts]').forEach(root =>
       const fitDevices=()=>{tvFrame.style.width='1280px';tvFrame.style.height='720px';tvFrame.style.transform=`scale(${tvScreen.clientWidth/1280})`;phoneFrame.style.width='100%';phoneFrame.style.height='100%';phoneFrame.style.transform='none';};
       const deviceResize=new ResizeObserver(fitDevices);deviceResize.observe(tvScreen);deviceResize.observe(phoneScreen);fitDevices();
     } else {
-      const viewport=document.createElement('div');viewport.className='native-application-viewport';viewport.setAttribute('data-scroll-owner','');
+      const viewport=document.createElement('div');viewport.className='native-application-viewport';viewport.setAttribute('role','region');viewport.setAttribute('aria-label',c.name+' '+root.dataset.kind);viewport.tabIndex=0;
       const f=frame(c.embedUrl || c.url,c.name+' '+root.dataset.kind,'native-application');viewport.append(f);state.view.append(viewport);
       if(root.dataset.kind==='voices') {
         f.dataset.contentHeight='850';
-        const fit=()=>{const scale=Math.min(1,viewport.clientWidth/1100); f.style.width='1100px';f.style.height=f.dataset.contentHeight+'px';f.style.transform=`scale(${scale})`;viewport.style.height=Math.min(500,Number(f.dataset.contentHeight)*scale)+'px';};
+        const fit=()=>{if(f.hasAttribute('data-embed-measured-frame'))return;const scale=Math.min(1,viewport.clientWidth/1100); f.style.width='1100px';f.style.height=f.dataset.contentHeight+'px';f.style.transform=`scale(${scale})`;viewport.style.height=Math.min(500,Number(f.dataset.contentHeight)*scale)+'px';};
         const resize=new ResizeObserver(fit);resize.observe(viewport);fit();
       }
     }
@@ -126,20 +128,7 @@ document.querySelectorAll<HTMLElement>('[data-native-contexts]').forEach(root =>
   window.addEventListener('ch:storychange',maybeMount);
   const panel=root.closest('[data-eng-panel]');
   if(panel)new MutationObserver(maybeMount).observe(panel,{attributes:true,attributeFilter:['inert']});
-  // Resize messages are accepted only from the active source frame and its origin.
-  window.addEventListener('message',event=>{
-    const f=[...mount.querySelectorAll<HTMLIFrameElement>('.native-application')].find(x=>x.contentWindow===event.source);
-    if(!f||event.source!==f.contentWindow||event.origin!==new URL(f.src).origin) return;
-    const d=event.data;
-    if(d?.messageType==='content-resize' && Number.isFinite(Number(d.height))) {
-      const height=Math.min(4000,Math.max(380,Number(d.height)));
-      f.dataset.contentHeight=String(height);f.style.height=height+'px';
-      const viewport=f.parentElement!;
-      if(root.dataset.kind==='voices') viewport.style.height=Math.min(500,height*Math.min(1,viewport.clientWidth/1100))+'px';
-      else { f.style.height='480px'; }
-
-    }
-  });
+  // Application resize messages are fitted by the shared embed-scroll module.
 });
 
 document.querySelectorAll<HTMLElement>('[data-phone-demo]').forEach(root=>{
@@ -194,6 +183,8 @@ document.querySelectorAll<HTMLIFrameElement>('[data-native-scroll-frame]').forEa
  window.addEventListener('message',event=>{
   const url=f.src||f.dataset.deferSrc;
   if(!url||event.source!==f.contentWindow||event.origin!==new URL(url).origin)return;
-  if(event.data?.messageType==='content-resize' && Number.isFinite(Number(event.data.height))){sourceHeight=Math.min(8000,Math.max(600,Number(event.data.height)));fit();}
+  if(event.data?.messageType!=='content-resize')return;
+  const height=reportedEmbedHeight(event.data.height);
+  if(height!==null){sourceHeight=height;f.setAttribute('data-native-scroll-height-confirmed','');f.setAttribute('scrolling','no');fit();window.dispatchEvent(new Event('ch:embed-scrollchange'));}
  });
 });

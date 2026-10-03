@@ -46,6 +46,7 @@ function controller() {
     cancel: () => { context.publicRequest = null; },
     eventElement: event => event.target,
     innerScroller: target => !!target?.canScroll,
+    horizontalScroller: target => !!target?.canScrollX,
     headerHeight: 80,
   };
   runInNewContext(`${gestureSource}\nconst wheelGesture = new WheelGesture(); function resetGesture() { wheelGesture.reset(); }\n${goSource}\n${wheelSource}\n${touchSources.touchstart}\n${touchSources.touchmove}\nthis.go = go; this.wheel = handleWheel;`, context);
@@ -118,12 +119,34 @@ test('long inertia and small direction noise still yield one cut per gesture', (
   assert.deepEqual(c.cuts, [720, 0]);
 });
 
-test('zoom, horizontal wheel and already handled input keep their native ownership', () => {
+test('zoom, pure horizontal wheel and already handled input keep their native ownership', () => {
   const c = controller();
-  for (const options of [{ ctrlKey: true }, { deltaX: 120 }, { shiftKey: true }]) {
+  for (const options of [{ ctrlKey: true }, { deltaX: 120, deltaY: 0 }, { shiftKey: true }]) {
     assert.equal(c.wheel(options).defaultPrevented, false);
   }
   c.wheel({ defaultPrevented: true });
+  assert.deepEqual(c.cuts, []);
+});
+
+test('diagonal trackpad gestures over ordinary content cut instead of smoothly drifting', () => {
+  const c = controller();
+  assert.equal(c.wheel({ deltaX: 120, deltaY: 90 }).defaultPrevented, true);
+  assert.deepEqual(c.cuts, [720]);
+  assert.equal(c.wheel({ delay: 300, deltaX: -120, deltaY: -90 }).defaultPrevented, true);
+  assert.deepEqual(c.cuts, [720, 0]);
+});
+
+test('a horizontal rail retains a horizontal-dominant diagonal gesture', () => {
+  const c = controller();
+  const event = c.wheel({ deltaX: 120, deltaY: 90, target: { canScrollX: true } });
+  assert.equal(event.defaultPrevented, false);
+  assert.deepEqual(c.cuts, []);
+});
+
+test('diagonal gestures still scroll an overflowing embedded region natively', () => {
+  const c = controller();
+  const event = c.wheel({ deltaX: 120, deltaY: 90, target: { canScroll: true } });
+  assert.equal(event.defaultPrevented, false);
   assert.deepEqual(c.cuts, []);
 });
 

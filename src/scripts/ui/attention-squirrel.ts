@@ -3,7 +3,8 @@
    When the site wants the visitor to do something to see more (scroll an
    inner region, try a phone controller), the squirrel pops out beside that
    target with a short speech bubble. As soon as the visitor starts doing it
-   the squirrel pops back out of sight and that target is done for the session.
+   the squirrel pops back out of sight. Scroll cues return on the next visit;
+   controller cues remain done for the session.
 
    The decision logic at the top is pure (no DOM) and unit-tested in
    tests/attention-squirrel.test.mjs; initAttentionSquirrel() below wires it
@@ -113,6 +114,30 @@ export function serializeDone(done: ReadonlySet<string>): string {
   return JSON.stringify([...done]);
 }
 
+/** Scrolling one embed never completes another, or a later visit to the same embed. */
+export function refreshScrollVisits(done: ReadonlySet<string>, targets: readonly CueTarget[]): Set<string> {
+  return new Set(targets.filter(t => t.visible && t.ratio >= HIDE_RATIO && done.has(t.id)).map(t => t.id));
+}
+
+export interface ScrollAction {
+  type: string;
+  key?: string;
+  deltaY?: number;
+  ctrlKey?: boolean;
+  metaKey?: boolean;
+  altKey?: boolean;
+  /** Native controls and editable content keep their own keyboard behavior. */
+  control?: boolean;
+}
+
+/** A click, focus, touch-down or Tab is not evidence that a visitor started scrolling. */
+export function startsScrolling(e: ScrollAction): boolean {
+  if (e.ctrlKey || e.metaKey || e.altKey) return false;
+  if (e.type === "wheel") return Math.abs(e.deltaY || 0) > 0;
+  if (e.type === "touchmove") return true;
+  return e.type === "keydown" && !e.control && ["ArrowUp", "ArrowDown", "PageUp", "PageDown", "Home", "End", " ", "Spacebar"].includes(e.key || "");
+}
+
 export function sideOrder(pref?: string | null): Side[] {
   const all: Side[] = ["right", "left", "top", "bottom"];
   const first = all.find(s => s === pref);
@@ -202,7 +227,7 @@ const AUTO_TARGETS: AutoTarget[] = [
 const SCROLL_TEXT = "Scroll here";
 /** Short forms for phones, used only when the full cue has no room (a page can set data-squirrel-short). */
 const SHORT_TEXT: Record<string, string> = { "Try the controller": "Try it", "Pick one to explore": "Pick one", "Scroll here": "Scroll" };
-const MIN_OVERFLOW = 40;
+const MIN_OVERFLOW = 1;
 
 interface Handle { destroy(): void }
 
@@ -222,8 +247,10 @@ export function initAttentionSquirrel(): Handle | undefined {
   const SQ_H = () => Math.round(SQ_W() * (160 / 113));
 
   let done = new Set<string>();
+  let scrollDone = new Set<string>();
   try { done = parseDone(sessionStorage.getItem(STORE_KEY)); } catch { /* storage may be blocked */ }
   function persist() { try { sessionStorage.setItem(STORE_KEY, serializeDone(done)); } catch { /* ignore */ } }
+  function completed(s: Source) { return (s.kind === "scroll" ? scrollDone : done).has(s.id); }
 
   /* ---- the single cue element ---- */
   const cue = doc.createElement("div");
@@ -231,7 +258,6 @@ export function initAttentionSquirrel(): Handle | undefined {
   cue.setAttribute("aria-hidden", "true");
   cue.hidden = true;
   cue.innerHTML = '<div class="sq-fig"><span class="sq-bubble"></span><img class="sq-img" alt="" width="113" height="160" decoding="async" draggable="false"></div>';
-  const fig = cue.firstElementChild as HTMLElement;
   const bubble = cue.querySelector(".sq-bubble") as HTMLElement;
   const img = cue.querySelector(".sq-img") as HTMLImageElement;
   img.src = STATIC;
@@ -263,11 +289,10 @@ export function initAttentionSquirrel(): Handle | undefined {
   }
   function overflows(el: HTMLElement) { return el.scrollHeight - el.clientHeight > MIN_OVERFLOW; }
 
-  /* A frame that fills a scroll region is scaled to its whole height, so the region does the scrolling. If the frame
-     could also scroll itself (its page is a little taller than it reports), the visitor's first swipe or wheel notch
-     would move the frame's own content: nothing the page can hear, the region still at the top, the cue still up. */
+  /* Only a frame with an authenticated measured content height can safely hand scrolling to its parent.
+     Estimated heights must retain native frame scrolling so real embedded content cannot be clipped. */
   function lockFrames() {
-    doc.querySelectorAll<HTMLIFrameElement>("[data-scroll-owner] iframe[data-native-scroll-frame]").forEach(f => {
+    doc.querySelectorAll<HTMLIFrameElement>("[data-scroll-owner] iframe[data-native-scroll-frame][data-native-scroll-height-confirmed]").forEach(f => {
       if (f.getAttribute("scrolling") !== "no") f.setAttribute("scrolling", "no");
     });
   }
@@ -283,6 +308,7 @@ export function initAttentionSquirrel(): Handle | undefined {
     }
     doc.querySelectorAll<HTMLElement>("[data-squirrel]").forEach(el => {
       const text = (el.getAttribute("data-squirrel") || "").trim();
+      if (el.hasAttribute("data-squirrel-off")) return;
       add(el, text, "right", el.hasAttribute("data-scroll-owner") ? "scroll" : "control");
     });
     AUTO_TARGETS.forEach(a => doc.querySelectorAll<HTMLElement>(a.sel).forEach(el => {
@@ -297,9 +323,9 @@ export function initAttentionSquirrel(): Handle | undefined {
     // Keep describedby in step: a hint on every live target, none on dropped ones.
     sources.forEach(s => { if (!seen.has(s.el)) unhint(s); });
     const prev = new Map(sources.map(s => [s.el, s]));
-    sources = list.map(s => { const p = prev.get(s.el); if (p) { p.text = s.text; p.side = s.side; p.order = s.order; return p; } return s; });
-    sources.forEach(s => { if (done.has("text:" + s.text)) done = markDone(done, s.id); });
-    sources.forEach(s => { if (done.has(s.id)) unhint(s); else hint(s); });
+    sources = list.map(s => { const p = prev.get(s.el); if (p) { p.text = s.text; p.side = s.side; p.kind = s.kind; p.order = s.order; return p; } return s; });
+    sources.forEach(s => { if (s.kind === "control" && done.has("text:" + s.text)) done = markDone(done, s.id); });
+    sources.forEach(s => { if (completed(s)) unhint(s); else hint(s); });
   }
   function hint(s: Source) {
     if (!s.hint) {
@@ -441,7 +467,7 @@ export function initAttentionSquirrel(): Handle | undefined {
     trace = [s.id + " t=" + JSON.stringify(full)];
     // When the full cue finds no free space, a smaller squirrel with a short bubble can fit the gutter beside the target
     // (on phones always; elsewhere when the page gives a short form).
-    const short = s.el.getAttribute("data-squirrel-short") || (phone.matches ? SHORT_TEXT[s.text] || "" : "");
+    const short = s.el.getAttribute("data-squirrel-short") || (s.kind === "scroll" ? "Scroll" : phone.matches ? SHORT_TEXT[s.text] || "" : "");
     const rounds = [{ text: s.text, sw: SQ_W(), sh: SQ_H() }];
     if (short && short !== s.text) rounds.push({ text: short, sw: 52, sh: Math.round(52 * 160 / 113) });
     cue.hidden = false;
@@ -452,8 +478,10 @@ export function initAttentionSquirrel(): Handle | undefined {
     const tries: { text: string; sw: number; sh: number; side: Side }[] = [];
     if (scroll) {
       // By the scrollbar first; a smaller squirrel there still beats the far side of the region.
-      const sizes = [{ sw: SQ_W(), sh: SQ_H() }, { sw: 52, sh: Math.round(52 * 160 / 113) }];
-      for (const z of sizes) for (const side of SCROLL_SIDES.slice(0, 3)) tries.push({ text: s.text, ...z, side });
+      const compact = innerWidth <= 900;
+      const small = { sw: 52, sh: Math.round(52 * 160 / 113) };
+      const sizes = compact ? [small] : [{ sw: SQ_W(), sh: SQ_H() }, small];
+      for (const z of sizes) for (const side of SCROLL_SIDES.slice(0, 3)) tries.push({ text: compact ? short : s.text, ...z, side });
       for (const r of rounds) for (const side of SCROLL_SIDES) tries.push({ ...r, side });
     } else for (const r of rounds) for (const side of sideOrder(s.side)) tries.push({ ...r, side });
     outer: for (const { text, sw, sh, side } of tries) {
@@ -497,7 +525,7 @@ export function initAttentionSquirrel(): Handle | undefined {
   let hideTimer: number | undefined;
   const unplaceable = new Map<string, number>();
 
-  function apply(p: Placement, s: Source) {
+  function apply(p: Placement) {
     const { box, side, size, text } = p;
     cue.dataset.side = side;
     cue.toggleAttribute("data-flip", !!p.flip);
@@ -512,23 +540,24 @@ export function initAttentionSquirrel(): Handle | undefined {
     shownSrc = s;
     shownAt = performance.now();
     if (shownOnPage.path !== location.pathname) shownOnPage = { path: location.pathname, n: 0 };
-    shownOnPage.n++;
+    if (s.kind === "control") shownOnPage.n++;
     placement = p;
     img.src = still.matches ? STATIC : ANIMATED;
     cue.hidden = false;
-    apply(p, s);
+    apply(p);
     cue.classList.remove("is-in");
     void cue.offsetWidth;
     cue.classList.add("is-in");
     lastRect = rectOf(s.el);
     log("show", s.id);
   }
-  function hide(why: string) {
+  function hide(why: string, immediate = false) {
     if (!shownId) return;
     log("hide:" + why, shownId);
     shownId = null; shownSrc = undefined; placement = null;
     cue.classList.remove("is-in");
     clearTimeout(hideTimer);
+    if (immediate) { cue.hidden = true; img.src = STATIC; return; }
     hideTimer = window.setTimeout(() => {
       if (shownId) return;
       cue.hidden = true;
@@ -536,11 +565,17 @@ export function initAttentionSquirrel(): Handle | undefined {
     }, still.matches ? 160 : 340);
   }
   function finish(s: Source, why: string) {
-    if (done.has(s.id)) return;
+    if (completed(s)) return;
+    if (s.kind === "scroll") {
+      scrollDone = markDone(scrollDone, s.id);
+      unhint(s);
+      if (shownId === s.id) hide(why, true);
+      return;
+    }
     done = markDone(done, s.id);
-    // Once a visitor has had a hint, the same hint elsewhere is noise: it counts as done everywhere.
+    // Controller instructions stay learned for the session; scroll guidance belongs to its region.
     done = markDone(done, "text:" + s.text);
-    sources.forEach(o => { if (o !== s && o.text === s.text && !done.has(o.id)) { done = markDone(done, o.id); unhint(o); } });
+    sources.forEach(o => { if (o.kind === "control" && o !== s && o.text === s.text && !done.has(o.id)) { done = markDone(done, o.id); unhint(o); } });
     persist();
     unhint(s);
     if (shownId === s.id) hide(why);
@@ -563,8 +598,13 @@ export function initAttentionSquirrel(): Handle | undefined {
     const t = e.target as Node | null;
     if (!t || cue.contains(t)) return;
     const wheelLike = e.type === "wheel" || e.type === "touchmove";
+    const eventTarget = t instanceof Element ? t : t.parentElement;
+    const action = e as KeyboardEvent & WheelEvent;
+    const scrollAction = startsScrolling({ type: e.type, key: action.key, deltaY: action.deltaY, ctrlKey: action.ctrlKey, metaKey: action.metaKey, altKey: action.altKey,
+      control: !!eventTarget?.closest("input,textarea,select,button,a[href],[contenteditable]:not([contenteditable='false']),[role='slider'],[role='listbox'],[role='combobox']") });
     for (const s of sources) {
-      if (done.has(s.id) || !s.el.contains(t)) continue;
+      if (completed(s) || !s.el.contains(t)) continue;
+      if (s.kind === "scroll" && !scrollAction) continue;
       if (wheelLike && s.kind !== "scroll") continue;
       // Inertia from a scene swipe is not the visitor working this region.
       if (wheelLike && shownId !== s.id && performance.now() - lastScene < 1600) continue;
@@ -583,7 +623,7 @@ export function initAttentionSquirrel(): Handle | undefined {
     if (!a || a.tagName !== "IFRAME") { lastFrame = null; return; }
     if (a === lastFrame) return;
     lastFrame = a;
-    for (const s of sources) if (!done.has(s.id) && s.el.contains(a)) finish(s, "did");
+    for (const s of sources) if (s.kind === "control" && !completed(s) && s.el.contains(a)) finish(s, "did");
   }
   const onBlur = () => { setTimeout(frameFocus, 0); };
   window.addEventListener("blur", onBlur);
@@ -598,8 +638,8 @@ export function initAttentionSquirrel(): Handle | undefined {
     s.scrollAt = now;
     s.top = el.scrollTop;
     if (el.hasAttribute("data-scroll-hinting")) { s.from = s.top; return; }
-    if (!e.isTrusted || done.has(s.id) || !el.querySelector("iframe")) return;
-    if (Math.abs(s.top - s.from) >= 4) finish(s, "did");
+    if (!e.isTrusted || completed(s)) return;
+    if (Math.abs(s.top - s.from) > 0) finish(s, "did");
   }
   window.addEventListener("scroll", onRegionScroll, { capture: true, passive: true });
   const onScene = () => { lastScene = lastActivity = performance.now(); schedule(); };
@@ -658,11 +698,15 @@ export function initAttentionSquirrel(): Handle | undefined {
     const now = performance.now();
     const inset = headerInset();
     const measured = sources.map(s => measure(s, inset));
+    const previousScrollDone = scrollDone;
+    scrollDone = refreshScrollVisits(scrollDone, measured.filter((_, i) => sources[i].kind === "scroll"));
+    sources.forEach(s => { if (s.kind === "scroll" && previousScrollDone.has(s.id) && !scrollDone.has(s.id)) hint(s); });
+    const completedTargets = new Set(sources.filter(completed).map(s => s.id));
     if (doc.querySelector(".mnav:not([hidden])")) { if (shownId) hide("menu"); return; }
     // A timed cue (data-squirrel-for) in view goes first; the others wait for it to hand over.
     sources.forEach(s => { if (rested.has(s.id)) { const r = rectOf(s.el); if (r.y + r.h <= inset || r.y >= innerHeight) rested.delete(s.id); } });
-    const lead = sources.find((s, i) => s.el.hasAttribute("data-squirrel-for") && isEligible(measured[i], done));
-    const d = decide(shownId, measured, done, now, lastActivity, id => (unplaceable.get(id) || 0) <= now && (!lead || lead.id === id) && !rested.has(id)
+    const lead = sources.find((s, i) => s.el.hasAttribute("data-squirrel-for") && isEligible(measured[i], completedTargets));
+    const d = decide(shownId, measured, completedTargets, now, lastActivity, id => (unplaceable.get(id) || 0) <= now && (!lead || lead.id === id) && !rested.has(id)
       && (id === shownId || shownOnPage.path !== location.pathname || shownOnPage.n < MAX_PER_PAGE || sources.find(x => x.id === id)?.kind === "scroll"));
     if (d.kind === "hide") { hide("left-view"); return; }
     if (d.kind === "show") {
@@ -684,11 +728,12 @@ export function initAttentionSquirrel(): Handle | undefined {
       const r = rectOf(shownSrc.el);
       if (!lastRect || Math.abs(r.x - lastRect.x) > 1 || Math.abs(r.y - lastRect.y) > 1 || Math.abs(r.w - lastRect.w) > 1 || Math.abs(r.h - lastRect.h) > 1) {
         const p = place(shownSrc, inset);
-        if (p) { placement = p; apply(p, shownSrc); lastRect = r; } else hide("no-room");
+        if (p) { placement = p; apply(p); lastRect = r; } else hide("no-room");
       }
     }
   }
   function rescan() { collect(); schedule(); }
+  window.addEventListener("ch:embed-scrollchange", rescan);
   let mutT: number | undefined;
   const mo = typeof MutationObserver !== "undefined"
     ? new MutationObserver(list => {
@@ -713,6 +758,7 @@ export function initAttentionSquirrel(): Handle | undefined {
       doEvents.forEach(n => doc.removeEventListener(n, onDo, true));
       touchy.forEach(n => window.removeEventListener(n, noteActivity, true));
       window.removeEventListener("ch:storychange", onScene);
+      window.removeEventListener("ch:embed-scrollchange", rescan);
       window.removeEventListener("blur", onBlur);
       window.removeEventListener("scroll", onRegionScroll, true);
       window.removeEventListener("resize", onResize);
@@ -723,9 +769,9 @@ export function initAttentionSquirrel(): Handle | undefined {
       hints.remove();
     },
     /** For checks and the dev console. */
-    state() { return { shown: shownId, placement, done: [...done], sources: sources.map(s => ({ id: s.id, text: s.text, kind: s.kind })) }; },
+    state() { return { shown: shownId, placement, done: [...done], scrollDone: [...scrollDone], sources: sources.map(s => ({ id: s.id, text: s.text, kind: s.kind })) }; },
     sources() { return sources.map(s => ({ id: s.id, text: s.text, side: s.side, kind: s.kind, el: s.el })); },
-    reset() { done = new Set(); persist(); unplaceable.clear(); collect(); schedule(); },
+    reset() { done = new Set(); scrollDone = new Set(); persist(); unplaceable.clear(); collect(); schedule(); },
     trace() { return trace; },
     events() { return events.slice(); },
   };

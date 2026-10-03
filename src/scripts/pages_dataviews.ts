@@ -281,17 +281,19 @@ import { required } from "./dom";
     const kind = box.hasAttribute("data-dv-heat") ? "heat" : "load";
     const url = required(box.getAttribute("data-dv-" + kind));
     if (!box.offsetWidth) return;
-    (cache[url] =
+    const p = (cache[url] =
       cache[url] ||
       fetch(url).then(function (r) {
         if (!r.ok) throw new Error(String(r.status));
         return r.json().then(chartData);
-      }))
+      }));
+    p
       .then(function (j) {
         DRAW[kind](box, j);
         box.dataset.done = String(box.offsetWidth);
       })
       .catch(function (error: unknown) {
+        if (cache[url] === p) delete cache[url];
         const message = error instanceof Error && error.message === "No usable heatmap readings"
           ? "No readings are available for this view."
           : "The live data is not reachable right now.";

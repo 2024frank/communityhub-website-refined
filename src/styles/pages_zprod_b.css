@@ -478,7 +478,7 @@ html:not(.motion) .zpb-cv-card{opacity:1;transform:none}
 #main[data-pager] .dashboard-evidence-scene--image-only>.dashboard-evidence-image>figcaption{margin:0;font:700 clamp(1.05rem,1.4vw,1.3rem)/1.3 var(--font-body);color:#287034}
 #main[data-pager] .dashboard-evidence-scene--image-only>.dashboard-evidence-image>img{width:auto;max-width:100%;max-height:calc(100dvh - var(--hdr-h,77px) - 140px);object-position:left top;align-self:flex-start}
 /* See it live: the dashboard is shown at full length inside a frame with its own visible scrollbar. */
-#main#main#main[data-page="see-it-live"] .lf-body[data-scroll-owner]{overflow-y:auto;overscroll-behavior:contain}
+#main#main#main[data-page="see-it-live"] .lf-body[data-scroll-owner]{overflow-y:auto;overscroll-behavior:auto}
 #main#main#main[data-page="see-it-live"] .lf-body[data-scroll-owner]>iframe{height:1300px!important;display:block}
 /* See it live: both pickers share one row above the dashboard, leaving the height to the dashboard. */
 #main#main#main .live-pickers{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:4px 24px;margin:14px 0 18px}

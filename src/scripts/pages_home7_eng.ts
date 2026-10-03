@@ -19,8 +19,31 @@ Array.from(
   let frame = 0;
   let layoutFrame = 0;
   let activeSection = false;
+  // True when the rail's own swipe or momentum picked the shown panel. The
+  // layout that follows must not instant-scroll the rail under the user's
+  // finger; it realigns once the rail has settled instead.
+  let railDriven = false;
+  let settlePending = false;
+  let settleTimer = 0;
+  function alignRail(rail: HTMLElement, panel: HTMLElement) {
+    const offset = panel.getBoundingClientRect().left - rail.getBoundingClientRect().left;
+    if (Math.abs(offset) < 1) return;
+    rail.scrollTo({ left: rail.scrollLeft + offset, behavior: "instant" });
+  }
+  function settleRail() {
+    clearTimeout(settleTimer);
+    settleTimer = 0;
+    if (!settlePending) return;
+    settlePending = false;
+    if (stage.matches) return;
+    const rail = sec.querySelector<HTMLElement>("[data-story-rail]");
+    const panel = panels[shown];
+    if (rail && panel) alignRail(rail, panel);
+  }
   function layoutPanel() {
     layoutFrame = 0;
+    const driven = railDriven;
+    railDriven = false;
     const panel = panels[shown];
     if (!panel) return;
     const copy = panel.querySelector<HTMLElement>("[data-eng-context]");
@@ -58,10 +81,11 @@ Array.from(
       // Measuring and restoring the reading scenes changes the snap layout.
       // Align only after that geometry is final, otherwise the browser can
       // snap back to the previous column and leave the selected product offscreen.
-      if (rail) rail.scrollTo({
-        left: rail.scrollLeft + panel.getBoundingClientRect().left - rail.getBoundingClientRect().left,
-        behavior: "instant",
-      });
+      if (rail && driven) {
+        settlePending = true;
+        clearTimeout(settleTimer);
+        settleTimer = window.setTimeout(settleRail, 120);
+      } else if (rail) alignRail(rail, panel);
     }
     // Scene identity can change without changing the section's total height.
     // Ask the existing controller to publish ownership immediately.
@@ -122,6 +146,7 @@ Array.from(
         const rail = sec.querySelector<HTMLElement>("[data-story-rail]");
         if (rail && panels[k]) {
           show(k);
+          railDriven = false;
           if (layoutFrame) { cancelAnimationFrame(layoutFrame); layoutFrame = 0; }
           layoutPanel();
         }
@@ -150,8 +175,14 @@ Array.from(
   rail?.addEventListener("scroll", () => {
     if (stage.matches || !rail) return;
     const index = panels.reduce((best, panel, i) => Math.abs(panel.getBoundingClientRect().left - rail.getBoundingClientRect().left) < Math.abs(panels[best].getBoundingClientRect().left - rail.getBoundingClientRect().left) ? i : best, 0);
+    if (index !== shown) railDriven = true;
     show(index);
+    if (settlePending) {
+      clearTimeout(settleTimer);
+      settleTimer = window.setTimeout(settleRail, 120);
+    }
   }, { passive: true });
+  rail?.addEventListener("scrollend", settleRail);
   tabs.forEach((tab, i) => tab.addEventListener("keydown", event => {
     if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
     event.preventDefault();

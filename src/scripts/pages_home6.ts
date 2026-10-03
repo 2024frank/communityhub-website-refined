@@ -2,6 +2,7 @@ import type { StoryFrame, StoryTouch } from "./types";
 import { WheelGesture } from "./ui/wheel-gesture";
 import { productBoundary, productHasMore } from "./ui/product-navigation";
 import { mayAutoAdvanceHero } from "./ui/hero-policy";
+import { freshDocumentUrl } from "./ui/fresh-document-url";
 import { required, eventElement, htmlChildren } from "./dom";
 /* v6 home: problem line over the drone zoom, connection diagram, scaled live embeds */
 (function () {
@@ -331,7 +332,7 @@ import { required, eventElement, htmlChildren } from "./dom";
         all.forEach(function (x) { x.setAttribute("aria-pressed", String(x === b)); });
         const url = b.dataset.url || "";
         sign.style.backgroundImage = "url(" + b.dataset.shot + ")";
-        frame.src = url;
+        frame.src = freshDocumentUrl(url);
         cap.innerHTML = "";
         cap.append("Live: " + (b.dataset.cap || "") + ". ");
         const a = document.createElement("a");
@@ -392,6 +393,10 @@ import { required, eventElement, htmlChildren } from "./dom";
   });
   let touch: StoryTouch | null = null;
   const wheelGesture = new WheelGesture();
+  const frameWheelGesture = new WheelGesture();
+  let frameScroll: { y: number; at: number } | null = null;
+  let frameScrollBypassUntil = 0;
+  let allowFrameFocus = true;
   let guardUntil = 0;
   // Fields that use the arrow, page and wheel keys themselves. A horizontal tablist,
   // button, link or slider arrow does not: page keys keep cutting scenes from there.
@@ -873,11 +878,78 @@ import { required, eventElement, htmlChildren } from "./dom";
     return productHasMore(current()?.els[0], 1);
   }
   window.chStory = { frames: frames, go: go, current: current, hasNext: hasNext };
+  function iframeOwnsScroll() {
+    // Child wheel/touch events never bubble across an iframe boundary. Hover
+    // and focus are observable without reading its cross-origin document.
+    const hovered = main.querySelector<HTMLIFrameElement>("iframe:hover");
+    const focused = document.activeElement;
+    const frame = hovered || (allowFrameFocus && focused instanceof HTMLIFrameElement ? focused : null);
+    return !!frame && !frame.closest("[inert],[hidden]") &&
+      !!activeFrame?.els.some(owner => owner.contains(frame));
+  }
+  function releaseFrameScroll() {
+    frameScroll = null;
+    frameWheelGesture.reset();
+    frameScrollBypassUntil = performance.now() + 400;
+  }
+  function handleFrameScroll() {
+    const now = performance.now();
+    if (dirty || initialHashPending || blocked() || now < frameScrollBypassUntil) {
+      frameScroll = null;
+      return false;
+    }
+    const continuing = !!frameScroll && now - frameScroll.at <= 260;
+    const sourceY = continuing ? frameScroll!.y : activeFrame?.y;
+    if (sourceY == null) return false;
+    const delta = window.scrollY - sourceY;
+    // Our own instant cut emits a scroll event too. Never treat it as input.
+    if (Math.abs(delta) <= 1) return false;
+    // Exact destinations remain available to links, scripts and restoration.
+    if (stops.some(frame => Math.abs(frame.y - window.scrollY) <= 1)) {
+      frameScroll = null;
+      frameWheelGesture.reset();
+      return false;
+    }
+    if (!continuing) {
+      frameScroll = null;
+      frameWheelGesture.reset();
+      if (!iframeOwnsScroll()) return false;
+    }
+    // Only document drift reaches here. Native iframe or parent-region
+    // scrolling keeps its position and never becomes a page gesture.
+    // The first native movement already establishes direction. Cancelling the
+    // browser's smooth animation can remove its later samples, so do not wait
+    // for a wheel threshold that only the child document could have observed.
+    const movement = continuing ? delta : Math.sign(delta) * Math.max(28, Math.abs(delta));
+    const decision = frameWheelGesture.next(movement, now, false);
+    cutTo(sourceY);
+    if (decision.kind === "step") go(decision.direction, true);
+    frameScroll = { y: window.scrollY, at: now };
+    return true;
+  }
+  // Explicit parent input and browser navigation take ownership from an old
+  // embedded gesture. In particular, a scrollbar drag must remain direct.
+  document.addEventListener("pointerdown", e => {
+    allowFrameFocus = e.target instanceof HTMLIFrameElement;
+    releaseFrameScroll();
+  }, { capture: true, passive: true });
+  document.addEventListener("focusin", e => {
+    allowFrameFocus = e.target instanceof HTMLIFrameElement;
+  });
+  window.addEventListener("blur", () => { allowFrameFocus = true; });
+  document.addEventListener("keydown", releaseFrameScroll, { capture: true, passive: true });
+  document.addEventListener("wheel", releaseFrameScroll, { capture: true, passive: true });
+  document.addEventListener("touchstart", releaseFrameScroll, { capture: true, passive: true });
+  // Content fitting already remeasures and restores its semantic stop below.
+  // It must not release the still-active momentum of an embedded gesture.
+  ["hashchange", "popstate", "pagehide", "resize"].forEach(event =>
+    window.addEventListener(event, releaseFrameScroll, { capture: true, passive: true }));
   window.addEventListener(
     "scroll",
     function () {
       if (guardUntil && performance.now() < guardUntil && tabY >= 0 && Math.abs(window.scrollY - tabY) > 1)
         window.scrollTo({ top: tabY, behavior: "instant" });
+      if (handleFrameScroll()) return;
       if (!activePaint) activePaint = requestAnimationFrame(publish);
     },
     { passive: true },
@@ -908,6 +980,14 @@ import { required, eventElement, htmlChildren } from "./dom";
     }
     return false;
   }
+  function horizontalScroller(el: Element | null) {
+    for (; el && el !== document.body && el !== document.documentElement; el = el.parentElement) {
+      const st = getComputedStyle(el);
+      if (/(auto|scroll|overlay)/.test(st.overflowX) && el.scrollWidth > el.clientWidth + 1)
+        return true;
+    }
+    return false;
+  }
   /* Wheel events have no gesture-end signal. Consume one burst, including its
      momentum, until a quiet gap or a deliberate change of direction. */
   window.addEventListener(
@@ -918,8 +998,7 @@ import { required, eventElement, htmlChildren } from "./dom";
         e.ctrlKey ||
         e.metaKey ||
         e.shiftKey ||
-        !e.deltaY ||
-        Math.abs(e.deltaX) >= Math.abs(e.deltaY)
+        !e.deltaY
       )
         return;
       if (blocked()) {
@@ -927,6 +1006,10 @@ import { required, eventElement, htmlChildren } from "./dom";
         resetGesture();
         return;
       }
+      // A diagonal gesture over a horizontal rail belongs to that rail. Over
+      // ordinary copy its vertical component still belongs to the story;
+      // otherwise the browser smoothly drifts between the authored stops.
+      if (Math.abs(e.deltaX) >= Math.abs(e.deltaY) && horizontalScroller(eventElement(e))) return;
       // Input time, not dispatch time: a stalled main thread (the cut to the next
       // section lays out iframes) must not turn queued momentum events into a
       // "quiet gap" that unlocks a second advance.

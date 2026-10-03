@@ -764,7 +764,7 @@ export function register(H: SiteContext): void {
       ]) => `<li data-story-scene><article class="rs-vid">
   <a class="rs-vid-th" href="https://www.youtube.com/watch?v=${yt}" data-yt="${yt}" data-title="${e(t)}" aria-label="Watch: ${e(t)}" target="_blank" rel="noopener">
     <span class="rs-video-fallback" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="M11 6 26 16 11 26Z"/></svg></span>
-    <img src="https://i.ytimg.com/vi/${yt}/hqdefault.jpg" alt="" loading="lazy" hidden data-video-poster>
+    <img src="https://i.ytimg.com/vi/${yt}/hqdefault.jpg" alt="" decoding="async" hidden data-video-poster>
     <span class="rs-watch rs-watch-sm">Watch video</span>
   </a>
   <span><a class="rs-video-source" href="https://www.youtube.com/watch?v=${yt}" aria-label="Open ${e(t)} on YouTube" target="_blank" rel="noopener"><b>${e(t)}</b></a><small>${e(d)}</small></span>
@@ -1058,10 +1058,6 @@ export function register(H: SiteContext): void {
   <p class="lede" style="margin-top:18px">Community Hub creates software products that foster stronger, more sustainable, and more resilient connections among people and the natural systems upon which we depend. Our award-winning communications platform uses sophisticated data acquisition and visualization applications to simplify complexity and share the wisdom of community-focused solutions.</p>
   
 </div>${H.postcard("glsc-exhibit.jpg", "Visitors at the Environmental Dashboard exhibit at the Great Lakes Science Center in Cleveland")}</div></section>`;
-    const tl_items = H.TIMELINE.map(
-      ([y, t, d], i) =>
-        `<li data-reveal style="--i:${i}"><span class="rs-tl-yr">${y}</span><div><h3>${t}</h3><p>${d}</p></div></li>`,
-    );
     const funders_html = H.FUNDERS.map((f) => `<span>${e(f)}</span>`).join(" ");
     // The whole story plays on one TV-style screen: the platform, then each year, then funders.
     const tv_slides = [

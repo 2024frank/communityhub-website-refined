@@ -61,11 +61,12 @@
 #main#main#main[data-page="web-embeddables"] .zpb-sec-body:has(.live-tabs button:nth-of-type(1)[aria-selected="true"]) #zpb-webemb-live-panel .lf-body { background-image:url("/assets/eng-midtown-events.jpg"); }
 #main#main#main[data-page="web-embeddables"] .zpb-sec-body:has(.live-tabs button:nth-of-type(2)[aria-selected="true"]) #zpb-webemb-live-panel .lf-body { background-image:url("/assets/cal-partner-oberlin.jpg"); }
 #main#main#main[data-page="web-embeddables"] #zpb-webemb-live-panel .lf-wait { inset:auto auto 8px 8px; padding:4px 12px; border-radius:99px; background:rgba(255,255,255,.94); font-size:14px; }
-#main#main#main[data-page="web-embeddables"] #zpb-webemb-live-panel.needs-retry .lf-body > iframe { display:none; }
-#main#main#main[data-page="web-embeddables"] #zpb-webemb-live-panel .lf-notice { display:none; }
+/* A slow remote page remains mounted and visible while it finishes loading.
+   Its real retry/open-site controls explain recovery instead of hiding it. */
+#main#main#main[data-page="web-embeddables"] #zpb-webemb-live-panel .lf-notice { display:block; }
 #main#main#main[data-page="web-embeddables"] #zpb-webemb-live-panel .lf-retry,
 #main#main#main[data-page="web-embeddables"] #zpb-webemb-live-panel .lf-saved { display:none; }
-#main#main#main[data-page="web-embeddables"] #zpb-webemb-live-panel.needs-retry .lf-saved { display:inline; font-size:14px; }
+#main#main#main[data-page="web-embeddables"] #zpb-webemb-live-panel.needs-retry .lf-saved { display:none; }
 #main#main#main[data-page="web-embeddables"] #zpb-webemb-live-panel.needs-retry .lf-retry { display:inline-flex; align-items:center; min-height:36px; padding:0 12px; border:1px solid #648259; border-radius:6px; background:#f7faf2; color:var(--ch-pine,#244b38); font:700 14px/1.2 var(--font-body); cursor:pointer; }
 
 

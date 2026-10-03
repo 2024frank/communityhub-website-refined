@@ -18,6 +18,32 @@
  #main#main#main[data-page="data-dashboard"] #citywide .live-frame{width:min(100%,calc((100dvh - var(--story-hdr-h,77px) - 180px)*1584/893));margin-inline-start:auto}
 }
 
+/* The gallery's separate Citywide scene also reserves its heading, introduction,
+   toolbar and next-control row. Limit width with height so the complete native
+   SVG, including the bottom gauges, stays at its authored ratio. */
+#main#main#main#main[data-page="dashboards"] #cwd .live-frame { margin-inline:auto; }
+#main#main#main#main[data-page="dashboards"] #cwd .live-frame .lf-body {
+  width:100%;
+  aspect-ratio:1584/893;
+  height:auto!important;
+  min-height:0;
+  max-height:none;
+  overflow:hidden;
+}
+#main#main#main#main[data-page="dashboards"] #cwd .live-frame .lf-body > iframe {
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%!important;
+  max-width:none;
+  transform:none;
+}
+@media(min-width:700px){
+  #main#main#main#main[data-page="dashboards"] #cwd .live-frame {
+    width:min(100%,max(320px,calc((100dvh - var(--story-hdr-h,77px) - 320px)*1584/893)));
+  }
+}
+
 /* 3/5. Ecolympics: heading, lede and both results share one scene; images are capped so captions sit clear of the next control. */
 @media(min-width:901px){
  #main#main#main[data-page="data-dashboard"] #eco .chapter-scene{margin-top:12px}

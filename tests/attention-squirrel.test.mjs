@@ -7,7 +7,7 @@ import ts from 'typescript';
 const code = ts.transpileModule(readFileSync('src/scripts/ui/attention-squirrel.ts', 'utf8').replace(/export /g, ''),
   { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.None } }).outputText;
 const ctx = {};
-runInNewContext(`${code}\nthis.S = { visibleRatio, isEligible, rankTargets, pickTarget, idleReady, decide, markDone, parseDone, serializeDone, sideOrder, anchorsFor, cueBox, roomFor, insideViewport, EDGE_GAP, EDGE_MARGIN, CLEARANCE, SHOW_RATIO, HIDE_RATIO, IDLE_MS };`, ctx);
+runInNewContext(`${code}\nthis.S = { visibleRatio, isEligible, rankTargets, pickTarget, idleReady, decide, markDone, parseDone, serializeDone, refreshScrollVisits, startsScrolling, sideOrder, anchorsFor, cueBox, roomFor, insideViewport, EDGE_GAP, EDGE_MARGIN, CLEARANCE, SHOW_RATIO, HIDE_RATIO, IDLE_MS };`, ctx);
 const S = ctx.S;
 
 const T = (id, o = {}) => ({ id, text: 'x', side: 'right', ratio: 1, visible: true, centerDist: 0, order: 0, ...o });
@@ -72,6 +72,42 @@ test('one squirrel at a time: a shown cue is kept, hidden when done or out of vi
 test('a target that left view may show again later unless done', () => {
   assert.equal(S.decide(null, [T('a')], none, 9000, 0).kind, 'show');
   assert.equal(S.decide(null, [T('a')], new Set(['a']), 9000, 0).kind, 'none');
+});
+
+test('scroll completion belongs to one embed and resets when that embed is left', () => {
+  const completed = new Set(['dashboard']);
+  const here = [T('dashboard', { text: 'Scroll here' }), T('voices', { text: 'Scroll here' })];
+  let visit = S.refreshScrollVisits(completed, here);
+  assert.equal(S.pickTarget(here, visit).id, 'voices');
+  visit = S.refreshScrollVisits(visit, [T('dashboard', { visible: false }), T('voices')]);
+  assert.equal(visit.has('dashboard'), false);
+  assert.equal(S.pickTarget([T('dashboard')], visit).id, 'dashboard');
+  assert.equal(completed.has('dashboard'), true, 'visit refresh does not mutate the prior state');
+});
+
+test('scroll completion survives minor viewport movement but not leaving the target', () => {
+  const completed = new Set(['a']);
+  assert.equal(S.refreshScrollVisits(completed, [T('a', { ratio: 0.5 })]).has('a'), true);
+  assert.equal(S.refreshScrollVisits(completed, [T('a', { ratio: 0.4 })]).has('a'), false);
+  assert.equal(S.refreshScrollVisits(completed, []).size, 0);
+});
+
+test('scroll cues dismiss on movement, not clicking, focus, touching down or tabbing', () => {
+  for (const type of ['pointerdown', 'click', 'focusin', 'touchstart']) assert.equal(S.startsScrolling({ type }), false, type);
+  assert.equal(S.startsScrolling({ type: 'keydown', key: 'Tab' }), false);
+  assert.equal(S.startsScrolling({ type: 'keydown', key: 'Enter' }), false);
+  assert.equal(S.startsScrolling({ type: 'wheel', deltaY: 0 }), false);
+  assert.equal(S.startsScrolling({ type: 'wheel', deltaY: 1 }), true);
+  assert.equal(S.startsScrolling({ type: 'wheel', deltaY: -1 }), true);
+  assert.equal(S.startsScrolling({ type: 'touchmove' }), true);
+  for (const key of ['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' ']) assert.equal(S.startsScrolling({ type: 'keydown', key }), true, key);
+});
+
+test('zoom, native controls and text editing do not consume scroll guidance', () => {
+  assert.equal(S.startsScrolling({ type: 'wheel', deltaY: 100, ctrlKey: true }), false);
+  assert.equal(S.startsScrolling({ type: 'keydown', key: 'ArrowDown', control: true }), false);
+  assert.equal(S.startsScrolling({ type: 'keydown', key: ' ', control: true }), false);
+  assert.equal(S.startsScrolling({ type: 'keydown', key: 'Home', metaKey: true }), false);
 });
 
 test('targets with no room are skipped for the next best', () => {

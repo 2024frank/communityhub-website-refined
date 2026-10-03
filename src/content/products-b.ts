@@ -1050,7 +1050,7 @@ ${_ticks()}
 <div class="zpb-emb-stage">
 <div class="zpb-emb-main" data-story-scene>
 <div class="zpb-emb-browser">
-<div class="zpb-emb-site" data-zpb-emb-site data-squirrel-off role="region" aria-label="Example partner website with Community Hub content embedded" data-head="${pp["head"]}" data-tabs="${pp["tabs"]}" data-list="${pp["list"]}" data-scheme="${pp["scheme"]}" data-corners="rounded" style="${_style_vars(pp)}">
+<div class="zpb-emb-site" data-zpb-emb-site role="region" aria-label="Example partner website with Community Hub content embedded" data-head="${pp["head"]}" data-tabs="${pp["tabs"]}" data-list="${pp["list"]}" data-scheme="${pp["scheme"]}" data-corners="rounded" style="${_style_vars(pp)}">
 <header class="zpb-emb-s-head zpb-emb-swap">
 <span class="zpb-emb-s-logo"><span class="zpb-emb-s-mark" data-zpb-emb-logo>${LOGOS[pp["logo"]]}</span><b data-zpb-emb-name>${pp["site"]}</b></span>
 <ul class="zpb-emb-s-nav" data-zpb-emb-menu aria-label="The partner's own menu (example)">${menu}<li class="on">Community</li></ul>

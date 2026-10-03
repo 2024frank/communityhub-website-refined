@@ -1,5 +1,7 @@
 import { shouldLoadDeferredFrame } from "./ui/deferred-frame-policy";
 import { initAttentionSquirrel } from "./ui/attention-squirrel";
+import { initEmbedScroll } from "./ui/embed-scroll";
+import { freshDocumentUrl } from "./ui/fresh-document-url";
 import type { GaugeReading, Mood } from "./types";
 import { calendarData } from "./data";
 type NowReading = Pick<GaugeReading, "title" | "value" | "num" | "pos" | "ok">;
@@ -1137,6 +1139,7 @@ import { $, $$, isPresent, required, eventElement } from "./dom";
     function rescan() { clearTimeout(later); later = window.setTimeout(adopt, 250); }
     adopt();
     if (doc.body && typeof MutationObserver !== "undefined") new MutationObserver(rescan).observe(doc.body, { childList: true, subtree: true });
+    initEmbedScroll();
     initAttentionSquirrel();
   })();
 
@@ -1171,7 +1174,7 @@ import { $, $$, isPresent, required, eventElement } from "./dom";
     const loadDeferred = (f: HTMLIFrameElement) => {
       const rect = f.getBoundingClientRect();
       if (!shouldLoadDeferredFrame({loaded:!!f.getAttribute("src"),inactive:!!f.closest("[inert]"),visibility:getComputedStyle(f).visibility,width:rect.width,height:rect.height,top:rect.top,bottom:rect.bottom},innerHeight)) return;
-      f.src = f.dataset.deferSrc || "";
+      f.src = freshDocumentUrl(f.dataset.deferSrc || "");
       deferred.delete(f);
     };
     const activateVisible = () => deferred.forEach(loadDeferred);
@@ -1213,6 +1216,7 @@ import { $, $$, isPresent, required, eventElement } from "./dom";
       $(".lf-notice", fig)?.remove();
       const body = required($(".lf-body", fig));
       const title = fig.getAttribute("data-title") || "the dashboard";
+      const source = fig.getAttribute("data-src") || "";
       const retryButton = fig.querySelector<HTMLButtonElement>(".lf-load");
       if (retryButton) { retryButton.disabled = true; retryButton.setAttribute("aria-busy", "true"); retryButton.textContent = "Loading…"; }
       const f = doc.createElement("iframe");
@@ -1227,22 +1231,11 @@ import { $, $$, isPresent, required, eventElement } from "./dom";
       const preview = $(".embed-preview-image", body);
       body.replaceChildren(...(preview ? [preview, f] : [wait, f]));
       bindPreview(body, f);
-      // A fitted frame grows to the height its dashboard reports, so the box around it does the
-      // scrolling with a visible bar (and the squirrel cue) instead of the frame's hidden one.
-      if (fig.hasAttribute("data-fit-content")) {
-        f.setAttribute("scrolling", "no");
-        const origin = new URL(fig.getAttribute("data-src") || "", location.href).origin;
-        const onResize = (ev: MessageEvent) => {
-          if (!body.contains(f)) { window.removeEventListener("message", onResize); return; }
-          if (ev.source !== f.contentWindow || ev.origin !== origin || ev.data?.messageType !== "content-resize") return;
-          const h = Number(ev.data.height);
-          if (Number.isFinite(h)) f.style.setProperty("height", `${Math.min(8000, Math.max(body.clientHeight, Math.ceil(h)))}px`, "important");
-        };
-        window.addEventListener("message", onResize);
-      }
+      // embed-scroll promotes the parent only after this frame reports a valid
+      // content height. Until then the embedded application's scrolling works.
       let finished = false;
       const timeout = window.setTimeout(() => {
-        if (!finished && body.contains(f)) slowWait(body, f.src);
+        if (!finished && body.contains(f)) slowWait(body, source);
       }, 12000);
       f.addEventListener("load", () => {
         finished = true;
@@ -1256,9 +1249,9 @@ import { $, $$, isPresent, required, eventElement } from "./dom";
       f.addEventListener("error", () => {
         finished = true;
         window.clearTimeout(timeout);
-        if (body.contains(f)) slowWait(body, f.src);
+        if (body.contains(f)) slowWait(body, source);
       });
-      f.src = fig.getAttribute("data-src") || "";
+      f.src = freshDocumentUrl(source);
     }
     // A cross-origin load event cannot prove the remote application's health.
     // Keep the separate Open dashboard link visible even after the iframe loads.
@@ -1308,6 +1301,7 @@ import { $, $$, isPresent, required, eventElement } from "./dom";
     /* tabbed picker: [data-live-tabs] feeding one [data-live-panel] iframe */
     $$("[data-live-tabs]").forEach(function (tabs) {
       const btns = $$('[role="tab"]', tabs);
+      if (!btns.length) return;
       const panelSel = tabs.getAttribute("data-live-tabs");
       const panel = doc.getElementById(panelSel || "");
       if (!panel) return;
@@ -1320,22 +1314,39 @@ import { $, $$, isPresent, required, eventElement } from "./dom";
       const openEl = $<HTMLAnchorElement>("[data-live-open]", panel);
       let current = btns[0];
       let loaded = false;
+      let frameTimeout: number | undefined;
       function frame() {
         const src = current.getAttribute("data-src") || "";
-        body.innerHTML =
-          '<span class="lf-wait">Loading the live dashboard</span><iframe src="' +
-          src +
-          '" title="' +
-          esc(current.textContent.trim()) +
-          ' live dashboard" loading="lazy" referrerpolicy="no-referrer-when-downgrade" style="position:relative;z-index:1;opacity:1"></iframe>';
-        loaded = true;
-        const f = required($("iframe", body));
-        f.addEventListener("load", function () {
-          if ($("iframe", body) === f) clearWait(body);
-        });
-        window.setTimeout(function () {
-          if ($("iframe", body) === f) slowWait(body, src);
+        window.clearTimeout(frameTimeout);
+        clearWait(body);
+        const wait = doc.createElement("span");
+        wait.className = "lf-wait";
+        wait.setAttribute("role", "status");
+        wait.textContent = "Loading the live dashboard";
+        const f = doc.createElement("iframe");
+        f.title = current.textContent.trim() + " live dashboard";
+        f.loading = "eager";
+        f.referrerPolicy = "no-referrer-when-downgrade";
+        f.style.cssText = "position:relative;z-index:1;opacity:1";
+        let finished = false;
+        const timeout = window.setTimeout(() => {
+          if (!finished && body.contains(f)) slowWait(body, src);
         }, 12000);
+        frameTimeout = timeout;
+        f.addEventListener("load", () => {
+          finished = true;
+          window.clearTimeout(timeout);
+          if (body.contains(f)) clearWait(body);
+        });
+        f.addEventListener("error", () => {
+          finished = true;
+          window.clearTimeout(timeout);
+          if (body.contains(f)) slowWait(body, src);
+        });
+        // Register handlers before navigation, including fast cached responses.
+        f.src = freshDocumentUrl(src);
+        body.replaceChildren(wait, f);
+        loaded = true;
       }
       function select(b: HTMLElement, load: boolean) {
         btns.forEach(function (t) {
@@ -1374,6 +1385,7 @@ import { $, $$, isPresent, required, eventElement } from "./dom";
           },
           { rootMargin: "150px" },
         ).observe(panel);
+      else frame();
     });
   })();
 

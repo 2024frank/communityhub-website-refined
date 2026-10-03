@@ -63,7 +63,7 @@ test('a collapsed product frame keeps its semantic panel for the next resize',()
 let productFunctions;
 before(() => {
  const ast=ts.createSourceFile('pages_home7_eng.ts',readFileSync('src/scripts/pages_home7_eng.ts','utf8'),ts.ScriptTarget.Latest,true);
- const names=new Set(['room','layoutPanel','scheduleLayout','show','update','selectPanel','resizeProduct']);
+ const names=new Set(['room','alignRail','settleRail','layoutPanel','scheduleLayout','show','update','selectPanel','resizeProduct']);
  const functions=[];
  function visit(n){if(ts.isFunctionDeclaration(n)&&names.has(n.name?.text))functions.push(n.getText(ast));ts.forEachChild(n,visit);}visit(ast);
  assert.equal(functions.length,names.size);
@@ -102,7 +102,7 @@ function productFixture({width=1361,height=916,count=3,index=1}={}) {
  Object.defineProperty(sec,'offsetHeight',{get:()=>stage.matches?count*(context.innerHeight-80)-(count-1)*65:900});
  const window={innerHeight:height,scrollY:0,chStory:{current:()=>({y:window.scrollY,els:[sec],part:0})},
   scrollTo:({top})=>{window.scrollY=top;},dispatchEvent:event=>events.push(event)};
- context={sec,panels,tabs,choice,stage,window,document,innerWidth:width,innerHeight:height,shown:-1,frame:0,layoutFrame:0,activeSection:true,
+ context={sec,panels,tabs,choice,stage,window,document,innerWidth:width,innerHeight:height,shown:-1,frame:0,layoutFrame:0,railDriven:false,settlePending:false,settleTimer:0,clearTimeout(){},activeSection:true,
   getComputedStyle:()=>({getPropertyValue:()=>80,marginBottom:'0',paddingTop:'0',paddingBottom:'0',rowGap:'16'}),
   requestAnimationFrame:callback=>{pending.set(++nextFrame,callback);return nextFrame;},cancelAnimationFrame:id=>pending.delete(id),
   CustomEvent:class {constructor(type,init){this.type=type;this.detail=init.detail;}}};

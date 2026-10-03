@@ -26,3 +26,23 @@ html #main#main#main[data-page="index"]>.hv.intro-peek .hv-film{height:160px}
 html #main#main#main[data-page="index"].has-intro-peek #people{padding-top:16px!important}
 html #main#main#main[data-page="index"].has-intro-peek #people .pp-fade .pp img{height:clamp(120px,calc(100dvh - 650px),230px)!important}
 }
+/* Phones: scenes taller than the screen scroll under the circle, so it gets a
+   dock in the page surface; content ends at the dock instead of sitting under
+   the control. */
+@media (max-width:760px){
+body:has(>.page-next.is-on):has(>#main[data-page]:not([data-page="index"]))::after{content:"";position:fixed;left:0;right:0;bottom:0;height:calc(var(--next-room) + 6px);z-index:4;pointer-events:none;background:inherit;-webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 14px);mask-image:linear-gradient(to bottom,transparent 0,#000 14px)}
+body>.page-next{bottom:max(10px,env(safe-area-inset-bottom))}
+/* Small text links keep a finger-sized hit area without moving the layout. */
+#main .crumbs a{display:inline-block;padding-block:8px;margin-block:-8px}
+#main#main#main .live-frame .bar a,#main .now-go{display:inline-flex;align-items:center;min-height:32px}
+/* Home calendar preview: one-line titles keep three rows and the caption above the circle whatever the live titles are. */
+#main#main#main[data-page="index"] .calendar-brief .ev-what{min-width:0}
+#main#main#main[data-page="index"] .calendar-brief .ev-what>b{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:1;line-clamp:1;overflow:hidden}
+#main#main#main[data-page="index"] .calendar-brief .events-src{margin-top:8px}
+/* Chapter arrows point down on a phone: the content they lead to sits below the heading. */
+#main#main#main[data-page="index"] .chapter-connector{display:inline-block;transform:rotate(90deg);transform-origin:50% 55%}
+/* About carousel: controls sit clear of the dock, dots take a finger. */
+#main#main#main#main[data-page="about"] #history .about-tv .native-tv-device{margin-bottom:14px}
+#main#main#main .about-tv-dots button{position:relative}
+#main#main#main .about-tv-dots button::after{content:"";position:absolute;inset:-13px -3px}
+}
