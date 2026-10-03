@@ -40,3 +40,13 @@
 @media (prefers-reduced-motion:reduce){
   .sq-pulse{animation:none;outline:3px solid var(--ch-pine,#244b38);outline-offset:3px}
 }
+
+/* By an inner scrollbar: squirrel at the bar's end, bubble to its left pointing at it. */
+.sq-cue[data-flip] .sq-fig{flex-direction:row;justify-content:flex-end}
+.sq-cue[data-flip] .sq-bubble::after{left:auto;right:-5px}
+/* Beside a short control: squirrel next to the control, bubble on its far side, in one row. */
+.sq-cue[data-row] .sq-fig{flex-direction:row-reverse;align-items:center;justify-content:flex-start}
+.sq-cue[data-row][data-side="left"] .sq-fig{flex-direction:row;justify-content:flex-end}
+.sq-cue[data-row] .sq-bubble{text-align:left}
+.sq-cue[data-row] .sq-bubble::after{left:-5px;bottom:auto;top:50%;transform:translateY(-50%) rotate(45deg);border-radius:0 0 0 3px}
+.sq-cue[data-row][data-side="left"] .sq-bubble::after{left:auto;right:-5px;border-radius:0 3px 0 0}

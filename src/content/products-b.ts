@@ -329,17 +329,22 @@ export function register(H: SiteContext): void {
       undefined,
       true,
     );
-    body += H.quote(
-      "When I see the dashboard sign in our lobby, I get that good feeling that people are doing good things",
-      "Jennifer Harris",
-      "Director of the Oberlin Early Childhood Center",
-      "quote-text-only",
-    );
-    body += H.quote(
-      "Psychology and marketing teach us that what we believe other community members are doing powerfully influences our own behavior; Community Voices encourages pro-environmental and pro-community behavior",
-      "Dr. Cindy Frantz",
-      "Professor of Psychology, Oberlin College",
-    );
+    // Both partner quotes share one titled scene, so a visitor knows who is speaking and why.
+    const said = [
+      H.quote(
+        "When I see the dashboard sign in our lobby, I get that good feeling that people are doing good things",
+        "Jennifer Harris",
+        "Director of the Oberlin Early Childhood Center",
+        "quote-text-only",
+      ),
+      H.quote(
+        "Psychology and marketing teach us that what we believe other community members are doing powerfully influences our own behavior; Community Voices encourages pro-environmental and pro-community behavior",
+        "Dr. Cindy Frantz",
+        "Professor of Psychology, Oberlin College",
+        "quote-text-only",
+      ),
+    ].map(q => q.replace(" data-story-scene>", ">")).join("");
+    body += sec("said", "In their words", "What people say about Community Voices", `<div class="cv-said">${said}</div>`);
     body += H.cta_band("Contact Us", "");
     H.write_page(
       "community-voices",
@@ -457,7 +462,7 @@ export function register(H: SiteContext): void {
     body += sec(
       "controller",
       "Controlled by phone",
-      "Try the controller. It works!",
+      "Controlled by phone",
       controller,
     );
     const ctls = [
@@ -559,7 +564,8 @@ export function register(H: SiteContext): void {
       "art-choose-story.jpg",
       "A hand holding the phone story menu, with a live chart on a screen and Flash and his friends watching",
     );
-    const phone_preview = `<img src="assets/phone-person-water-display.jpg" alt="A person uses the phone controller beside a shared Water Use display">`;
+    // Learn more lands on the working controller, not the photo the homepage block already shows.
+    const phone_preview = phoneDemo();
     let body = opening(
       H.crumbs([null, p["group"]] as const, [null, p["name"]] as const),
       p["group"],
@@ -568,7 +574,6 @@ export function register(H: SiteContext): void {
       phone_preview,
     );
     body += jump([
-      ["controller", "Try it"] as const,
       ["what", "What it does"] as const,
       ["qr", "QR posters"] as const,
       ["related", "Works well with"] as const,
@@ -583,16 +588,7 @@ export function register(H: SiteContext): void {
         "Our phone app doubles as a remote, giving users the power to control digital signage by simply scanning the respective QR code on location and selecting viewable content",
       ] as const,
     ]);
-    const controller = phoneDemo();
-    body += sec(
-      "controller",
-      "Try it",
-      "Try the controller. It works!",
-      controller,
-      "",
-      undefined,
-      true,
-    ).replace('<section ', '<section data-stable-start ');
+
     const qr = `<div class="product-evidence" data-story-scene="desktop"><div class="product-evidence-copy" id="what" aria-labelledby="what-h" data-story-scene><h3 id="what-h">What it does</h3>${what}<div class="phone-related-links">${related_group("What the app opens", ["digital-signage", "community-calendar", "community-voices", "stories"])}</div></div><div class="product-evidence-media" data-story-scene>${media}</div></div>`;
     body += sec("qr", "QR posters", "Phone App & Screen Controller", qr);
     body += H.cta_band("Contact Us", "");
@@ -1049,7 +1045,7 @@ ${_ticks()}
       .join("");
     return `<div class="zpb-emb-demo zpb-emb-demo--focused" data-zpb-emb data-chapter-scenes data-story-scene="all">
 <script type="application/json" id="zpb-emb-data">${data_json}</script>
-<div class="zpb-emb-presets" role="group" aria-label="Example partner sites">${_preset_buttons()}</div>
+<div class="zpb-emb-presets" role="group" aria-label="Example partner sites" data-squirrel="Choose one to explore" data-squirrel-side="bottom" data-squirrel-short="Choose one to explore">${_preset_buttons()}</div>
 <label class="zpb-emb-preset-field">Example partner<select data-zpb-emb-preset-select>${PRESETS.map(preset => `<option value="${e(preset.key)}">${e(preset.name)}</option>`).join("")}</select></label>
 <div class="zpb-emb-stage">
 <div class="zpb-emb-main" data-story-scene>

@@ -450,3 +450,36 @@ html:not(.motion) .zpb-cv-card{opacity:1;transform:none}
   .zpb-emb-live i{animation:none}
   .zpb-emb-demo.is-touring .zpb-emb-pre[aria-pressed="true"] .zpb-emb-prog{animation:none}
 }
+/* Community Voices: the two partner quotes side by side under one heading. */
+#main .cv-said{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(18px,3vw,40px);margin-top:clamp(18px,3vh,32px)}
+#main .cv-said .pull{max-width:none;margin:0;border-left:4px solid var(--ch-pine,#2f6b3a)}
+#main .cv-said .pull p{font-size:clamp(1.15rem,1.7vw,1.6rem);line-height:1.35}
+#main .cv-said .pull footer{margin-top:14px;font-weight:600}
+@media (max-width:900px){#main .cv-said{grid-template-columns:1fr}}
+/* Desktop: the example partner sites run down the left of the demo, with room under them for the squirrel. */
+@media (min-width:901px){
+#main[data-pager] .zpb-emb-demo--focused{display:grid;grid-template-columns:200px minmax(0,1fr);column-gap:28px;align-items:start}
+#main[data-pager] .zpb-emb-demo--focused>*{grid-column:2}
+#main[data-pager] .zpb-emb-demo--focused>.zpb-emb-presets{grid-column:1;grid-row:1/span 6;flex-direction:column;flex-wrap:nowrap;align-items:flex-start;gap:2px;padding:0}
+#main[data-pager] .zpb-emb-demo--focused>.zpb-emb-presets .zpb-emb-pre{padding:7px 0;text-align:left}
+}
+/* Data Dashboard: the two Ecolympics 2024 results side by side, each with its own label. */
+#main .eco-pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(20px,3vw,40px);align-items:start}
+#main .eco-card{margin:0;display:grid;gap:10px}
+#main .eco-label{margin:0;font:700 clamp(1.05rem,1.4vw,1.3rem)/1.3 var(--font-body);color:#287034}
+#main .eco-card img{display:block;width:100%;height:auto;max-height:46dvh;object-fit:contain;object-position:left top;border-radius:6px}
+#main .eco-card figcaption{font:400 clamp(.98rem,1.1vw,1.1rem)/1.45 var(--font-body);color:#242b27}
+@media (max-width:700px){#main .eco-pair{grid-template-columns:1fr}#main .eco-card img{max-height:30dvh}}
+/* Data Dashboard: a picture-only evidence scene starts clear of the header, names itself above the chart and fits the screen. */
+#main[data-pager] .dashboard-evidence-scene--image-only{padding-top:clamp(14px,2.4dvh,28px)}
+#main[data-pager] .dashboard-evidence-scene--image-only>.dashboard-evidence-image{display:flex;flex-direction:column-reverse;gap:12px}
+#main[data-pager] .dashboard-evidence-scene--image-only>.dashboard-evidence-image>figcaption{margin:0;font:700 clamp(1.05rem,1.4vw,1.3rem)/1.3 var(--font-body);color:#287034}
+#main[data-pager] .dashboard-evidence-scene--image-only>.dashboard-evidence-image>img{width:auto;max-width:100%;max-height:calc(100dvh - var(--hdr-h,77px) - 140px);object-position:left top;align-self:flex-start}
+/* See it live: the dashboard is shown at full length inside a frame with its own visible scrollbar. */
+#main#main#main[data-page="see-it-live"] .lf-body[data-scroll-owner]{overflow-y:auto;overscroll-behavior:contain}
+#main#main#main[data-page="see-it-live"] .lf-body[data-scroll-owner]>iframe{height:1300px!important;display:block}
+/* See it live: both pickers share one row above the dashboard, leaving the height to the dashboard. */
+#main#main#main .live-pickers{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:4px 24px;margin:14px 0 18px}
+#main#main#main .live-pickers>details{margin:0;position:relative}
+#main#main#main .live-pickers .live-more-list{position:absolute;top:100%;right:0;z-index:8;width:min(560px,calc(100vw - 48px));padding:10px 20px 14px;background:#fbfcf8;border:1px solid rgba(36,75,56,.18);border-radius:8px;box-shadow:0 10px 26px rgba(20,40,30,.14)}
+#main#main#main .live-pickers .live-more-list>ul{margin:0 0 6px}

@@ -30,9 +30,11 @@ export function register(H: SiteContext): void {
   const toolChoices = LIVE_DEMOS.map(([href, , title]) => `<li><a href="${href}">${title}</a></li>`).join("");
   const liveBody = `<section class="live-directory" data-nofit aria-labelledby="see-live-h"><div class="wrap">
     <h1 class="h1" id="see-live-h">See it live</h1>
-    <details class="live-demo-picker"><summary>${liveTitle}</summary><ul>${liveChoices}</ul></details>
-    ${H.live_frame(liveSource, "The Cleveland Environmental Dashboard", "Great Lakes Science Center", 520)}
-    <details class="live-more-tools"><summary>More live examples</summary><ul>${toolChoices}</ul><a href="dashboards.html">All public dashboards</a></details>
+    <div class="live-pickers">
+      <details class="live-demo-picker"><summary data-squirrel="Open this to explore other dashboards" data-squirrel-short="Open this to explore other dashboards" data-squirrel-for="4500">${liveTitle}</summary><ul>${liveChoices}</ul></details>
+      <details class="live-more-tools"><summary>More live examples</summary><div class="live-more-list"><ul>${toolChoices}</ul><a href="dashboards.html">All public dashboards</a></div></details>
+    </div>
+    ${H.live_frame(liveSource, "The Cleveland Environmental Dashboard", "Great Lakes Science Center", 520).replace('<div class="lf-body"', '<div class="lf-body" data-scroll-owner data-squirrel="Scroll here to see the whole dashboard" data-squirrel-short="Scroll here" tabindex="0" aria-label="Great Lakes Science Center dashboard, scrolls"')}
   </div></section>` + H.cta_band("Contact Us", "");
   H.write_page("see-it-live", H.page("see-it-live", "See it live", "Explore Community Hub’s public dashboards and community tools.", liveBody, {current:"see-it-live",jsonld:H.ORG_LD}));
   directory(

@@ -34,6 +34,10 @@ export const SHOW_RATIO = 0.6;
 /** A shown squirrel stays until its target is clearly leaving (hysteresis). */
 export const HIDE_RATIO = 0.45;
 export const IDLE_MS = 1000;
+/** A page shows at most this many hints, so the squirrel guides only where it is needed. */
+export const MAX_PER_PAGE = 2;
+/** Longest a cue stays on screen before it steps aside for good. */
+export const MAX_SHOW_MS = 8000;
 export const STORE_KEY = "ch-squirrel-done";
 
 /** Share of the target rectangle that lies inside the viewport, below `topInset` (the sticky header). */
@@ -114,8 +118,8 @@ export function sideOrder(pref?: string | null): Side[] {
   return first ? [first, ...all.filter(s => s !== first)] : all;
 }
 
-/** Along the target: centred, at its start, at its end; above or below, also flush with the left or right screen margin. */
-export type Anchor = "c" | "s" | "e" | "l" | "r";
+/** Along the target: centred, at its start, at its end; above or below, also flush with the left or right screen margin, or ("b") flush with the target's right edge, where a scrollbar is. */
+export type Anchor = "c" | "s" | "e" | "l" | "r" | "b" | "u" | "m";
 export function anchorsFor(side: Side = "right"): Anchor[] {
   return side === "top" || side === "bottom" ? ["c", "s", "e", "r", "l"] : ["c", "s", "e"];
 }
@@ -134,11 +138,18 @@ export const FIG_GAP = 4;
 export function cueBox(side: Side, t: Rect, m: CueSize, anchor: Anchor, vw = 0): Rect {
   if (side === "top" || side === "bottom") {
     const w = m.sw + FIG_GAP + m.bw, h = Math.max(m.sh, m.bh);
-    const x = anchor === "s" ? t.x + 12 : anchor === "e" ? t.x + t.w - w - 12
+    const x = anchor === "s" ? t.x + 12 : anchor === "e" ? t.x + t.w - w - 12 : anchor === "b" ? t.x + t.w - w
       : anchor === "l" ? EDGE_MARGIN : anchor === "r" ? vw - EDGE_MARGIN - w : t.x + (t.w - w) / 2;
     return { x, y: side === "top" ? t.y - EDGE_GAP - h : t.y + t.h + EDGE_GAP, w, h };
   }
   const w = Math.max(m.sw, m.bw), h = m.bh + FIG_GAP + m.sh;
+  // "u": right under a small control in a narrow gutter, lined up with its outer edge.
+  if (anchor === "u") return { x: side === "right" ? t.x : t.x + t.w - w, y: t.y + t.h + EDGE_GAP, w, h };
+  // "m": beside a short control, squirrel and bubble in one row, standing on the control's baseline.
+  if (anchor === "m") {
+    const rw = m.sw + FIG_GAP + m.bw, rh = Math.max(m.sh, m.bh);
+    return { x: side === "right" ? t.x + t.w + EDGE_GAP : t.x - EDGE_GAP - rw, y: t.y + t.h - rh, w: rw, h: rh };
+  }
   const x = side === "right" ? t.x + t.w + EDGE_GAP : t.x - EDGE_GAP - w;
   const y = anchor === "s" ? t.y + 8 : anchor === "e" ? t.y + t.h - h - 8 : t.y + (t.h - h) / 2;
   return { x, y, w, h };
@@ -153,6 +164,8 @@ export function roomFor(side: Side, t: Rect, vw: number, margin = 6): number {
 
 /** A visitor should never see the cue touching the screen edge or the text beside it. */
 export const EDGE_MARGIN = 10;
+/** Furthest a cue may sit sideways from its target. */
+export const NEAR_PX = 120;
 export const CLEARANCE = 8;
 export function insideViewport(b: Rect, vw: number, vh: number, topInset: number, margin = 4): boolean {
   return b.x >= margin && b.y >= topInset + margin && b.x + b.w <= vw - margin && b.y + b.h <= vh - margin;
@@ -258,7 +271,11 @@ export function initAttentionSquirrel(): Handle | undefined {
       const text = (el.getAttribute("data-squirrel") || "").trim();
       add(el, text, "right", el.hasAttribute("data-scroll-owner") ? "scroll" : "control");
     });
-    AUTO_TARGETS.forEach(a => doc.querySelectorAll<HTMLElement>(a.sel).forEach(el => add(el, a.text, a.side, a.kind)));
+    AUTO_TARGETS.forEach(a => doc.querySelectorAll<HTMLElement>(a.sel).forEach(el => {
+      // Where a controller is the thing to try, the community tabs need no cue of their own.
+      if (a.sel === ".native-choices" && el.closest("[data-native-contexts]")?.querySelector(".native-phone-device")) return;
+      add(el, a.text, a.side, a.kind);
+    }));
     doc.querySelectorAll<HTMLElement>("[data-scroll-owner]").forEach(el => {
       if (overflows(el)) add(el, SCROLL_TEXT, "right", "scroll");
     });
@@ -266,6 +283,7 @@ export function initAttentionSquirrel(): Handle | undefined {
     sources.forEach(s => { if (!seen.has(s.el)) unhint(s); });
     const prev = new Map(sources.map(s => [s.el, s]));
     sources = list.map(s => { const p = prev.get(s.el); if (p) { p.text = s.text; p.side = s.side; p.order = s.order; return p; } return s; });
+    sources.forEach(s => { if (done.has("text:" + s.text)) done = markDone(done, s.id); });
     sources.forEach(s => { if (done.has(s.id)) unhint(s); else hint(s); });
   }
   function hint(s: Source) {
@@ -378,10 +396,12 @@ export function initAttentionSquirrel(): Handle | undefined {
   }
 
   /* ---- placement ---- */
-  interface Placement { side: Side; anchor: Anchor; box: Rect; size: CueSize; text: string }
+  interface Placement { side: Side; anchor: Anchor; box: Rect; size: CueSize; text: string; flip?: boolean; row?: boolean }
+  /** An inner scroll region: the squirrel goes where its scrollbar is, beside it, else under or over its end. */
+  const SCROLL_SIDES: Side[] = ["right", "bottom", "top", "left"];
   function sizeBubble(text: string, maxW: number): { bw: number; bh: number } {
     bubble.textContent = text;
-    bubble.style.maxWidth = Math.max(60, Math.min(170, Math.floor(maxW))) + "px";
+    bubble.style.maxWidth = Math.max(60, Math.min(text.length > 40 ? 300 : 170, Math.floor(maxW))) + "px";
     return { bw: bubble.offsetWidth, bh: bubble.offsetHeight };
   }
   function visibleTarget(el: HTMLElement, inset: number): Rect {
@@ -404,15 +424,24 @@ export function initAttentionSquirrel(): Handle | undefined {
   function place(s: Source, inset: number): Placement | null {
     const full = visibleTarget(s.el, inset);
     trace = [s.id + " t=" + JSON.stringify(full)];
-    // Phones: when the full cue finds no free space, a smaller squirrel with a short bubble can fit the gutter beside the target.
-    const short = phone.matches ? (s.el.getAttribute("data-squirrel-short") || SHORT_TEXT[s.text] || "") : "";
+    // When the full cue finds no free space, a smaller squirrel with a short bubble can fit the gutter beside the target
+    // (on phones always; elsewhere when the page gives a short form).
+    const short = s.el.getAttribute("data-squirrel-short") || (phone.matches ? SHORT_TEXT[s.text] || "" : "");
     const rounds = [{ text: s.text, sw: SQ_W(), sh: SQ_H() }];
     if (short && short !== s.text) rounds.push({ text: short, sw: 52, sh: Math.round(52 * 160 / 113) });
     cue.hidden = false;
     cue.style.visibility = "hidden";
     cue.dataset.measuring = "";
     let found: Placement | null = null;
-    outer: for (const { text, sw, sh } of rounds) for (const side of sideOrder(s.side)) {
+    const scroll = s.kind === "scroll";
+    const tries: { text: string; sw: number; sh: number; side: Side }[] = [];
+    if (scroll) {
+      // By the scrollbar first; a smaller squirrel there still beats the far side of the region.
+      const sizes = [{ sw: SQ_W(), sh: SQ_H() }, { sw: 52, sh: Math.round(52 * 160 / 113) }];
+      for (const z of sizes) for (const side of SCROLL_SIDES.slice(0, 3)) tries.push({ text: s.text, ...z, side });
+      for (const r of rounds) for (const side of SCROLL_SIDES) tries.push({ ...r, side });
+    } else for (const r of rounds) for (const side of sideOrder(s.side)) tries.push({ ...r, side });
+    outer: for (const { text, sw, sh, side } of tries) {
       const horizontal = side === "top" || side === "bottom";
       // A wide, short row of items (a tab picker): stand by the items, whichever side. Devices and regions keep their own edges.
       const row = full.w >= full.h * 4;
@@ -420,15 +449,18 @@ export function initAttentionSquirrel(): Handle | undefined {
       const room = roomFor(side, t, innerWidth, EDGE_MARGIN);
       if (!horizontal && room < sw) continue;
       // Above or below, a one-line bubble first, then narrower two-line ones that fit tighter gaps.
-      for (const cap of horizontal ? [170, 104, 84] : [room]) {
+      for (const cap of horizontal ? (text.length > 40 ? [300, 240, 200] : [170, 104, 84]) : [room, 110]) {
         const { bw, bh } = sizeBubble(text, horizontal ? Math.min(cap, innerWidth - 2 * EDGE_MARGIN - sw - FIG_GAP) : cap);
         const size = { sw, sh, bw, bh };
-        for (const anchor of anchorsFor(side)) {
+        for (const anchor of scroll && horizontal ? ["b" as Anchor] : horizontal ? anchorsFor(side) : [...anchorsFor(side), "u" as Anchor, "m" as Anchor]) {
           const box = cueBox(side, t, size, anchor, innerWidth);
           if (!insideViewport(box, innerWidth, innerHeight, inset, EDGE_MARGIN)) { trace.push(side + anchor + cap + " outside"); continue; }
+          // A guide stays by its target: a cue lined up with a far screen edge points at nothing.
+          if (box.x > t.x + t.w + NEAR_PX || box.x + box.w < t.x - NEAR_PX) { trace.push(side + anchor + cap + " too far"); continue; }
           const hit = blocked(box, inset, s.el);
           if (hit) { trace.push(side + anchor + cap + " blocked by " + hit); continue; }
-          found = { side, anchor, box, size, text };
+          // By a scrollbar the squirrel stands at the bar's end with its bubble to its left.
+          found = { side, anchor, box, size, text, flip: anchor === "b", row: anchor === "m" };
           break outer;
         }
       }
@@ -444,6 +476,8 @@ export function initAttentionSquirrel(): Handle | undefined {
   function log(what: string, id: string) { events.push({ t: Math.round(performance.now()), what, id }); if (events.length > 60) events.shift(); }
   let shownId: string | null = null;
   let shownSrc: Source | undefined;
+  let shownAt = 0;
+  let shownOnPage = { path: location.pathname, n: 0 };
   let placement: Placement | null = null;
   let hideTimer: number | undefined;
   const unplaceable = new Map<string, number>();
@@ -451,6 +485,8 @@ export function initAttentionSquirrel(): Handle | undefined {
   function apply(p: Placement, s: Source) {
     const { box, side, size, text } = p;
     cue.dataset.side = side;
+    cue.toggleAttribute("data-flip", !!p.flip);
+    cue.toggleAttribute("data-row", !!p.row);
     cue.style.cssText = `left:${Math.round(box.x)}px;top:${Math.round(box.y)}px;width:${Math.ceil(box.w)}px;height:${Math.ceil(box.h)}px;--sq-w:${size.sw}px;--sq-h:${size.sh}px`;
     bubble.textContent = text;
     bubble.style.maxWidth = Math.ceil(size.bw) + "px";
@@ -459,6 +495,9 @@ export function initAttentionSquirrel(): Handle | undefined {
     clearTimeout(hideTimer);
     shownId = s.id;
     shownSrc = s;
+    shownAt = performance.now();
+    if (shownOnPage.path !== location.pathname) shownOnPage = { path: location.pathname, n: 0 };
+    shownOnPage.n++;
     placement = p;
     img.src = still.matches ? STATIC : ANIMATED;
     cue.hidden = false;
@@ -484,6 +523,9 @@ export function initAttentionSquirrel(): Handle | undefined {
   function finish(s: Source, why: string) {
     if (done.has(s.id)) return;
     done = markDone(done, s.id);
+    // Once a visitor has had a hint, the same hint elsewhere is noise: it counts as done everywhere.
+    done = markDone(done, "text:" + s.text);
+    sources.forEach(o => { if (o !== s && o.text === s.text && !done.has(o.id)) { done = markDone(done, o.id); unhint(o); } });
     persist();
     unhint(s);
     if (shownId === s.id) hide(why);
@@ -595,7 +637,10 @@ export function initAttentionSquirrel(): Handle | undefined {
     const inset = headerInset();
     const measured = sources.map(s => measure(s, inset));
     if (doc.querySelector(".mnav:not([hidden])")) { if (shownId) hide("menu"); return; }
-    const d = decide(shownId, measured, done, now, lastActivity, id => (unplaceable.get(id) || 0) <= now);
+    // A timed cue (data-squirrel-for) in view goes first; the others wait for it to hand over.
+    const lead = sources.find((s, i) => s.el.hasAttribute("data-squirrel-for") && isEligible(measured[i], done));
+    const d = decide(shownId, measured, done, now, lastActivity, id => (unplaceable.get(id) || 0) <= now && (!lead || lead.id === id)
+      && (id === shownId || shownOnPage.path !== location.pathname || shownOnPage.n < MAX_PER_PAGE));
     if (d.kind === "hide") { hide("left-view"); return; }
     if (d.kind === "show") {
       const s = sources.find(x => x.id === d.id)!;
@@ -604,6 +649,13 @@ export function initAttentionSquirrel(): Handle | undefined {
       return;
     }
     if (d.kind === "keep" && shownSrc) {
+      // A cue with data-squirrel-for (ms) hands over to the next one after that long on screen;
+      // any other cue steps aside after MAX_SHOW_MS so it guides without nagging.
+      const forMs = Number(shownSrc.el.getAttribute("data-squirrel-for")) || MAX_SHOW_MS;
+      if (now - shownAt >= forMs) {
+        if (shownSrc.el.hasAttribute("data-squirrel-for")) lastActivity = now - IDLE_MS;
+        finish(shownSrc, "timed"); return;
+      }
       const r = rectOf(shownSrc.el);
       if (!lastRect || Math.abs(r.x - lastRect.x) > 1 || Math.abs(r.y - lastRect.y) > 1 || Math.abs(r.w - lastRect.w) > 1 || Math.abs(r.h - lastRect.h) > 1) {
         const p = place(shownSrc, inset);

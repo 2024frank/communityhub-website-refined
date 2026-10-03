@@ -28,7 +28,8 @@ export function fitViewportTools(): void {
         ? settledToolTop(header?.getBoundingClientRect().height ?? 0, section.getBoundingClientRect().top, targetTop)
         : targetTop;
       if (!section && (top < 0 || top >= innerHeight)) return;
-      const reserve = target.classList.contains('native-voices-content') ? 92 : 108;
+      // See it live keeps only the next-scene button below the dashboard (its pickers sit above it).
+      const reserve = target.classList.contains('native-voices-content') ? 92 : 96;
       const value = `${availableToolRoom(innerHeight, top, reserve)}px`;
       if (target.style.getPropertyValue('--viewport-tool-room') !== value)
         target.style.setProperty('--viewport-tool-room', value);

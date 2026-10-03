@@ -1063,15 +1063,19 @@ export function register(H: SiteContext): void {
         `<li data-reveal style="--i:${i}"><span class="rs-tl-yr">${y}</span><div><h3>${t}</h3><p>${d}</p></div></li>`,
     );
     const funders_html = H.FUNDERS.map((f) => `<span>${e(f)}</span>`).join(" ");
-    const timeline = `<section class="sec-pad" id="history"><div class="wrap resource-scene" data-story-scene="desktop"><div data-story-scene>
+    // The whole story plays on one TV-style screen: the platform, then each year, then funders.
+    const tv_slides = [
+      communicationNetwork().replace(" data-story-scene", ""),
+      ...H.TIMELINE.map(([y, t, d]) => `<div class="about-tv-year"><span class="about-tv-yr">${y}</span><h3>${t}</h3><p>${d}</p></div>`),
+      `<div class="about-tv-year"><span class="about-tv-yr">Thank you</span><h3>Supported over the years by</h3><p class="rs-funders-list">${funders_html}</p></div>`,
+    ];
+    const timeline = `<section class="sec-pad about-story" id="history"><div class="wrap about-story-grid" data-story-scene="all"><div class="about-story-copy">
   ${sec_label("Our history", "Origin Story")}
-  <ol class="rs-tl" data-reveal-group style="margin-top:26px">${tl_items.slice(0, 2).join("")}</ol></div>
-  <ol class="rs-tl" start="3" data-story-scene data-reveal-group>${tl_items.slice(2, 4).join("")}</ol>
-</div><div class="wrap resource-scene" data-story-scene="desktop">
-  <ol class="rs-tl" start="5" data-story-scene data-reveal-group>${tl_items.slice(4,6).join("")}</ol>
-  <div data-story-scene><ol class="rs-tl" start="7" data-reveal-group>${tl_items.slice(6).join("")}</ol>
-  <div class="rs-funders"><p class="fig">Supported over the years by</p><p class="rs-funders-list">${funders_html}</p></div></div>
-</div></section>`;
+  <p class="lede" style="margin-top:14px">From one building at Oberlin College in 2000 to a platform shared by whole communities.</p>
+</div><div class="about-tv" data-tv-story data-interval="6500" aria-roledescription="carousel" aria-label="Community Hub story">
+  <div class="native-tv-device"><div class="native-tv-screen about-tv-screen" aria-live="off">${tv_slides.map((h, i) => `<div class="about-tv-slide${i ? "" : " is-on"}" role="group" aria-roledescription="slide" aria-label="${i + 1} of ${tv_slides.length}"${i ? " hidden" : ""}>${h}</div>`).join("")}</div></div>
+  <div class="about-tv-bar"><button type="button" class="about-tv-pause" data-tv-pause aria-label="Pause story">${"<svg viewBox='0 0 24 24' aria-hidden='true'><path d='M8 5v14M16 5v14'/></svg>"}</button><div class="about-tv-dots">${tv_slides.map((_, i) => `<button type="button" data-tv-go="${i}" aria-label="Show slide ${i + 1}"${i ? "" : ' aria-current="true"'}></button>`).join("")}</div></div>
+</div></div></section>`;
     const partners_html = PARTNERS.map(
       ([ic, n, d]) =>
         `<div><img class="rs-partner-ic" src="assets/${ic}" alt="" width="32" height="32" loading="lazy"><div><h3>${e(n)}</h3><p>${d}</p></div></div>`,
@@ -1093,7 +1097,6 @@ export function register(H: SiteContext): void {
 </div></section>`;
     const body =
       mission +
-      `<section class="sec-pad about-network" id="community-connections"><div class="wrap">${communicationNetwork()}</div></section>` +
       timeline +
       partners +
       team +

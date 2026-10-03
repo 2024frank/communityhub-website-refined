@@ -761,8 +761,25 @@ import { required, eventElement, htmlChildren } from "./dom";
   // A stop a few pixels ahead (a tab click or late layout leaves the page just short of
   // its stop) shows the scene already on screen: stepping to it would be a dead gesture.
   const NEAR = 24;
+  // A scene with community tabs (Oberlin College / Great Lakes Science Center) steps
+  // through its tabs before the next scene: scrolling down shows the next community.
+  function choiceStep(dir: number, act: boolean) {
+    const els = current()?.els || [];
+    for (const el of els) {
+      const group = el.querySelector<HTMLElement>(".native-choices");
+      if (!group || !group.getClientRects().length) continue;
+      const btns = [...group.querySelectorAll<HTMLButtonElement>("[data-native-choice]")];
+      const at = btns.findIndex(b => b.getAttribute("aria-pressed") === "true");
+      const next = btns[at + (dir > 0 ? 1 : -1)];
+      if (at < 0 || !next) return false;
+      if (act) next.click();
+      return true;
+    }
+    return false;
+  }
   function go(dir: number, advance = false) {
     if (blocked() || !dir) return false;
+    if (typeof choiceStep === "function" && choiceStep(dir, true)) return true;
     // An explicit control or the scoped identity sequence now owns navigation;
     // a slow startup resource must not later restore the older hash destination.
     initialHashPending = false;
@@ -826,7 +843,7 @@ import { required, eventElement, htmlChildren } from "./dom";
   // (product tabs) still count, so the next control matches what a swipe would do.
   function hasNext() {
     const y = window.scrollY;
-    if (frames().some(f => f.y > y + NEAR)) return true;
+    if ((typeof choiceStep === "function" && choiceStep(1, false)) || frames().some(f => f.y > y + NEAR)) return true;
     return productHasMore(current()?.els[0], 1);
   }
   window.chStory = { frames: frames, go: go, current: current, hasNext: hasNext };

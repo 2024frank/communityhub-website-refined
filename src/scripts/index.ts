@@ -20,4 +20,6 @@ import "./pages_zzzzz_shield";
 import "./meeting_embeds";
 
 import { fitViewportTools } from "./ui/viewport-tool";
+import { initTvStory } from "./ui/tv-story";
 fitViewportTools();
+initTvStory();

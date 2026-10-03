@@ -31,15 +31,15 @@
 
 #main#main#main .home-preview .preview-context{display:flex;align-items:center;gap:12px;margin:0 0 12px;font:700 18px/1.4 var(--font-body);color:var(--ch-pine);text-align:left}
 /* Restored participant network belongs to About, distinct from the platform deck. */
-#main#main#main[data-page="about"] .about-network .conn{max-width:680px;margin-inline:auto}
-#main#main#main[data-page="about"] .about-network .conn-heading{text-align:center;font:700 clamp(25px,3vw,38px)/1.25 var(--font-body);margin-bottom:24px}
-#main#main#main[data-page="about"] .about-network .conn-art{aspect-ratio:340/390;max-width:440px;margin:auto}
-#main#main#main[data-page="about"] .about-network .conn-core{background:transparent;border-radius:0}
-#main#main#main[data-page="about"] .about-network .conn-core span{display:none}
-#main#main#main[data-page="about"] .about-network .conn-core img{width:100%;height:auto}
-#main#main#main[data-page="about"] .about-network .cn img{background:var(--ch-field);border-radius:50%;box-shadow:0 0 0 5px var(--ch-field)}
-#main#main#main[data-page="about"] .about-network .cn span{font-size:14px;line-height:1.25;background:var(--ch-field);padding:4px}
-#main#main#main[data-page="about"] .about-network .conn-cap{max-width:56ch;margin:20px auto 0;text-align:left}
+#main#main#main[data-page="about"] .about-tv-screen .conn{max-width:680px;margin-inline:auto}
+#main#main#main[data-page="about"] .about-tv-screen .conn-heading{text-align:center;font:700 clamp(25px,3vw,38px)/1.25 var(--font-body);margin-bottom:24px}
+#main#main#main[data-page="about"] .about-tv-screen .conn-art{aspect-ratio:340/390;max-width:440px;margin:auto}
+#main#main#main[data-page="about"] .about-tv-screen .conn-core{background:transparent;border-radius:0}
+#main#main#main[data-page="about"] .about-tv-screen .conn-core span{display:none}
+#main#main#main[data-page="about"] .about-tv-screen .conn-core img{width:100%;height:auto}
+#main#main#main[data-page="about"] .about-tv-screen .cn img{background:var(--ch-field);border-radius:50%;box-shadow:0 0 0 5px var(--ch-field)}
+#main#main#main[data-page="about"] .about-tv-screen .cn span{font-size:14px;line-height:1.25;background:var(--ch-field);padding:4px}
+#main#main#main[data-page="about"] .about-tv-screen .conn-cap{max-width:56ch;margin:20px auto 0;text-align:left}
 
 #main#main#main .home-preview .native-scroll{height:clamp(300px,48dvh,540px);scrollbar-gutter:stable;scrollbar-width:auto}
 #main#main#main .home-preview .calendar-preview{min-height:310px}
@@ -52,7 +52,6 @@
 #main#main#main .home-preview .events-src{font-size:14px;line-height:1.45;margin-top:14px}
 
 #main#main#main .home-preview .sp-nav:not(.sp-pause){border-color:transparent}
-#main#main#main .native-controller-cue{font:400 16px/1.5 var(--font-body);margin:8px 0 12px;color:var(--ch-ink);max-width:60ch}
 
 #main#main#main .sec-next path{stroke-width:var(--control-stroke)}
 #main#main#main .preview-readable-text{display:block;font:400 var(--preview-caption)/1.45 var(--font-body);margin:12px 0 0;color:var(--ch-ink);max-width:60ch;text-align:left}
@@ -78,7 +77,6 @@
 @media(min-width:901px){
  #main#main#main [data-kind="stories"]{display:grid;grid-template-columns:auto minmax(0,1fr);column-gap:24px;align-items:center}
  #main#main#main [data-kind="stories"] .native-choices{grid-column:1;margin:8px 0}
- #main#main#main [data-kind="stories"] .native-controller-cue{grid-column:2;margin:8px 0;justify-self:end}
  #main#main#main [data-kind="stories"] :is([data-native-mount],.native-caption){grid-column:1/-1}
  #main#main#main[data-page="digital-signage"] #controller .zpb-sec-body>p{max-width:none!important;font-size:17px;line-height:1.5;margin-bottom:12px!important}
 }
@@ -105,3 +103,27 @@ body>.page-next path{stroke-width:var(--control-stroke)}
 
 /* Decision 8: the Building Dashboard title sits exactly where every other preview title sits. */
 #main#main#main .home-preview .native-heading{margin:0 0 12px;font:700 18px/1.4 var(--font-body);color:var(--ch-pine);text-align:left}
+/* About: the Community Hub story plays on one TV-style screen. */
+#main#main#main .about-story-grid{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.4fr);gap:clamp(24px,4vw,56px);align-items:center}
+#main#main#main .about-tv .native-tv-device{margin-bottom:44px}
+#main#main#main .about-tv-screen{background:var(--ch-field,#f3f5ee);max-height:62dvh;aspect-ratio:16/10}
+#main#main#main .about-tv-slide{position:absolute;inset:0;display:grid;place-items:center;padding:clamp(14px,2.4vw,32px);animation:about-tv-in .5s ease both}
+#main#main#main .about-tv-slide[hidden]{display:none}
+#main#main#main .about-tv-screen .conn{margin:0;max-width:none;height:100%;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);grid-template-rows:auto 1fr;gap:4px 18px;align-items:center}
+#main#main#main .about-tv-screen .conn-heading{grid-column:1;grid-row:1;text-align:left;font-size:clamp(20px,2.1vw,30px)}
+#main#main#main .about-tv-screen .conn-cap{grid-column:1;grid-row:2;align-self:start;margin:8px 0 0;font-size:clamp(15px,1.2vw,18px)}
+#main#main#main .about-tv-screen .conn-art{grid-column:2;grid-row:1/3;height:100%;max-height:100%;max-width:100%;aspect-ratio:340/390;margin:auto}
+#main#main#main .about-tv-year{max-width:46ch;text-align:left}
+#main#main#main .about-tv-yr{display:block;font:700 clamp(44px,6vw,92px)/1 var(--font-display);color:var(--ch-pine,#2f6b3a)}
+#main#main#main .about-tv-year h3{margin:12px 0 8px;font-size:clamp(20px,2vw,30px)}
+#main#main#main .about-tv-year p{font-size:clamp(16px,1.35vw,21px);line-height:1.45}
+#main#main#main .about-tv-bar{display:flex;align-items:center;gap:14px;justify-content:center}
+#main#main#main .about-tv-pause{width:36px;height:36px;border-radius:50%;border:2px solid currentColor;color:var(--ch-pine,#2f6b3a);background:none;display:grid;place-items:center;cursor:pointer}
+#main#main#main .about-tv-pause svg{width:16px;height:16px;stroke:currentColor;stroke-width:3;fill:none;stroke-linecap:round}
+#main#main#main .about-tv-pause[aria-pressed="true"] svg path{d:path("M8 5l11 7-11 7z");fill:currentColor;stroke-width:1}
+#main#main#main .about-tv-dots{display:flex;gap:7px;flex-wrap:wrap}
+#main#main#main .about-tv-dots button{width:10px;height:10px;padding:0;border-radius:50%;border:0;background:#c4cfbf;cursor:pointer}
+#main#main#main .about-tv-dots button[aria-current="true"]{background:var(--ch-pine,#2f6b3a);width:26px;border-radius:5px}
+@keyframes about-tv-in{from{opacity:0}to{opacity:1}}
+@media (prefers-reduced-motion:reduce){#main#main#main .about-tv-slide{animation:none}}
+@media (max-width:900px){#main#main#main .about-story-grid{grid-template-columns:1fr}#main#main#main .about-tv-screen{aspect-ratio:4/5;max-height:none}#main#main#main .about-tv-screen .conn{grid-template-columns:1fr;grid-template-rows:auto auto 1fr}#main#main#main .about-tv-screen .conn-cap{grid-row:2}#main#main#main .about-tv-screen .conn-art{grid-column:1;grid-row:3}}
