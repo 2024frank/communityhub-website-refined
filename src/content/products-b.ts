@@ -1045,7 +1045,7 @@ ${_ticks()}
       .join("");
     return `<div class="zpb-emb-demo zpb-emb-demo--focused" data-zpb-emb data-chapter-scenes data-story-scene="all">
 <script type="application/json" id="zpb-emb-data">${data_json}</script>
-<div class="zpb-emb-presets" role="group" aria-label="Example partner sites" data-squirrel="Choose one to explore" data-squirrel-side="bottom" data-squirrel-short="Choose one to explore">${_preset_buttons()}</div>
+<div class="zpb-emb-presets" role="group" aria-label="Example partner sites" data-squirrel="Choose one to explore" data-squirrel-side="top" data-squirrel-short="Choose one">${_preset_buttons()}</div>
 <label class="zpb-emb-preset-field">Example partner<select data-zpb-emb-preset-select>${PRESETS.map(preset => `<option value="${e(preset.key)}">${e(preset.name)}</option>`).join("")}</select></label>
 <div class="zpb-emb-stage">
 <div class="zpb-emb-main" data-story-scene>

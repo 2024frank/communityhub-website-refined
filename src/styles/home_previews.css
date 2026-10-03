@@ -127,3 +127,7 @@ body>.page-next path{stroke-width:var(--control-stroke)}
 @keyframes about-tv-in{from{opacity:0}to{opacity:1}}
 @media (prefers-reduced-motion:reduce){#main#main#main .about-tv-slide{animation:none}}
 @media (max-width:900px){#main#main#main .about-story-grid{grid-template-columns:1fr}#main#main#main .about-tv-screen{aspect-ratio:4/5;max-height:none}#main#main#main .about-tv-screen .conn{grid-template-columns:1fr;grid-template-rows:auto auto 1fr}#main#main#main .about-tv-screen .conn-cap{grid-row:2}#main#main#main .about-tv-screen .conn-art{grid-column:1;grid-row:3}}
+/* Home examples: ‹ and › sit on either side of the example, outside the image, centred on it. */
+#main#main#main .home-preview:has(>.sp-bar){padding:0 calc(var(--control-size) + 10px)!important}
+#main#main#main .home-preview>.sp-bar{inset:0;height:auto;justify-content:space-between;pointer-events:none}
+#main#main#main .home-preview>.sp-bar .sp-nav{pointer-events:auto}

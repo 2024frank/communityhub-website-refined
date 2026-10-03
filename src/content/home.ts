@@ -183,7 +183,7 @@ export function register(H: SiteContext): void {
   ]);
   const installationNames = ["Dave's Market · MidTown Cleveland", "Hotel at Oberlin", "Oberlin City Schools", "Great Lakes Science Center · Workshop", "Great Lakes Science Center · Exhibit", "Oberlin College · Carbon Neutral Stories"];
   const sign_media = previewGallery("Digital Signage", signs.map(([image, alt], index) => ({image, alt, context: installationNames[index], readableText: alt})));
-  const emb_media = calendarPreview("Web Embeddables");
+  const emb_media = calendarPreview("Web Embeddables", false);
   const live = {
     "data-dashboard": buildingPreview(),
     "the-hub": dataHubPreview(),
