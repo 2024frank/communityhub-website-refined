@@ -1227,6 +1227,19 @@ import { $, $$, isPresent, required, eventElement } from "./dom";
       const preview = $(".embed-preview-image", body);
       body.replaceChildren(...(preview ? [preview, f] : [wait, f]));
       bindPreview(body, f);
+      // A fitted frame grows to the height its dashboard reports, so the box around it does the
+      // scrolling with a visible bar (and the squirrel cue) instead of the frame's hidden one.
+      if (fig.hasAttribute("data-fit-content")) {
+        f.setAttribute("scrolling", "no");
+        const origin = new URL(fig.getAttribute("data-src") || "", location.href).origin;
+        const onResize = (ev: MessageEvent) => {
+          if (!body.contains(f)) { window.removeEventListener("message", onResize); return; }
+          if (ev.source !== f.contentWindow || ev.origin !== origin || ev.data?.messageType !== "content-resize") return;
+          const h = Number(ev.data.height);
+          if (Number.isFinite(h)) f.style.setProperty("height", `${Math.min(8000, Math.max(body.clientHeight, Math.ceil(h)))}px`, "important");
+        };
+        window.addEventListener("message", onResize);
+      }
       let finished = false;
       const timeout = window.setTimeout(() => {
         if (!finished && body.contains(f)) slowWait(body, f.src);

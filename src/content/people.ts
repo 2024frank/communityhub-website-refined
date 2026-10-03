@@ -1655,7 +1655,9 @@ ${H.postcard("cs-illo-ajlc.png", "The Adam Joseph Lewis Center at Oberlin Colleg
       ["great-lakes-science-center", LIVE.glsc, "Great Lakes Science Center", "cleveland.communityhub.cloud"],
     ] as const;
     const tabs = tiles.map(([key, , name], i) => `<button type="button" role="tab" id="demo-tab-${key}" data-dashboard-key="${key}" aria-controls="${key}" aria-selected="${i === 0}" tabindex="${i === 0 ? 0 : -1}">${name}</button>`).join("");
-    const panels = tiles.map(([key, url, name, host], i) => `<div id="${key}" role="tabpanel" aria-labelledby="demo-tab-${key}" data-dashboard-panel="${key}"${i ? " hidden" : ""}>${H.live_frame(url, name, host, 720)}</div>`).join("");
+    const panels = tiles.map(([key, url, name, host], i) => `<div id="${key}" role="tabpanel" aria-labelledby="demo-tab-${key}" data-dashboard-panel="${key}"${i ? " hidden" : ""}>${H.live_frame(url, name, host, 720)
+      .replace('<figure class="live-frame"', '<figure class="live-frame" data-fit-content')
+      .replace('<div class="lf-body"', `<div class="lf-body" data-scroll-owner data-squirrel="Scroll down to explore" data-squirrel-short="Scroll down" tabindex="0" role="region" aria-label="${name} dashboard"`)}</div>`).join("");
     let body = `<section class="dashboard-gallery" id="gallery" aria-labelledby="dashboard-heading" data-dashboard-gallery><div class="wrap">
       <h1 class="h1" id="dashboard-heading">Dashboard demos</h1><p class="dashboard-intro">Explore a public dashboard or visit its partner page.</p>
       <div class="dashboard-tabs" role="tablist" aria-label="Choose a public dashboard">${tabs}</div>${panels}

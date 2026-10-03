@@ -451,12 +451,14 @@ html.motion #main#main#main[data-pager]>.ch-story-section.is-in:not(.hub-flow) [
 #main#main#main[data-page="dashboards"]>.dashboard-gallery{height:calc(100dvh - var(--story-hdr-h,77px));min-height:calc(100dvh - var(--story-hdr-h,77px));padding-bottom:18px;display:flex;flex-direction:column}
 #main#main#main[data-page="dashboards"]>section.dashboard-gallery>.wrap{height:auto!important;min-height:0!important;flex:1;margin-top:12px!important;margin-bottom:0!important}
 #main#main#main[data-page="dashboards"] .dashboard-gallery :is([data-dashboard-panel],.live-frame){min-height:0!important;flex:1}
-#main#main#main[data-page="dashboards"] .dashboard-gallery .lf-body{height:auto!important;min-height:160px!important;flex:1;overflow:hidden}
-#main#main#main[data-page="dashboards"] .dashboard-gallery .lf-body iframe{height:100%!important}
+#main#main#main[data-page="dashboards"] .dashboard-gallery .lf-body{height:auto!important;min-height:160px!important;flex:1;overflow-x:hidden;overflow-y:auto}
+#main#main#main[data-page="dashboards"] .dashboard-gallery .lf-body iframe{height:100%;display:block;position:static}
 #main#main#main[data-page="dashboards"] .dashboard-gallery .dashboard-intro{margin-block:0 8px;font-size:17px;line-height:1.4}
 #main#main#main[data-page="dashboards"] .dashboard-gallery .dashboard-tabs{display:flex;flex-wrap:nowrap;overflow-x:auto;margin-block:0 12px;padding-bottom:0;border:0}
 #main#main#main[data-page="dashboards"] .dashboard-gallery .bar{flex-wrap:nowrap;overflow-x:auto;white-space:nowrap;min-height:44px;padding-block:6px}
 #main#main#main[data-page="dashboards"] .dashboard-gallery .dashboard-other{margin-top:6px}
+/* Leave a gutter on the right for Wally's "Scroll down" cue where the frame would otherwise reach the screen edge. */
+@media (max-width:1240px){#main#main#main[data-page="dashboards"] .dashboard-gallery [data-dashboard-panel]:not([hidden]){max-width:calc(100% - 58px)}}
 /* A plain explanation beside a larger, native Citywide application. */
 #main#main#main[data-page="data-dashboard"] #citywide .citywide-product-layout{display:grid;grid-template-columns:minmax(220px,.72fr) minmax(0,1.6fr);gap:32px;align-items:start}
 #main#main#main[data-page="data-dashboard"] #citywide .citywide-product-copy p{font:400 18px/1.6 var(--font-body);margin:0;max-width:36ch}
