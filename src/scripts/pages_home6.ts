@@ -777,9 +777,35 @@ import { required, eventElement, htmlChildren } from "./dom";
     }
     return false;
   }
+  // The phone controller demo (Phone App) steps the same way while it is on screen:
+  // scroll down opens Screen Controller, then shows each controller choice in turn,
+  // and only then leaves for the next scene.
+  function phoneStep(dir: number, act: boolean) {
+    const els = current()?.els || [];
+    for (const el of els) {
+      const demo = el.querySelector<HTMLElement>("[data-phone-demo]");
+      const device = demo?.querySelector<HTMLElement>(".pw-phone");
+      if (!demo || !device) continue;
+      const r = device.getBoundingClientRect();
+      if (!r.height || r.top < 0 || r.bottom > window.innerHeight) continue;
+      const btns = [...demo.querySelectorAll<HTMLButtonElement>("[data-phone-channel]")];
+      const menu = demo.dataset.phase === "menu";
+      const at = btns.findIndex(b => b.getAttribute("aria-pressed") === "true");
+      if (dir > 0 && menu) {
+        if (act) demo.querySelector<HTMLButtonElement>("[data-phone-scan]")?.click();
+        return true;
+      }
+      const next = menu ? undefined : btns[at + (dir > 0 ? 1 : -1)];
+      if (!next || (dir < 0 && at < 0)) return false;
+      if (act) next.click();
+      return true;
+    }
+    return false;
+  }
   function go(dir: number, advance = false) {
     if (blocked() || !dir) return false;
     if (typeof choiceStep === "function" && choiceStep(dir, true)) return true;
+    if (typeof phoneStep === "function" && phoneStep(dir, true)) return true;
     // An explicit control or the scoped identity sequence now owns navigation;
     // a slow startup resource must not later restore the older hash destination.
     initialHashPending = false;
@@ -843,7 +869,7 @@ import { required, eventElement, htmlChildren } from "./dom";
   // (product tabs) still count, so the next control matches what a swipe would do.
   function hasNext() {
     const y = window.scrollY;
-    if ((typeof choiceStep === "function" && choiceStep(1, false)) || frames().some(f => f.y > y + NEAR)) return true;
+    if ((typeof choiceStep === "function" && choiceStep(1, false)) || (typeof phoneStep === "function" && phoneStep(1, false)) || frames().some(f => f.y > y + NEAR)) return true;
     return productHasMore(current()?.els[0], 1);
   }
   window.chStory = { frames: frames, go: go, current: current, hasNext: hasNext };

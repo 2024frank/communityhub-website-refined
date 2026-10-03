@@ -589,7 +589,7 @@ export function register(H: SiteContext): void {
       ] as const,
     ]);
 
-    const qr = `<div class="product-evidence" data-story-scene="desktop"><div class="product-evidence-copy" id="what" aria-labelledby="what-h" data-story-scene><h3 id="what-h">What it does</h3>${what}<div class="phone-related-links">${related_group("What the app opens", ["digital-signage", "community-calendar", "community-voices", "stories"])}</div></div><div class="product-evidence-media" data-story-scene>${media}</div></div>`;
+    const qr = `<div class="product-evidence" data-story-scene="all"><div class="product-evidence-copy" id="what" aria-labelledby="what-h"><h3 id="what-h">What it does</h3>${what}<div class="phone-related-links">${related_group("What the app opens", ["digital-signage", "community-calendar", "community-voices", "stories"])}</div></div><div class="product-evidence-media">${media}</div></div>`;
     body += sec("qr", "QR posters", "Phone App & Screen Controller", qr);
     body += H.cta_band("Contact Us", "");
     H.write_page(
@@ -1086,6 +1086,8 @@ ${_ticks()}
 </div>`;
   }
   function web_embeddables(): void {
+    // One titled section = one scene on every screen: drop the per-group phone stops.
+    const one_scene = (h: string): string => h.replace(/\sdata-story-scene(?![=\w-])/g, "");
     const p = H.PBY["web-embeddables"];
     const media = H.postcard(
       "ops-embed-shot.jpg",
@@ -1174,7 +1176,7 @@ ${_ticks()}
       "hold",
       "What it can hold",
       "The Web Embeddable can feature any or all of the applications provided by CommunityHub",
-      hold,
+      one_scene(hold),
       "",
     );
     const live_tabs = [
@@ -1197,7 +1199,7 @@ ${_ticks()}
       .join("");
     const partners = `<div class="live-tabs" role="tablist" aria-label="Partner pages" data-live-tabs="zpb-webemb-live-panel">${tab_btns}</div>
 <figure class="live-frame" id="zpb-webemb-live-panel" data-src="${live_tabs[0][0]}" data-title="${live_tabs[0][2]}" style="--h:520px">
-<div class="bar"><i></i><i></i><i></i><span data-live-url>${live_tabs[0][0].replaceAll("https://", "")}</span><a data-live-open href="${live_tabs[0][0]}" target="_blank" rel="noopener">Open full site ${ARR}</a></div>
+<div class="bar"><i></i><i></i><i></i><span data-live-url>${live_tabs[0][0].replaceAll("https://", "")}</span><span class="lf-saved">Showing a saved picture</span><button type="button" class="lf-retry">Try again</button><a data-live-open href="${live_tabs[0][0]}" target="_blank" rel="noopener">Open full site ${ARR}</a></div>
 <div class="lf-body"></div>
 </figure>
 <p style="margin-top:14px;color:var(--ink-2);max-width:64ch">Two partner pages, live: MidTown Cleveland's events page, which runs the Community Calendar, and the City of Oberlin’s climate action plan page. Community Hub is the City’s communication platform for that plan.</p>`;
@@ -1243,7 +1245,7 @@ ${_ticks()}
       "examples",
       "Already in use",
       "Embeds already running",
-      trio(examples),
+      one_scene(trio(examples)),
       undefined,
       undefined,
       true,

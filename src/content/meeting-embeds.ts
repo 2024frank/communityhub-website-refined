@@ -27,7 +27,7 @@ export const nativeCitywide = () => nativeContexts('citywide',[
  {name:'Cleveland',url:'https://cleveland.communityhub.cloud/citywide-dashboard/index?embed=1&show-menu=0'},
 ]);
 export function nativeScrollable(url:string,title:string,height:number):string {
- return `<div class="native-scroll-feature"><h4 class="native-heading">${esc(title)}</h4><div class="native-scroll" data-scroll-owner tabindex="0" role="region" aria-label="${esc(title)}"><div class="native-scroll-canvas"><iframe data-native-scroll-frame data-defer-src="${esc(url)}" title="${esc(title)}" width="100%" height="${height}" loading="lazy"></iframe></div></div><p class="native-scroll-help">Scroll within the dashboard to explore its resource-use data.</p></div>`;
+ return `<div class="native-scroll-feature"><h4 class="native-heading">${esc(title)}</h4><div class="native-scroll" data-scroll-owner data-squirrel="Scroll down to explore" data-squirrel-short="Scroll down" tabindex="0" role="region" aria-label="${esc(title)}"><div class="native-scroll-canvas"><iframe data-native-scroll-frame data-defer-src="${esc(url)}" title="${esc(title)}" width="100%" height="${height}" loading="lazy"></iframe></div></div></div>`;
 }
 export function phoneDemo():string {
  const arrow='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg>';

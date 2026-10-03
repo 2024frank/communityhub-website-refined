@@ -1162,3 +1162,12 @@ import { $, $$, isPresent, required, eventElement } from "./dom";
     }
   });
 })();
+
+// Partner frame: "Try again" reloads the selected partner page (a tab click reloads it).
+document.addEventListener("click", function (ev) {
+  const btn = (ev.target as Element | null)?.closest?.(".lf-retry");
+  if (!btn) return;
+  const root = btn.closest(".zpb-sec-body");
+  const tab = root?.querySelector<HTMLButtonElement>('[role="tab"][aria-selected="true"]');
+  tab?.click();
+});

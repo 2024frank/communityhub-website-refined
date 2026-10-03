@@ -38,7 +38,8 @@ export const IDLE_MS = 1000;
 export const MAX_PER_PAGE = 2;
 /** Longest a cue stays on screen before it steps aside for good. */
 export const MAX_SHOW_MS = 8000;
-export const STORE_KEY = "ch-squirrel-done";
+// Versioned: a change to when hints count as done starts every visitor fresh.
+export const STORE_KEY = "ch-squirrel-done-2";
 
 /** Share of the target rectangle that lies inside the viewport, below `topInset` (the sticky header). */
 export function visibleRatio(r: Rect, vw: number, vh: number, topInset = 0): number {
@@ -623,6 +624,9 @@ export function initAttentionSquirrel(): Handle | undefined {
 
   /* ---- scheduler ---- */
   let lastRect: Rect | null = null;
+  /* A scroll hint is only done once the visitor has scrolled that region. After its time on screen it
+     rests, and comes back the next time its region comes into view. */
+  const rested = new Set<string>();
   let raf = 0;
   let timer: number | undefined;
   function schedule() {
@@ -638,9 +642,10 @@ export function initAttentionSquirrel(): Handle | undefined {
     const measured = sources.map(s => measure(s, inset));
     if (doc.querySelector(".mnav:not([hidden])")) { if (shownId) hide("menu"); return; }
     // A timed cue (data-squirrel-for) in view goes first; the others wait for it to hand over.
+    sources.forEach(s => { if (rested.has(s.id)) { const r = rectOf(s.el); if (r.y + r.h <= inset || r.y >= innerHeight) rested.delete(s.id); } });
     const lead = sources.find((s, i) => s.el.hasAttribute("data-squirrel-for") && isEligible(measured[i], done));
-    const d = decide(shownId, measured, done, now, lastActivity, id => (unplaceable.get(id) || 0) <= now && (!lead || lead.id === id)
-      && (id === shownId || shownOnPage.path !== location.pathname || shownOnPage.n < MAX_PER_PAGE));
+    const d = decide(shownId, measured, done, now, lastActivity, id => (unplaceable.get(id) || 0) <= now && (!lead || lead.id === id) && !rested.has(id)
+      && (id === shownId || shownOnPage.path !== location.pathname || shownOnPage.n < MAX_PER_PAGE || sources.find(x => x.id === id)?.kind === "scroll"));
     if (d.kind === "hide") { hide("left-view"); return; }
     if (d.kind === "show") {
       const s = sources.find(x => x.id === d.id)!;
@@ -654,6 +659,7 @@ export function initAttentionSquirrel(): Handle | undefined {
       const forMs = Number(shownSrc.el.getAttribute("data-squirrel-for")) || MAX_SHOW_MS;
       if (now - shownAt >= forMs) {
         if (shownSrc.el.hasAttribute("data-squirrel-for")) lastActivity = now - IDLE_MS;
+        if (shownSrc.kind === "scroll") { rested.add(shownSrc.id); hide("rest"); return; }
         finish(shownSrc, "timed"); return;
       }
       const r = rectOf(shownSrc.el);

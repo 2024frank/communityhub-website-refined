@@ -1057,7 +1057,7 @@ export function register(H: SiteContext): void {
   <h1 class="h1">About us</h1>
   <p class="lede" style="margin-top:18px">Community Hub creates software products that foster stronger, more sustainable, and more resilient connections among people and the natural systems upon which we depend. Our award-winning communications platform uses sophisticated data acquisition and visualization applications to simplify complexity and share the wisdom of community-focused solutions.</p>
   
-</div>${H.postcard("live-contact-workshop.jpg", "Participants in an Environmental Dashboard workshop at the Great Lakes Science Center")}</div></section>`;
+</div>${H.postcard("glsc-exhibit.jpg", "Visitors at the Environmental Dashboard exhibit at the Great Lakes Science Center in Cleveland")}</div></section>`;
     const tl_items = H.TIMELINE.map(
       ([y, t, d], i) =>
         `<li data-reveal style="--i:${i}"><span class="rs-tl-yr">${y}</span><div><h3>${t}</h3><p>${d}</p></div></li>`,
@@ -1080,11 +1080,11 @@ export function register(H: SiteContext): void {
       ([ic, n, d]) =>
         `<div><img class="rs-partner-ic" src="assets/${ic}" alt="" width="32" height="32" loading="lazy"><div><h3>${e(n)}</h3><p>${d}</p></div></div>`,
     );
-    const partners = `<section class="sec-pad"><div class="wrap resource-scene resource-partners" data-story-scene="desktop">
+    const partners = `<section class="sec-pad"><div class="wrap resource-scene resource-partners" data-story-scene="all">
   ${sec_label("Partners", "Who We Serve")}
   <p class="about-audiences-intro">Community Hub clients include organizations, businesses, and whole communities that are working to enhance understanding, embrace challenges, celebrate success, and foster positive initiative. We believe that it has never been more important to act locally while thinking globally.</p>
-  <div class="rs-partners" style="margin-top:24px" data-story-scene>${partners_html.slice(0, 3).join("")}</div>
-  <div class="rs-partners" data-story-scene>${partners_html.slice(3).join("")}</div>
+  <div class="rs-partners" style="margin-top:24px">${partners_html.slice(0, 3).join("")}</div>
+  <div class="rs-partners">${partners_html.slice(3).join("")}</div>
 </div></section>`;
     const team_html = TEAM.map(
       ([img, n, role], i) =>
