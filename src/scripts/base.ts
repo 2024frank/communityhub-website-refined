@@ -1176,8 +1176,21 @@ import { $, $$, isPresent, required, eventElement } from "./dom";
     };
     const activateVisible = () => deferred.forEach(loadDeferred);
     if (deferred.size && "IntersectionObserver" in window) {
+      // A frame can enter view while its scene is still inert or hidden mid-cut; the observer
+      // will not fire again while it stays in view, so keep retrying until it loads or leaves.
+      const waiting = new Set<HTMLIFrameElement>();
+      let retry = 0;
+      const retryWaiting = () => {
+        retry = 0;
+        waiting.forEach(f => { loadDeferred(f); if (!deferred.has(f)) { waiting.delete(f); io.unobserve(f); } });
+        if (waiting.size) retry = window.setTimeout(retryWaiting, 400);
+      };
       const io = new IntersectionObserver(entries => entries.forEach(entry => {
-        if (entry.isIntersecting) { loadDeferred(entry.target as HTMLIFrameElement); if (!deferred.has(entry.target as HTMLIFrameElement)) io.unobserve(entry.target); }
+        const f = entry.target as HTMLIFrameElement;
+        if (!entry.isIntersecting) { waiting.delete(f); return; }
+        loadDeferred(f);
+        if (!deferred.has(f)) io.unobserve(f);
+        else { waiting.add(f); if (!retry) retry = window.setTimeout(retryWaiting, 400); }
       }));
       const owners = new Set<Element>();
       deferred.forEach(f => {
