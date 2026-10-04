@@ -55,7 +55,7 @@ export function previewGallery(label: string, examples: Preview[]): string {
   return previewCarousel(label, examples.map(previewFigure));
 }
 
-export const buildingPreview=()=>previewCarousel('Building Dashboard',[
+export const buildingPreview=()=>previewCarousel('Technology to monitor, display and compare real-time resource use in schools, businesses and public facilities.',[
  nativeScrollable('https://oberlin.communityhub.cloud/dh-public/ops/dashboard/815','Oberlin College · Harkness',1500),
  nativeScrollable('https://oberlin.communityhub.cloud/dh-public/ops/dashboard/529','Oberlin City Schools · Elementary School',1500),
  nativeScrollable('https://oberlin.communityhub.cloud/dh-public/ops/dashboard/1001','City of Oberlin · Public Library',1500),
@@ -78,11 +78,11 @@ export const dataHubPreview=()=>previewCarousel('Data Hub',[
  passiveEmbed('https://oberlin.communityhub.cloud/dh-public/time-series-chart/embed/0/chart-window/today?variableId=45660','Oberlin electricity time-series chart','Oberlin · Electricity through the day'),
 ]);
 
-export const citywidePreview=()=>previewCarousel('Citywide Dashboard',[
- passiveEmbed('https://www.environmentaldashboard.org/cwd-files/dashboard.php?interval=&current_state=','Oberlin Citywide Dashboard','Oberlin · Citywide Dashboard'),
- passiveEmbed('https://cleveland.communityhub.cloud/citywide-dashboard/index?embed=1&show-menu=0','Cleveland Citywide Dashboard','Cleveland · Citywide Dashboard'),
+export const citywidePreview=()=>previewCarousel('Animated display of energy and water use and environmental conditions for entire organizations and communities.',[
+ passiveEmbed('https://www.environmentaldashboard.org/cwd-files/dashboard.php?interval=&current_state=','Oberlin','Oberlin'),
+ passiveEmbed('https://cleveland.communityhub.cloud/citywide-dashboard/index?embed=1&show-menu=0','Cleveland','Cleveland'),
 ]);
 export function calendarPreview(label='Community Calendar',controls=true):string {
- /* controls=false: the two city lists rotate on their own, like the Building Dashboard preview. */
+ /* controls=false: the two city lists rotate on their own, like the resource-use preview. */
  return previewCarousel(label,['oberlin','cleveland'].map(city=>`<div class="calendar-preview"><h4 class="preview-context">${city==='oberlin'?'Oberlin':'Cleveland'} · Community Calendar</h4><div class="ev-mini calendar-brief" data-events data-city="${city}" data-count="3" data-event-preview><p class="events-fallback" role="status">Loading upcoming events…</p></div></div>`),12000,controls);
 }

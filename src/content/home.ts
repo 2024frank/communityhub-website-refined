@@ -4,7 +4,6 @@ import { renderPlatformExplanation } from "./platform_explanation";
 /** Homepage executive summary: place, people, mission and three product chapters. */
 import type { SiteContext } from "../lib/site";
 
-type Testimonial = Pick<SiteContext["TESTIMONIALS"][number], "img" | "alt" | "pos" | "quote" | "who" | "role">;
 type Links = readonly (readonly [href: string, label: string])[];
 type Pairs = readonly (readonly [string, string])[];
 type ProductPanels = readonly (readonly [
@@ -16,7 +15,6 @@ type ProductPanels = readonly (readonly [
 ])[];
 
 export function register(H: SiteContext): void {
-  const e = H.e;
   const ARR = H.ARR;
   // The hero plays forward once; the browser controller owns its end-frame hold.
   const hero = `<section class="hv full" aria-label="Community Hub: our place and people"><div class="hv-film" aria-label="Drone video zooming from high above down to downtown Oberlin, Ohio">
@@ -32,126 +30,8 @@ export function register(H: SiteContext): void {
     <h1 class="hv-h"><span class="hv-premise">It has never been more important</span> <span class="hv-l">to <em>act locally</em> while <em>thinking globally</em></span></h1>
   </div>
   <div class="hv-skip"><span class="hv-prog" aria-hidden="true"><i data-hv-prog></i></span><button class="sec-next" type="button" data-hv-skip aria-label="Skip the video"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><path d="M5 9l7 7 7-7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
-  <a class="hv-next" href="#people" data-hv-next aria-label="Explore Community Hub">Explore</a>
+  <a class="hv-next" href="dashboards.html">See it live</a>
 </div></section>`;
-  function person(t: Testimonial, go: Links): string {
-    const btns = go.slice(0, 1)
-      .map(
-        ([u, l], i) =>
-          `<a class="pp-btn${i ? " pp-btn2" : ""}" href="${u}">${e(l)} ${ARR}</a>`,
-      )
-      .join("");
-    return `<figure class="pp">
-  <img src="assets/${t["img"]}" alt="${e(t["alt"])}" style="object-position:${t["pos"]}" loading="lazy">
-  <blockquote><p>${e(t["quote"])}</p></blockquote>
-  <figcaption><b>${e(t["who"])}</b> ${e(t["role"])}</figcaption>
-  <p class="pp-go">${btns}</p>
-</figure>`;
-  }
-  // Text, primary product associations and photos are preserved from the live
-  // homepage. The school dashboard/toolkit links follow the meeting example.
-  const stories: readonly (readonly [Testimonial, Links])[] = [
-    [
-      {
-        "img": "live-home-story-01.jpeg",
-        "alt": "Participants examining illuminated bulbs during an energy demonstration",
-        "pos": "50% 50%",
-        "quote": "“I really feel that I am a part of the resource use graphs displayed on the dashboards. This feeling motivates me to be more thoughtful when consuming water and electricity”",
-        "who": "Grace Gao",
-        "role": "Oberlin College Student"
-      },
-      [["digital-signage.html", "Digital Signage"]],
-    ],
-    [
-      {
-        "img": "live-home-story-02.jpeg",
-        "alt": "Children and a teacher gathered around a dashboard screen in a school hallway",
-        "pos": "50% 50%",
-        "quote": "“When you talk about 21st-century skills - gathering and interpreting data - the Dashboard will be a very important tool”",
-        "who": "Kim Koos",
-        "role": "Elementary Teacher"
-      },
-      [["phone-app.html", "Phone App"], ["schools.html#live", "Visit the Oberlin City Schools dashboard"], ["education.html", "Teacher toolkit"]],
-    ],
-    [
-      {
-        "img": "live-home-story-03.png",
-        "alt": "A group discussing the dashboard display and touch-screen exhibit at the Great Lakes Science Center",
-        "pos": "50% 50%",
-        "quote": "“The dashboard signage is stitching together the work of Cleveland organizations to make the team effort apparent”",
-        "who": "Scott Volmer",
-        "role": "Great Lakes Science Center"
-      },
-      [["web-embeddables.html", "Web Embeddables"]],
-    ],
-    [
-      {
-        "img": "live-home-story-04.jpeg",
-        "alt": "Students using laptops displaying the Citywide Dashboard",
-        "pos": "50% 50%",
-        "quote": "“Oberlin is helping us translate water and energy use in 44 school buildings into teaching and learning in the classroom”",
-        "who": "Bob Mendenhall",
-        "role": "Curriculum Director Toledo"
-      },
-      [["building-dashboard.html", "Building Dashboard"], ["education.html", "Teacher toolkit"]],
-    ],
-    [
-      {
-        "img": "live-home-story-05.jpeg",
-        "alt": "Janet Haar outside the Oberlin Business Partnership, with Main Street behind her",
-        "pos": "50% 50%",
-        "quote": "“Environmental Dashboard enables residents to understand their electricity and water consumption, which in turn helps prevent overuse”",
-        "who": "Janet Haar",
-        "role": "Executive Director, Oberlin Business Partnership"
-      },
-      [["citywide-dashboard.html", "Citywide Dashboard"]],
-    ],
-    [
-      {
-        "img": "live-home-story-06.jpeg",
-        "alt": "A group attending a workshop with a dashboard projected at the front of a library",
-        "pos": "50% 50%",
-        "quote": "\"CommunityHub's Digital Signage is central to our community's climate resilience communication strategy\"",
-        "who": "Linda Arbogast",
-        "role": "City of Oberlin Sustainability Coordinator"
-      },
-      [["the-hub.html", "Data Hub"]],
-    ],
-    [
-      {
-        "img": "live-home-story-07.jpeg",
-        "alt": "Shoppers and vendors at an indoor market with vegetables and pumpkins",
-        "pos": "50% 50%",
-        "quote": "“Community Hub’s events calendar has made our work easier. People in the community are participating — it’s simple, but transformative!”",
-        "who": "Janet Haar, Executive Director Oberlin Business Partnership",
-        "role": ""
-      },
-      [["community-calendar.html", "Community Calendar"]],
-    ],
-    [
-      {
-        "img": "live-home-story-08.jpeg",
-        "alt": "A speaker addressing a crowd at the corner of College and Main in Oberlin",
-        "pos": "50% 50%",
-        "quote": "“For a decade we have looked to the CommunityHub team as key partners in translating our energy conservation services into community engagement”",
-        "who": "Geoff Hunter",
-        "role": "President Palmer Conservation Consulting"
-      },
-      [["community-voices.html", "Community Voices"]],
-    ],
-  ];
-  const people = `<div class="ppl-first" id="people" aria-label="People using Community Hub" hidden>
-  <div class="wrap">
-    <div class="people-heading"><h2 class="h2 people-context">How we solve it</h2><p>Act locally while thinking globally</p></div>
-    <div class="pp-fade" data-pp-fade role="region" aria-roledescription="carousel" aria-label="Stories from the places we work" tabindex="0">${stories.map(([w, go]) => person(w, go)).join("")}</div>
-    <div class="pp-nav" data-pp-nav hidden>
-      <button type="button" class="pp-arrow" data-pp-prev aria-label="Previous story"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg></button>
-      <span class="pp-count" data-pp-count>1 / ${stories.length}</span>
-      <button type="button" class="pp-arrow" data-pp-next aria-label="Next story"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></button>
-      <button type="button" class="pp-play" data-pp-play aria-pressed="false" aria-label="Pause automatic stories"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14M16 5v14"/></svg></button>
-    </div>
-  </div>
-</div>`;
   const why = renderPlatformExplanation(ARR);
   const signs: Pairs = [
     [
@@ -265,48 +145,23 @@ export function register(H: SiteContext): void {
       emb_media,
     ] as const,
   ]);
-  const products =
-    group("products", "Educate", "dark", "Ways we educate", [
-      [
-        "Building Dashboard",
-        "Building Dashboard tracks and communicates patterns of real-time resource use in buildings in ways that engage, are easy to understand and make connections between resource conservation and resulting environmental and community benefits.",
-        "",
-        [
-          ["building-dashboard.html", "See the Building Dashboard"] as const,
-        ],
-        live["data-dashboard"],
-      ] as const,
-      [
-        "Citywide Dashboard",
-        "Citywide Dashboard is an animated visualization of whole-community flows of electricity, drinking water, and current environmental conditions. It is designed to enhance residents’ understandings of how they are connected to a larger whole — a whole that is ultimately dependent on renewable resource flows and a healthy environment.",
-        "",
-        [
-          [
-            "citywide-dashboard.html",
-            "See the Citywide Dashboard",
-          ] as const,
-        ],
-        citywidePreview(),
-      ] as const,
-      [
-        "Data Hub",
-        "Data Hub is a powerful and intuitive package of online data visualization tools. Data Hub makes it easy for managers, educators, students and communicators to translate real-time data acquired from a variety of sources into compelling visualizations that are easily understood and can be shared on websites and digital signage to tell stories of impact and opportunity.",
-        "",
-        [
-          ["the-hub.html", "See Data Hub"] as const,
-        ],
-        live["the-hub"],
-      ] as const,
-      [
-        "Stories",
-        "Illustrated stories explain how local systems work, starting with nine from Oberlin College's Sustainable Infrastructure Program. They play on screens, phones and the web.",
-        "",
-        [
-          ["stories.html", "See Stories"] as const,
-        ],
-        live["stories"],
-      ] as const,
-    ]) +
+  const untitled = (html: string) => html.replace(/<h4\b[^>]*>[\s\S]*?<\/h4>/g, "");
+  function plain(text: string, media: string): string {
+    return `<article class="eng-p home-plain"><div class="eng-copy"><p>${text}</p></div><div class="eng-media">${media}</div></article>`;
+  }
+  function named(name: string, text: string, href: string, media: string): string {
+    const icon = PRODUCTS.find(product => product.name === name)?.icon || "icon-ch.png";
+    return `<article class="eng-p" aria-label="${name}"><div class="eng-copy"><div class="product-identity"><img class="product-identity-icon" src="assets/${icon}" alt="" width="48" height="48"><h3>${name}</h3></div><p>${text}</p><p class="eng-go"><a class="pc-a" href="${href}">Learn more ${ARR}</a></p></div><div class="eng-media">${media}</div></article>`;
+  }
+  const educate = `<section class="home-stop" id="products" aria-labelledby="products-h">
+  <div class="wrap"><h2 class="h2" id="products-h">Educate</h2>
+    ${plain("Technology to monitor, display and compare real-time resource use in schools, businesses and public facilities.", untitled(live["data-dashboard"]))}
+    ${plain("Animated display of energy and water use and environmental conditions for entire organizations and communities.", untitled(citywidePreview()))}
+    ${named("Data Hub", "Data Hub is a powerful and intuitive package of online data visualization tools. Data Hub makes it easy for managers, educators, students and communicators to translate real-time data acquired from a variety of sources into compelling visualizations that are easily understood and can be shared on websites and digital signage to tell stories of impact and opportunity.", "the-hub.html", live["the-hub"])}
+    ${named("Stories", "Illustrated stories explain how local systems work, starting with nine from Oberlin College's Sustainable Infrastructure Program. They play on screens, phones and the web.", "stories.html", live["stories"])}
+  </div>
+</section>`;
+  const products = educate +
     group(
       "motivate",
       "Motivate and Empower",
@@ -316,7 +171,7 @@ export function register(H: SiteContext): void {
         [
           "Community Voices",
           "Community Voices combines images and words drawn from the full diversity of a community to celebrate and cultivate thought and actions that advance ecological, economic, and social resilience. Community Hub’s unique software makes it easy to build, manage, organize and customize content into powerful messages for display on digital signage, phone apps, and websites.",
-          "",
+          `<p>images and words drawn from the full diversity of a community</p>`,
           [
             ["community-voices.html", "See Community Voices"] as const,
           ],
@@ -331,9 +186,9 @@ export function register(H: SiteContext): void {
         ] as const,
       ],
     );
-  // Keep the public story order aligned with the section-navigation contract.
-  const opening = hero.replace("</section>", people + "</section>");
-  const body = opening + why + engage + products;
+  const seeLive = `<section class="home-stop home-see-live" id="see-live"><div class="wrap"><a class="pc-a" href="dashboards.html">See it live</a></div></section>`;
+  const gaps = [1, 2, 3].map((n) => `<section class="home-gap home-gap-${n}" aria-hidden="true"></section>`).join("");
+  const body = hero + why + engage + products + seeLive + gaps;
   const html_out = H.page(
     "index",
     "Community Hub",

@@ -9,11 +9,21 @@ export function renderPlatformExplanation(aboutArrow = ''): string {
   <div class="wrap why-grid">
     <div class="why-copy" data-identity-content data-story-scene data-stable-start>
       <h2 class="h2 why-sol" id="why-h">Who we are</h2>
-      <div class="roll on" data-roll role="img" aria-label="The Community Hub hands, with Community Voices, Citywide Dashboard, Building Dashboard and Community Calendar">
+      <div class="roll on" data-roll role="img" aria-label="The Community Hub hands">
         <img src="assets/ro-cv.png" alt="" style="--k:-2" width="120" height="120"><img src="assets/ro-cwd.png" alt="" style="--k:-1" width="120" height="120"><img class="roll-c" src="assets/ro-ch.png" alt="" width="132" height="131"><img src="assets/ro-bd.png" alt="" style="--k:1" width="120" height="120"><img src="assets/ro-cal.png" alt="" style="--k:2" width="120" height="120">
       </div>
       <p>${COMMUNITY_HUB_MISSION}</p>
       <a class="pc-a why-a" href="about.html">More about Community Hub ${aboutArrow}</a>
+      <p class="why-designed">Communication platform designed to:</p>
+      <ul class="why-aims">
+        <li>Accelerate positive economic, social and environmental development,</li>
+        <li>Enhance connection among organizations,</li>
+        <li>Situate individual decision-making in a community context,</li>
+        <li>Strengthen individuals' sense of connectedness and belonging,</li>
+        <li>Share and celebrates pro-community thought and action,</li>
+        <li>Promote individual & environmental health and climate resilience,</li>
+        <li>Engages, educates, motivates & empowers community!</li>
+      </ul>
     </div>
   </div>
 </section>`;
