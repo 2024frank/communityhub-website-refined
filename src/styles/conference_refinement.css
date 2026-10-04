@@ -27,7 +27,7 @@ body{color:var(--ch-ink);background:var(--ch-field)}
 #main#main#main[data-page="index"]>.hv .hv-h{max-width:28ch;font:500 clamp(30px,4.2vw,58px)/1.25 var(--font-display);letter-spacing:-.04em;color:white;text-align:left;text-shadow:none;white-space:normal}
 #main#main#main[data-page="index"]>.hv .hv-h .hv-premise{font:inherit;margin-bottom:0;max-width:none;white-space:normal}
 #main#main#main[data-page="index"]>.hv .hv-h .hv-l{font:inherit;white-space:normal;max-width:none}
-#main#main#main[data-page="index"]>.hv .hv-h em{color:white;font-style:normal}
+#main#main#main[data-page="index"]>.hv .hv-h em{color:#a1cd54;font-style:normal}
 #main#main#main[data-page="index"]>.hv .hv-scrim{background:linear-gradient(90deg,#12271ded,#12271d70 60%,#12271d12),linear-gradient(0deg,#12271da6,transparent 65%)}
 #main#main#main[data-page="index"]>.hv .hv-next{display:inline-flex!important;align-items:center;justify-content:center;text-decoration:none;left:var(--ch-gutter);right:auto;bottom:28px;min-height:48px;min-width:150px;z-index:5;background:#a1cd54;color:#243a24;border:0;border-radius:6px;font:700 16px/1.4 var(--font-body)}
 #main#main#main[data-page="index"]>.hv .hv-skip .sec-next{left:50%;right:auto;bottom:25px;transform:translateX(-50%);width:48px;height:48px;min-width:48px;max-width:48px;background:transparent;border:1px solid #ffffff90;box-shadow:none}
