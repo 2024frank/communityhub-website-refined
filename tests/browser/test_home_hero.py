@@ -59,8 +59,7 @@ class HomeHeroTests(unittest.TestCase):
         film,people=page.locator('.hv-film').bounding_box(),page.locator('#people').bounding_box()
         self.assertAlmostEqual(film['y']+film['height'],people['y'],delta=2)
         self.assertLess(film['height'],page.viewport_size['height']/2)
-        self.assertTrue(page.locator('[data-hv-next]').is_hidden())
-        self.assertTrue(page.locator('[data-hv-skip]').is_hidden())
+        self.assertEqual(page.locator('[data-hv-next], [data-hv-skip], .sec-next, .page-next').count(),0)
 
     def assert_next_gesture_reaches_mission(self, page):
         page.wait_for_timeout(600)  # A fresh gesture after the opening's latch.
@@ -88,6 +87,7 @@ class HomeHeroTests(unittest.TestCase):
             self.assertEqual(video.get('poster'),'assets/hero-first-frame.jpg')
             self.assertNotIn('loop',video.attrib)
             self.assertIn('hero-first-frame.jpg',hero.xpath('.//*[@data-hv-stills]/i')[0].get('style'))
+            self.assertFalse(hero.xpath('.//button[@data-hv-next or @data-hv-skip]'))
         finally:
             response.dispose()
 
@@ -102,35 +102,26 @@ class HomeHeroTests(unittest.TestCase):
                 film=page.locator('.hv-film').bounding_box()
                 self.assertAlmostEqual(film['y']+film['height'],height,delta=2)
                 self.assertGreater(film['height'],height/2)
-                page.get_by_role('button',name='Explore Community Hub',exact=True).click()
+                page.keyboard.press('PageDown')
                 self.assert_finished(page,seek=False)
                 self.assert_next_gesture_reaches_mission(page)
                 page.context.close()
 
-    def test_skip_and_explore_hold_final_frame_in_the_same_section(self):
+    def test_first_downward_gesture_holds_final_frame_in_the_same_section(self):
         for motion in ['reduce','no-preference']:
             for width,height in [(1280,720),(390,844)]:
-                for selector in ['[data-hv-skip]','[data-hv-next]']:
-                    with self.subTest(motion=motion,viewport=(width,height),action=selector):
+                for gesture in ['wheel','ArrowDown','PageDown']:
+                    with self.subTest(motion=motion,viewport=(width,height),gesture=gesture):
                         page=self.page(width,height,motion)
-                        page.locator(selector).click()
+                        self.assertEqual(page.locator('[data-hv-next], [data-hv-skip], .sec-next, .page-next').count(),0)
+                        if gesture=='wheel':
+                            page.mouse.move(width-12,200)
+                            page.mouse.wheel(0,90)
+                        else:
+                            page.keyboard.press(gesture)
                         self.assert_finished(page)
                         self.assert_next_gesture_reaches_mission(page)
                         page.context.close()
-
-    def test_first_downward_wheel_or_key_reveals_people_before_leaving(self):
-        for width,height in [(1280,720),(390,844)]:
-            for gesture in ['wheel','ArrowDown','PageDown']:
-                with self.subTest(viewport=(width,height),gesture=gesture):
-                    page=self.page(width,height)
-                    if gesture=='wheel':
-                        page.mouse.move(width-12,200)
-                        page.mouse.wheel(0,90)
-                    else:
-                        page.keyboard.press(gesture)
-                    self.assert_finished(page)
-                    self.assert_next_gesture_reaches_mission(page)
-                    page.context.close()
 
     def test_first_real_phone_swipe_reveals_people_in_place(self):
         page=self.page(390,844,touch=True)

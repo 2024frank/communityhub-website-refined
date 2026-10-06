@@ -1,0 +1,54 @@
+/* One stable navigation action for the whole page, independent of its media. */
+body > .global-page-next {
+ position:fixed;
+ left:50%;
+ bottom:calc(12px + env(safe-area-inset-bottom,0px));
+ transform:translateX(-50%);
+ z-index:70;
+ display:grid;
+ place-items:center;
+ box-sizing:border-box;
+ width:52px;
+ height:52px;
+ min-width:52px;
+ padding:0;
+ border:2px solid #244b38;
+ border-radius:50%;
+ background:#eef2e8;
+ color:#244b38;
+ cursor:pointer;
+ touch-action:manipulation;
+}
+body > .global-page-next[hidden] {display:none;}
+body > .global-page-next svg {
+ width:24px;
+ height:24px;
+ fill:none;
+ stroke:currentColor;
+ stroke-width:2;
+ stroke-linecap:round;
+ stroke-linejoin:round;
+}
+body > .global-page-next:hover {background:#dce6d5;}
+body > .global-page-next:focus-visible {
+ outline:3px solid #244b38;
+ outline-offset:4px;
+}
+/* A phone's persistent action has its own surface, so live controls never
+   appear underneath the circle while the long page is being read. */
+@media(max-width:699px) {
+ body:has(> .global-page-next:not([hidden]))::after {
+  content:"";position:fixed;inset:auto 0 0;
+  height:calc(76px + env(safe-area-inset-bottom,0px));
+  background:var(--ch-field, #f7f8f2);z-index:69;touch-action:pan-y;pointer-events:none;
+ }
+ body:has(#main[data-page="index"] > .hv.is-in:not(.intro-peek))::after {
+  display:none;
+ }
+}
+@media print {body > .global-page-next,body::after {display:none;}}
+
+/* Leave both the lesson-search destination and global navigation reachable. */
+#main#main#main[data-page="education"] #library .rs-lessons {
+ max-height:min(42dvh,var(--viewport-tool-room,440px));
+}

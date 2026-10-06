@@ -26,6 +26,7 @@ class SiteContractsTests(unittest.TestCase):
     def setUpClass(cls):
         cls.pages = {p.name: html.parse(str(p)) for p in SITE.glob('*.html')}
         cls.uploaded_images = {i['path']: i for i in json.loads((ROOT / 'tests/fixtures/uploaded-optimized-media.json').read_text())['images']}
+        cls.original_images = json.loads((ROOT / 'src/content/original-images.json').read_text())
         cls.approved = json.loads((ROOT / 'tests/fixtures/approved-refinements.json').read_text())
 
     def assert_source_media(self, path, historical_sha):
@@ -75,7 +76,7 @@ class SiteContractsTests(unittest.TestCase):
             attribution = self.approved['testimonials'].get(original['name'] if 'name' in original else original.get('who', ''), {}).get('attribution', original['attribution'])
             if original['attribution'].startswith('Scott Volmer '): attribution = self.approved['testimonials']['Scott Volmer']['attribution']
             self.assertEqual(normalize(story.xpath('.//figcaption')[0]), attribution)
-            self.assertEqual(image.get('src'), original['image']['local_path'])
+            self.assertEqual(image.get('src'), self.original_images.get(original['image']['local_path'], {}).get('file', original['image']['local_path']))
             self.assert_source_media(original['image']['local_path'], original['image']['sha256'])
             links = story.xpath('.//a[@href]')
             self.assertTrue(links)
@@ -124,7 +125,7 @@ class SiteContractsTests(unittest.TestCase):
         contact = self.pages['contact.html']
         original = source['contact_page']
         self.assertIn(original['introduction'], [normalize(p) for p in contact.xpath('//main//p')])
-        self.assertTrue(contact.xpath('//img[@src=$src]', src=original['image']['local_path']))
+        self.assertTrue(contact.xpath('//img[@src=$src]', src=self.original_images.get(original['image']['local_path'], {}).get('file', original['image']['local_path'])))
         self.assert_source_media(original['image']['local_path'], original['image']['sha256'])
 
     def test_hamilton_has_no_public_dashboard_endpoint(self):
@@ -166,9 +167,9 @@ class SiteContractsTests(unittest.TestCase):
         self.assertFalse(home.xpath('//main/section[@id="people"]'))
         self.assertEqual(len(home.xpath('//*[@id="people"]')), 1)
 
-    def test_home_hero_retains_skip_and_forward_only_video(self):
+    def test_home_hero_uses_gestures_and_retains_forward_only_video(self):
         home = self.pages['index.html']
-        self.assertEqual(len(home.xpath('//button[@data-hv-next]')), 1)
+        self.assertEqual(len(home.xpath('//button[@data-hv-next or @data-hv-skip]')), 0)
         videos = home.xpath('//video[@data-hv-vid]')
         self.assertEqual(len(videos), 1)
         self.assertNotIn('loop', videos[0].attrib)

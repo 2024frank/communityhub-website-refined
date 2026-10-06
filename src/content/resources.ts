@@ -1,5 +1,6 @@
 import { communicationNetwork } from "./communication-network";
 import lessonLinks from "./lesson-links.json";
+import { originalStory } from "./original-story";
 /** Resource, research, Story of Dashboard, About, Contact, and 404 page content.
  * Facts and source URLs are preserved from the reviewed September 30 prototype.
  * Shared document structure and presentation helpers live in the Astro shell.
@@ -391,7 +392,7 @@ export function register(H: SiteContext): void {
     <ul class="rs-lessons" id="lessons" data-scroll-owner tabindex="0" aria-label="Matching lessons">${items}</ul>
     <p class="rs-lessons-empty" id="lessons-empty" hidden>No lessons match. Try a different word or grade.</p>
   </div>
-  <p style="margin-top:22px"><a class="hand-link" href="https://environmentaldashboard.org/edresources/searchedresources" target="_blank" rel="noopener"><svg class="hand-arrow" viewBox="0 0 70 44" aria-hidden="true"><path d="M4 8 C 18 34, 40 38, 62 26"/></svg>Open the lesson search on environmentaldashboard.org</a></p>
+  <p style="margin-top:22px"><a class="hand-link destination-action" href="https://environmentaldashboard.org/edresources/searchedresources" target="_blank" rel="noopener"><svg class="hand-arrow" viewBox="0 0 70 44" aria-hidden="true"><path d="M4 8 C 18 34, 40 38, 62 26"/></svg>Open the lesson search on environmentaldashboard.org</a></p>
 </div></div></section>`;
     const eco = `<section class="sec-pad education-ecolympics"><div class="wrap education-eco-layout" data-story-scene="desktop">
   <div class="education-eco-context" data-story-scene="short-phone">
@@ -754,7 +755,7 @@ export function register(H: SiteContext): void {
   <ul class="rs-press" style="margin-top:22px">${press_html.slice(0, 2).join("")}</ul></div>
   <ul class="rs-press" data-story-scene>${press_html.slice(2, 4).join("")}</ul>
 </div><div class="wrap resource-scene" data-story-scene="all"><ul class="rs-press">${press_html.slice(4).join("")}</ul>
-  <p style="margin-top:20px"><a class="hand-link hand-link-light" href="https://environmentaldashboard.org/press-page" target="_blank" rel="noopener"><svg class="hand-arrow" viewBox="0 0 70 44" aria-hidden="true"><path d="M4 8 C 18 34, 40 38, 62 26"/></svg>Open the Environmental Dashboard press page</a></p>
+  <p style="margin-top:20px"><a class="hand-link hand-link-light destination-action" href="https://environmentaldashboard.org/press-page" target="_blank" rel="noopener"><svg class="hand-arrow" viewBox="0 0 70 44" aria-hidden="true"><path d="M4 8 C 18 34, 40 38, 62 26"/></svg>Open the Environmental Dashboard press page</a></p>
 </div></section>`;
     const vid_html = VIDEOS.map(
       ([
@@ -842,204 +843,10 @@ export function register(H: SiteContext): void {
       ),
     );
   }
-  // Original slide imagery and chapter notes remain distinct from the embedded deck.
-  const SOD_DECK =
-    "https://docs.google.com/presentation/d/e/2PACX-1vQfRVKa9JNw8GIXMMFZYf0XpjAwswzrJftYMBl7cBu-cJpzIgNcjBZo1X1jjMBrgofuabYMISCxdDLs";
-  const SOD = [
-    [
-      "Feedback lost",
-      [
-        [
-          "Environmental Dashboard",
-          "A short slideshow on what the Dashboard is and where it runs.",
-        ] as const,
-        [
-          "Survival based on feedback",
-          "For almost all of human history, nature told us right away what our actions did.",
-        ] as const,
-        [
-          "Breakdown in feedback",
-          "Now we spend 90% of our lives indoors, cut off from those cues.",
-        ] as const,
-        [
-          "Linear consumption",
-          "Food comes from stores, power from outlets, waste goes to the dump. The costs stay out of sight.",
-        ] as const,
-      ],
-    ] as const,
-    [
-      "Putting feedback back",
-      [
-        [
-          "Reintroducing feedback",
-          "Feedback links the parts of a system in a loop of cause and effect.",
-        ] as const,
-        [
-          "Reintroducing feedback",
-          "The Dashboard was built to bring that loop back.",
-        ] as const,
-        [
-          "Living sustainably",
-          "Sustainability means social, economic and environmental health, now and later.",
-        ] as const,
-        [
-          "Living sustainably",
-          "The three overlap. Each one depends on the others.",
-        ] as const,
-        [
-          "Promoting systems thinking",
-          "Systems thinking looks at relationships: our choices, their impact, the world that results.",
-        ] as const,
-        [
-          "Systems thinking through feedback",
-          "Information about impact improves choices, which improves the environment.",
-        ] as const,
-        [
-          "Systems thinkers",
-          "People start to see themselves as part of families, schools, towns and ecosystems.",
-        ] as const,
-      ],
-    ] as const,
-    [
-      "The platform",
-      [
-        [
-          "Motivating sustainable action",
-          "Making resource flows visible reconnects people with the natural world.",
-        ] as const,
-        [
-          "Our origins",
-          "From the 2008 Great Lakes Protection Fund pilot in Oberlin to Community Hub today.",
-        ] as const,
-        [
-          "How the platform works",
-          "Building, city and social data feed apps that show up on signs, phones and websites.",
-        ] as const,
-        [
-          "Building Dashboard",
-          "Live electricity, water and emissions for a school, home or business.",
-        ] as const,
-        [
-          "Citywide Dashboard",
-          "A whole town's electricity, water and streams, animated as one picture.",
-        ] as const,
-      ],
-    ] as const,
-    [
-      "Community Voices",
-      [
-        [
-          "Next Generation",
-          "Words and artwork from the community's children.",
-        ] as const,
-        [
-          "Neighbors",
-          "Neighbors whose everyday choices set an example.",
-        ] as const,
-        [
-          "Heritage",
-          "A town's history of stewardship and getting involved.",
-        ] as const,
-        [
-          "Natural Oberlin",
-          "The natural and planted beauty around town.",
-        ] as const,
-        [
-          "Our Downtown",
-          "Local businesses and what they do for their town.",
-        ] as const,
-        [
-          "Serving Our Community",
-          "Work by community groups, schools and city staff.",
-        ] as const,
-        [
-          "Climate Action",
-          "People building a safe, renewable, climate resilient future.",
-        ] as const,
-        [
-          "Different in every town",
-          "Each community's slides come from its own people.",
-        ] as const,
-      ],
-    ] as const,
-    [
-      "Where it's working",
-      [
-        [
-          "Schools are using Dashboard",
-          "Teachers build lessons on it that meet curriculum standards.",
-        ] as const,
-        [
-          "Oberlin Elementary",
-          "Kids choose their own path through stories on a lobby touchscreen.",
-        ] as const,
-        [
-          "Ecolympics",
-          "Schools compete to cut electricity and water, checking the Dashboard as they go.",
-        ] as const,
-        [
-          "Dashboard downtown",
-          "Each screen downtown carries content about the place it hangs.",
-        ] as const,
-        [
-          "Cleveland Environmental Dashboard",
-          "Since 2018, a Great Lakes Science Center exhibit on resources and Lake Erie.",
-        ] as const,
-        [
-          "MidTown Dashboard",
-          "Since 2021, a neighborhood dashboard with MidTown Cleveland Inc.",
-        ] as const,
-        [
-          "Building connections",
-          "Feedback from nature helps communities grow stronger and more resilient.",
-        ] as const,
-      ],
-    ] as const,
-  ];
   function story_of_dashboard(): void {
-    const flat = SOD.flatMap(([ch, items], ci) =>
-      items.map(([t, d]) => [ci, ch, t, d] as const),
-    );
-    const total = flat.length;
-    let strip = "";
-    let n = 0;
-    for (const [ci, [ch, items]] of SOD.entries()) {
-      let thumbs = "";
-      for (const [t, _d] of items) {
-        n += 1;
-        thumbs += `<li><button type="button" data-sb-go="${n - 1}" aria-label="Slide ${n}: ${H.e(t)}"${n === 1 ? ' aria-current="true"' : ""}><img src="assets/sod/t${String(n).padStart(2, "0")}.jpg" alt="" width="200" height="150" loading="lazy"><span>${n}</span></button></li>`;
-      }
-      strip += `<li class="sb-ch"><p>${ci + 1}. ${H.e(ch)}</p><ol>${thumbs}</ol></li>`;
-    }
-    const data = JSON.stringify(
-      flat.map(([ci, ch, t, d]) => ({ c: `${ci + 1}. ${ch}`, t: t, d: d })),
-    );
-    const [c0, ch0, t0, d0] = flat[0];
-    const board = `<section class="sb" id="storyboard" aria-labelledby="sb-h">
-  <div class="wrap" data-story-scene="all">
-    ${H.crumbs([null, "Resources"] as const, [null, "Story of Dashboard"] as const)}
-    <h1 class="h1" id="sb-h">Story of Dashboard</h1>
-    <div class="sb-view" data-sb tabindex="0" role="group" aria-roledescription="storyboard" aria-label="Story of Dashboard slides. Use the arrow keys to move through them.">
-      <figure class="sb-slide"><img data-sb-img src="assets/sod/01.jpg" alt="Slide 1: ${H.e(t0)}" width="960" height="720"></figure>
-      <div class="sb-note" aria-live="polite">
-        <p class="fig" data-sb-ch>${c0 + 1}. ${H.e(ch0)}</p>
-        <h2 class="sb-t" data-sb-t>${H.e(t0)}</h2>
-        <p class="sb-d" data-sb-d>${H.e(d0)}</p>
-        <p class="sb-original"><a class="pc-a" data-sb-original href="assets/sod/01.jpg" target="_blank" rel="noopener noreferrer">Open original slide ${ARR}</a></p>
-        <div class="sb-nav"><button type="button" data-sb-prev aria-label="Previous slide">&larr;</button><span data-sb-n>1 of ${total}</span><button type="button" data-sb-next aria-label="Next slide">&rarr;</button></div>
-      </div>
-    </div>
-    <ol class="sb-strip" aria-label="Every slide, by chapter">${strip}</ol>
-    <script type="application/json" data-sb-data>${data}</script>
-  </div>
-</section>`;
-    const deck = `<section class="sec-pad sb-deck" id="slideshow" aria-labelledby="sbd-h"><div class="wrap" data-story-scene="all">
-  ${sec_label("The original", "The original slides", "John's original slides, with the explanations included in each frame.", "sbd-h")}
-  <div class="sb-frame"><iframe data-defer-src="${SOD_DECK}/embed?start=false&amp;loop=false&amp;delayms=5000" title="Story of Dashboard, the Google Slides presentation" loading="lazy" allowfullscreen></iframe></div>
-  <p style="margin-top:12px"><a class="hand-link" href="${SOD_DECK}/pub?start=false&amp;loop=false&amp;delayms=5000" target="_blank" rel="noopener">Open it in Google Slides</a></p>
-</div></section>`;
+    const presentation = originalStory("storyboard", "Story of Dashboard", "h1");
     const collegeFrames = `<section class="sec-pad" id="college-heating" aria-labelledby="college-heating-h"><div class="wrap" data-story-scene="all"><h2 class="h2" id="college-heating-h">Original College heating and cooling story frames</h2>${H.story_player([["h44.jpg", "Chapter one: heating and cooling"] as const, ["h45.jpg", "The 1940s central plant behind Mudd Library"] as const, ["h46.jpg", "District heating carries heat through pipes below ground"] as const, ["h47.jpg", "1940 to 2014: a coal-fired boiler"] as const, ["h48.jpg", "2014: converted to natural gas"] as const, ["h49.jpg", "2024: geothermal becomes the primary source of campus heating and cooling"] as const], "Oberlin College's original heating and cooling story frames")}</div></section>`;
-    const body = board + deck + collegeFrames + H.cta_band();
+    const body = presentation + collegeFrames + H.cta_band();
     H.write_page(
       "story-of-dashboard",
       H.page(

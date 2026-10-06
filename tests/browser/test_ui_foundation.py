@@ -120,16 +120,20 @@ class UIFoundationTests(unittest.TestCase):
         }''')
         self.assertEqual(result,[False,'Save changes',False])
 
-    def test_hidden_scene_arrow_is_absent_from_accessibility_queries(self):
+    def test_wheel_and_keyboard_navigation_need_no_scene_arrow(self):
         self.page.set_viewport_size({'width':375,'height':667})
         self.page.goto(self.site.url+'contact.html',wait_until='domcontentloaded')
         self.page.wait_for_function('window.chStory && window.chStory.frames().length')
-        expect(self.page.locator('.page-next')).to_have_attribute('aria-hidden','true')
+        start=self.page.evaluate('chStory.current().y')
+        expect(self.page.locator('.page-next, .sec-next')).to_have_count(0)
         expect(self.page.get_by_role('button',name='Next section',exact=True)).to_have_count(0)
-        self.page.mouse.move(180,500)
+        self.page.mouse.move(8,500)
         self.page.mouse.wheel(0,650)
-        expect(self.page.locator('.page-next')).to_have_attribute('aria-hidden','false')
-        self.page.get_by_role('button',name='Next section',exact=True).click()
+        self.page.wait_for_function('start=>chStory.current().y>start',arg=start)
+        expect(self.page.locator('.page-next, .sec-next')).to_have_count(0)
+        self.page.keyboard.press('PageUp')
+        self.page.wait_for_function('start=>Math.abs(chStory.current().y-start)<3',arg=start)
+        expect(self.page.get_by_role('button',name='Next section',exact=True)).to_have_count(0)
 
     def async_fixture(self, timeout=15000):
         self.page.set_content('<div id="status" role="status" aria-live="polite"><p data-ui-message></p></div><div id="content" hidden></div><button id="retry" hidden>Try again</button>')

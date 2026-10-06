@@ -1,0 +1,121 @@
+/* Complete product lists retain explicit space above global page navigation. */
+@media (min-width:901px) {
+  #main#main#main[data-page="products"] .product-directory-grid { margin-top:16px; }
+  #main#main#main[data-page="products"] .product-category > h2 { min-height:0; }
+  #main#main#main[data-page="products"] .product-category ul { display:block; margin-top:0; }
+  #main#main#main[data-page="products"] .product-category li > a {
+    height:auto;
+    min-height:44px;
+    padding-block:6px;
+  }
+}
+
+/* Native published presentation, including its own playback/fullscreen controls.
+   The final row is reserved for the site's next-section button. */
+#main#main#main[data-page] > .original-presentation {
+  height:auto;
+  min-height:calc(100dvh - var(--story-hdr-h,77px));
+  padding-bottom:88px;
+  justify-content:flex-start;
+}
+#main#main#main[data-page] > .original-presentation > .wrap {
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  flex:none;
+  min-height:0;
+  padding-top:16px!important;
+  margin-top:0!important;
+}
+.original-presentation-frame {
+  align-self:center;
+  width:min(100%, calc((100dvh - var(--story-hdr-h,77px) - 224px) * 1.25));
+  min-width:min(100%,280px);
+  aspect-ratio:4/3.2;
+  background:var(--community-field);
+}
+.original-presentation-frame iframe { display:block; width:100%; height:100%; border:0; }
+@media(max-width:699px) {
+  .original-presentation-frame { width:100%; }
+}
+
+/* Preparing an email is a primary action in both forms. Keep the native
+   disabled and recovery states while sharing destination-button contrast. */
+#main:is([data-page="contact"],[data-page="pricing"]) button.ui-action--primary {
+  min-height:44px;
+  padding:10px 18px;
+  border:1px solid var(--destination-fill);
+  border-radius:var(--destination-radius);
+  background:var(--destination-fill);
+  color:var(--destination-ink);
+  font:700 16px/1.4 var(--font-body);
+}
+#main:is([data-page="contact"],[data-page="pricing"]) button.ui-action--primary:hover:not(:disabled) {
+  background:var(--destination-hover);
+  border-color:var(--destination-hover);
+}
+#main:is([data-page="contact"],[data-page="pricing"]) button.ui-action--primary:focus-visible {
+  outline:3px solid var(--destination-fill);
+  outline-offset:4px;
+}
+
+/* Keep each grade choice legible and touch-sized on narrow phones. */
+/* Embedded tools retain their own scrolling without widening the document. */
+#main#main#main[data-page="web-embeddables"] .live-example-list {
+  grid-template-columns:minmax(0,1fr);
+}
+#main#main#main[data-page="web-embeddables"] :is(.live-example-list > article,.zpb-emb-stage,.zpb-emb-main,.zpb-emb-site,.zpb-emb-embed,.zpb-emb-e-nav,.zpb-emb-e-tabs) {
+  min-width:0;
+  max-width:100%;
+}
+#main#main#main[data-page="web-embeddables"] .live-frame .bar {
+  height:auto;
+  min-height:0;
+  align-content:start;
+}
+#main#main#main[data-page="web-embeddables"] .live-frame .bar :is(a,button) {
+  max-width:100%;
+  white-space:normal;
+  overflow-wrap:anywhere;
+}
+#main#main#main[data-page="web-embeddables"] .live-frame:not(.needs-retry) .bar .lf-load {
+  display:none;
+}
+#main#main#main[data-page="web-embeddables"] .live-frame.needs-retry .bar .lf-load {
+  opacity:1;
+}
+@media(max-width:699px) {
+  #main#main#main[data-page="education"] #lesson-level {
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    width:100%;
+    gap:4px 8px;
+  }
+  #main#main#main[data-page="education"] #lesson-level button {
+    min-width:0;
+    min-height:44px;
+    padding:8px 4px;
+    white-space:nowrap;
+  }
+}
+
+/* Product detail explains the real controls alongside the complete source. */
+#main#main#main[data-page="data-dashboard"] .building-live-scene {
+ display:grid;grid-template-columns:minmax(240px,.8fr) minmax(0,1.5fr);gap:32px;align-items:start;
+}
+#main#main#main[data-page="data-dashboard"] .building-product-copy p,
+#main#main#main[data-page="data-dashboard"] .building-product-copy li {font-size:17px;line-height:1.5;}
+#main#main#main[data-page="data-dashboard"] .building-product-copy h3 {font-size:22px;margin:24px 0 12px;}
+#main#main#main[data-page="data-dashboard"] .building-product-copy ol {padding-left:24px;}
+#main#main#main[data-page="data-dashboard"] .building-product-copy li+li {margin-top:10px;}
+#main#main#main[data-page="data-dashboard"] .building-product-demo {min-width:0;padding-bottom:88px;}
+#main#main#main[data-page="data-dashboard"] .building-product-demo .native-scroll {height:clamp(360px,55dvh,540px);}
+#main#main#main[data-page="data-dashboard"] .building-open {margin:12px 0 0;}
+@media(max-width:900px) {
+ #main#main#main[data-page="data-dashboard"] .building-live-scene {grid-template-columns:minmax(0,1fr);gap:24px;}
+}
+@media(max-width:699px) {
+ #main#main#main[data-page="data-dashboard"] .building-product-copy p,
+ #main#main#main[data-page="data-dashboard"] .building-product-copy li {font-size:16px;}
+ #main#main#main[data-page="data-dashboard"] .building-product-demo .native-scroll {height:clamp(260px,calc(100dvh - 410px),460px);}
+}

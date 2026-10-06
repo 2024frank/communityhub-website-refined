@@ -5,6 +5,8 @@ import unittest
 from playwright.sync_api import sync_playwright
 from test_story_scroll import FIXTURE, SOURCE
 
+SCENE_ADVANCE_CONTROLS = '[data-story-next], .sec-next, .page-next, [data-hv-next], [data-hv-skip]'
+
 
 class StoryDeliveryTests(unittest.TestCase):
     @classmethod
@@ -90,35 +92,35 @@ class StoryDeliveryTests(unittest.TestCase):
         self.assertAlmostEqual(self.page.evaluate('scrollY'), 720, delta=3)
 
     def test_page_keys_move_one_story_without_a_persistent_next_control(self):
-        self.assertEqual(self.page.locator('[data-story-next]').count(), 0)
+        self.assertEqual(self.page.locator(SCENE_ADVANCE_CONTROLS).count(), 0)
         self.page.keyboard.press('PageDown')
         self.settle()
         self.assertAlmostEqual(self.page.evaluate('scrollY'), 720, delta=3)
-        self.assertEqual(self.page.locator('[data-story-next]').count(), 0)
+        self.assertEqual(self.page.locator(SCENE_ADVANCE_CONTROLS).count(), 0)
         self.page.keyboard.press('PageUp')
         self.settle()
         self.assertAlmostEqual(self.page.evaluate('scrollY'), 0, delta=3)
 
     def test_menu_and_final_stop_do_not_create_a_persistent_next_control(self):
-        self.assertEqual(self.page.locator('[data-story-next]').count(), 0)
+        self.assertEqual(self.page.locator(SCENE_ADVANCE_CONTROLS).count(), 0)
         self.page.locator('#mnav').evaluate('el => el.hidden = false')
-        self.assertEqual(self.page.locator('[data-story-next]').count(), 0)
+        self.assertEqual(self.page.locator(SCENE_ADVANCE_CONTROLS).count(), 0)
         self.page.locator('#mnav').evaluate('el => el.hidden = true')
         self.page.evaluate("scrollTo(0, chStory.frames().at(-1).y)")
         self.settle()
-        self.assertEqual(self.page.locator('[data-story-next]').count(), 0)
+        self.assertEqual(self.page.locator(SCENE_ADVANCE_CONTROLS).count(), 0)
 
-    def test_existing_hero_action_does_not_add_a_persistent_next_control(self):
-        self.page.goto('about:blank')
-        self.page.set_content(FIXTURE.replace('<h1>Hero</h1>',
-            '<h1>Hero</h1><button data-hv-next aria-label="Explore Community Hub">Explore</button>'))
-        self.page.add_script_tag(content=SOURCE.read_text())
-        self.page.wait_for_timeout(80)
-        self.assertTrue(self.page.get_by_role('button', name='Explore Community Hub').is_visible())
-        self.assertEqual(self.page.locator('[data-story-next]').count(), 0)
-        self.page.evaluate('chStory.go(1)')
+    def test_wheel_leaves_and_keyboard_returns_to_hero_without_extra_buttons(self):
+        self.assertEqual(self.page.locator(SCENE_ADVANCE_CONTROLS).count(), 0)
+        self.page.mouse.move(1000,500)
+        self.page.mouse.wheel(0,90)
         self.settle()
-        self.assertEqual(self.page.locator('[data-story-next]').count(), 0)
+        self.assertAlmostEqual(self.page.evaluate('scrollY'),720,delta=3)
+        self.page.keyboard.press('PageUp')
+        self.settle()
+        self.assertAlmostEqual(self.page.evaluate('scrollY'),0,delta=3)
+        self.assertTrue(self.page.locator('#control').is_visible())
+        self.assertEqual(self.page.locator(SCENE_ADVANCE_CONTROLS).count(), 0)
 
     def test_hash_navigation_during_motion_is_not_overridden(self):
         self.page.evaluate("""() => {

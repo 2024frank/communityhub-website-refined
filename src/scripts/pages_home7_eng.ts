@@ -39,8 +39,10 @@ Array.from(
       (parseFloat(getComputedStyle(panel).rowGap) || 0) +
       (parseFloat(style.paddingBottom) || 0);
     sec.classList.remove("eng-measuring");
-    const split = innerWidth <= 900 && natural > room() + 1;
-    const mode = innerWidth <= 699 && innerHeight <= 740 ? "short-phone" : "";
+    // Phones keep explanation and media in one natural flow. The page
+    // controller already creates reading stops where that real content overflows.
+    const split = innerWidth > 699 && innerWidth <= 900 && natural > room() + 1;
+    const mode = "";
     sec.style.setProperty("--eng-context-room", Math.max(0, room() - headingSpace) + "px");
     sec.classList.toggle("eng-sequenced", split);
     panels.forEach(function (item, index) {

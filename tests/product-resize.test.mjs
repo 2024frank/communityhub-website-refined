@@ -83,11 +83,15 @@ function productFixture({width=1361,height=916,count=3,index=1}={}) {
   focus(){document.activeElement=this;}
  }
  const document={activeElement:null,documentElement:new Element()};
- const sec=new Element(),rail=new Element(),choice=new Element(),heading=new Element();heading.offsetHeight=80;
+ const sec=new Element(),rail=new Element(),choice=new Element(),heading=new Element(),tabList=new Element();heading.offsetHeight=80;
  const stage={matches:width>900&&height>=480};
  let context;
  rail.scrollLeft=0;rail.getBoundingClientRect=()=>({left:24});rail.scrollTo=({left})=>{rail.scrollLeft=left;};
  const panels=Array.from({length:count},()=>new Element()),tabs=panels.map(()=>new Element());
+ tabList.scrollLeft=0;
+ tabList.getBoundingClientRect=()=>({left:24,right:(context?.innerWidth||width)-24});
+ tabList.scrollTo=({left})=>{tabList.scrollLeft=Math.max(0,Math.min(count*170-10-((context?.innerWidth||width)-48),left));};
+ tabs.forEach((tab,i)=>{tab.getBoundingClientRect=()=>({left:24+i*170-tabList.scrollLeft,right:24+i*170-tabList.scrollLeft+160});});
  panels.forEach((panel,i)=>{
   const copy=new Element(),media=new Element();copy.offsetHeight=280;media.offsetHeight=480;
   Object.defineProperty(panel,'offsetLeft',{get:()=>i*(context?.innerWidth||width)});
@@ -97,7 +101,7 @@ function productFixture({width=1361,height=916,count=3,index=1}={}) {
   panel.contains=element=>element===panel||element===copy||element===media;
   copy.closest=media.closest=()=>panel;
  });
- sec.querySelector=selector=>selector==='[data-story-rail]'?rail:selector==='.chapter-heading'?heading:null;
+ sec.querySelector=selector=>selector==='[data-story-rail]'?rail:selector==='.chapter-heading'?heading:selector==='.eng-tabs'?tabList:null;
  sec.getBoundingClientRect=()=>({top:1000-window.scrollY});
  Object.defineProperty(sec,'offsetHeight',{get:()=>stage.matches?count*(context.innerHeight-80)-(count-1)*65:900});
  const window={innerHeight:height,scrollY:0,chStory:{current:()=>({y:window.scrollY,els:[sec],part:0})},
@@ -121,6 +125,32 @@ test('desktop Calendar survives tablet resize with its panel, tab and destinatio
  fixture.resize(788,872);fixture.flush();fixture.assertSelected(1);
  assert.equal(fixture.events.at(-1).detail.anchor.anchor,fixture.panels[1]);
  assert.equal(fixture.events.at(-1).detail.anchor.els[0],fixture.sec);
+});
+
+test('phones keep copy and media in one natural flow while tablets retain authored scenes',()=>{
+ for(const width of [320,390,440,699]) {
+  const fixture=productFixture({width,height:956,count:4,index:2});
+  assert.equal(fixture.sec.classes.has('eng-sequenced'),false);
+  for(const panel of fixture.panels) for(const child of panel.querySelectorAll()) assert.equal(child.attrs.has('data-story-scene'),false);
+  fixture.assertSelected(2);
+ }
+ const tablet=productFixture({width:788,height:872,count:4,index:2});
+ assert.equal(tablet.sec.classes.has('eng-sequenced'),true);
+ assert.equal(tablet.panels[2].querySelector('[data-eng-context]').attrs.get('data-story-scene'),'');
+ tablet.resize(440,956);tablet.flush();tablet.assertSelected(2);
+ assert.equal(tablet.sec.classes.has('eng-sequenced'),false);
+ assert.equal(tablet.panels[2].querySelector('[data-eng-context]').attrs.has('data-story-scene'),false);
+});
+
+test('selecting phone products does not scroll the page or a tab strip',()=>{
+ const fixture=productFixture({width:440,height:956,count:4,index:0});
+ const list=fixture.sec.querySelector('.eng-tabs');
+ fixture.window.scrollY=1250;
+ fixture.context.api.selectPanel(3);fixture.flush();fixture.assertSelected(3);
+ assert.equal(fixture.window.scrollY,1250);
+ assert.equal(list.scrollLeft,0);
+ fixture.context.api.selectPanel(0);fixture.flush();fixture.assertSelected(0);
+ assert.equal(list.scrollLeft,0);assert.equal(fixture.window.scrollY,1250);
 });
 
 test('phone product survives a return to the matching desktop stop',()=>{

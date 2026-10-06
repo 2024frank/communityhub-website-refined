@@ -1,0 +1,29 @@
+/* Preserve the native landscape application without shrinking it to phone text. */
+#main#main#main#main[data-page="data-dashboard"] #citywide .citywide-product-layout {
+ grid-template-columns:minmax(240px,.7fr) minmax(0,1.7fr);gap:28px;align-items:start;
+}
+#main#main#main#main[data-page="data-dashboard"] #citywide .citywide-product-live,
+#main#main#main#main[data-page="data-dashboard"] .citywide-native-demo {min-width:0;width:100%;}
+#main#main#main#main[data-page="data-dashboard"] .citywide-pan {
+ position:relative;max-width:100%;overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;
+ border:1px solid #a9bba5;scrollbar-width:none;background:#eef2e8;
+}
+#main#main#main#main[data-page="data-dashboard"] .citywide-pan iframe {
+ display:block;max-width:none;border:0;transform:none;position:static;
+}
+#main#main#main#main[data-page="data-dashboard"] .citywide-open {margin:12px 0 0;}
+#main#main#main#main [data-scroll-axis="horizontal"] .native-scroll-shell {grid-template-columns:minmax(0,1fr);}
+#main#main#main#main [data-scroll-axis="horizontal"] .guided-scroll-viewport {grid-column:1;grid-row:2;}
+#main#main#main#main [data-scroll-axis="horizontal"] .native-scrollbar {
+ grid-column:1;grid-row:3;width:100%;height:44px;cursor:ew-resize;
+}
+#main#main#main#main [data-scroll-axis="horizontal"] .native-scroll-track {inset:14px 4px;}
+#main#main#main#main [data-scroll-axis="horizontal"] .native-scroll-thumb {top:1px;bottom:1px;left:0;right:auto;min-height:0;}
+@media(max-width:699px) {
+ #main#main#main#main[data-page="data-dashboard"] #citywide .citywide-product-layout {grid-template-columns:minmax(0,1fr);gap:24px;}
+ #main#main#main#main[data-page="data-dashboard"] #citywide .citywide-product-live {padding-bottom:80px;}
+}
+
+#main#main#main#main .citywide-product-copy h3 {font-size:22px;line-height:1.25;margin:24px 0 12px;}
+#main#main#main#main .citywide-product-copy p + p {margin-top:16px;}
+@media(min-width:700px) {.citywide-phone-guidance {display:none;}}

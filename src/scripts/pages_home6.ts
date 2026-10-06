@@ -50,7 +50,6 @@ import { required, eventElement, htmlChildren } from "./dom";
       window.scrollTo({ top: 0, behavior: "instant" });
     };
     const mainIntro = hv.closest("main");
-    hv.querySelector<HTMLElement>("[data-hv-skip]")?.addEventListener("click", finishAtPeople);
     window.addEventListener("ch:hero-peek", finishAtPeople);
     /* stills rotate (slow zoom) whenever the video is not actually moving: loading, stalled, blocked autoplay, error */
     const rotate = function (on: boolean) {
@@ -133,14 +132,11 @@ import { required, eventElement, htmlChildren } from "./dom";
     }, 3000);
     /* Play forward once, hold briefly, then reveal the people below the final frame.
        The film and people remain one semantic opening section. */
-    const btn = hv.querySelector<HTMLElement>("[data-hv-next]");
-    if (btn) btn.addEventListener("click", finishAtPeople);
     if (location.hash === "#people") queueMicrotask(finishAtPeople);
     window.addEventListener("hashchange", () => { if (location.hash === "#people") finishAtPeople(); });
     v.addEventListener("ended", function () {
       copy();
       hv.classList.add("done");
-      hv.querySelector("[data-hv-skip]")?.setAttribute("aria-label", "Next section");
       let y = window.scrollY;
       window.setTimeout(function () {
         if (
@@ -439,6 +435,19 @@ import { required, eventElement, htmlChildren } from "./dom";
     }
     root.classList.toggle("ch-story-banner", b > 0);
   }
+  function readingBottom() {
+    if (window.innerWidth > 699) return window.innerHeight;
+    const next = document.querySelector<HTMLElement>("body > .global-page-next");
+    if (!next) return window.innerHeight;
+    const style = getComputedStyle(next);
+    // The phone navigation surface covers the button, its resolved bottom
+    // offset (including the safe area), and 12px above it. Reserve it while
+    // measuring even before the button is shown, so its visibility cannot
+    // change the stop list that determines whether it has a next destination.
+    // A further 8px keeps text and focus outlines clear of the surface edge.
+    const reserve = (parseFloat(style.height) || 52) + (parseFloat(style.bottom) || 12) + 12 + 8;
+    return Math.max(1, window.innerHeight - reserve);
+  }
   /* Offset positions ignore the transforms used by the existing reveal effects. */
   function absTop(el: HTMLElement | null) {
     let y = 0;
@@ -489,13 +498,17 @@ import { required, eventElement, htmlChildren } from "./dom";
       target.focus({ preventScroll: true });
     }
   }
-  function frameForElement(element: HTMLElement, frames: StoryFrame[]) {
+  function frameForElement(element: HTMLElement, frames: StoryFrame[], reveal = false) {
     const candidates = frames.filter(frame => frame.els.some(section => section.contains(element)));
     const authored = candidates.filter(frame => frame.scene &&
       (frame.scene === element || frame.scene.contains(element)));
     const y = absTop(element) - headerHeight;
     const choices = authored.length ? authored : candidates;
-    const destination = choices.filter(frame => frame.y <= y + 3).at(-1) || choices[0];
+    const bottom = absTop(element) + element.offsetHeight;
+    const visible = reveal ? choices.filter(frame => frame.y <= y + 1 &&
+      bottom - frame.y <= readingBottom() + 1) : [];
+    const destination = visible.sort((a, b) => Math.abs(a.y - window.scrollY) - Math.abs(b.y - window.scrollY))[0] ||
+      choices.filter(frame => frame.y <= y + 3).at(-1) || choices[0];
     if (destination) destination.anchor = element;
     return destination;
   }
@@ -516,6 +529,17 @@ import { required, eventElement, htmlChildren } from "./dom";
      spaced evenly so no gesture moves a few pixels, and each one snaps to the top
      of a nearby heading, paragraph, card or figure so no stop bisects text. */
   const UNITS = "h2,h3,h4,p,li,figure,blockquote,details,article,table,img,iframe,video,.card,[class*=card]";
+  function layoutUnit(el: HTMLElement) {
+    if (!el.getClientRects().length || !el.offsetHeight || /absolute|fixed/.test(getComputedStyle(el).position)) return false;
+    // WebKit can report rectangles for the body of a closed disclosure. Only
+    // its summary participates in the page until the visitor expands it.
+    for (let closed = el.parentElement?.closest("details:not([open])"); closed;
+      closed = closed.parentElement?.closest("details:not([open])")) {
+      const summary = closed.querySelector(":scope > summary");
+      if (!summary?.contains(el)) return false;
+    }
+    return true;
+  }
   // A section that overflows its screen by less than a quarter screen starts at
   // its first line of content instead of its top padding, so it needs no tail stop.
   function lead(owner: HTMLElement, start: number, room: number, inset: number, from: HTMLElement = owner) {
@@ -523,9 +547,9 @@ import { required, eventElement, htmlChildren } from "./dom";
     // `from` supplies the first line of content: a section's own heading sits before its
     // first scene, and shifting the stop past it would tuck that heading under the header.
     const first = Array.from(from.querySelectorAll<HTMLElement>(UNITS))
-      .find(el => el.getClientRects().length && el.offsetHeight > 0 && !/absolute|fixed/.test(getComputedStyle(el).position));
+      .find(layoutUnit);
     if (!first) return start;
-    const over = absTop(owner) + owner.offsetHeight - window.innerHeight - start;
+    const over = absTop(owner) + owner.offsetHeight - (room + inset) - start;
     const top = Math.round(absTop(first) - inset - 16);
     return over > 0 && over < room * 0.25 && top > start ? Math.min(top, start + over) : start;
   }
@@ -533,6 +557,7 @@ import { required, eventElement, htmlChildren } from "./dom";
   const BLOCKS = "h2,h3,h4,figure,article,details,table,blockquote,.card,[class*=card],[class*=group]";
   function splitAt(owner: HTMLElement, start: number, end: number, room: number, inset: number) {
     const ys: number[] = [];
+    const viewportBottom = room + inset;
     // Prefer substantial reading steps. A real final content tail is retained
     // below, even when short; padding and sticky tracks need no tiny stop.
     const gap = Math.round(window.innerHeight * 0.25);
@@ -545,8 +570,7 @@ import { required, eventElement, htmlChildren } from "./dom";
       return kept;
     };
     const units = Array.from(owner.querySelectorAll<HTMLElement>(UNITS + ",a,button,svg,canvas,picture"))
-      .filter(el => el.getClientRects().length && el.offsetHeight > 0 &&
-        !/absolute|fixed/.test(getComputedStyle(el).position));
+      .filter(layoutUnit);
     const bottom = units.reduce((max, el) => Math.max(max, absTop(el) + el.offsetHeight), 0);
     // A sticky stage is much taller than its content on purpose: its height is the scroll
     // track, and its panel script expects even steps along it.
@@ -556,12 +580,16 @@ import { required, eventElement, htmlChildren } from "./dom";
       for (let n = 1; n <= count; n++) ys.push(start + (end - start) * n / count);
       return spaced(ys);
     }
-    // Content that already fits, or overflows by a few pixels of padding, needs no further stop.
-    if (bottom && bottom <= start + window.innerHeight + 8) return ys;
-    // The owner's own bottom is the furthest any stop may reach, so the next section
-    // never shares the screen with a tail.
-    const limit = end;
-    if (bottom) end = Math.max(start, Math.min(end, Math.round(bottom + 24 - window.innerHeight)));
+    const obstructed = viewportBottom < window.innerHeight;
+    // Padding is not content. On phones every real line must clear the surface;
+    // desktop keeps the original small overflow tolerance.
+    if (bottom && bottom <= start + viewportBottom + (obstructed ? 0 : 8)) return ys;
+    // A real phone tail must exceed go()'s proximity threshold. Advancing a few
+    // pixels beyond its bottom-aligned position is preferable to stranding a
+    // partially covered link; the same owner remains the only visible scene.
+    const minimum = obstructed && bottom ? start + NEAR + 1 : start;
+    const limit = Math.max(end, minimum);
+    if (bottom) end = Math.max(minimum, Math.min(limit, Math.round(bottom + 24 - viewportBottom)));
     if (end - start <= 16) return ys;
     const step = Math.max(1, room - 64);
     const count = Math.ceil((end - start) / step);
@@ -625,7 +653,8 @@ import { required, eventElement, htmlChildren } from "./dom";
     });
     sections.forEach(function (s, i) {
       const inset = s === foot ? baseHeaderHeight : headerHeight;
-      const room = Math.max(1, window.innerHeight - inset);
+      const viewportBottom = readingBottom();
+      const room = Math.max(1, viewportBottom - inset);
       // A long explanation can author its phone sequence around complete
       // content blocks, so the next stop never bisects the connection diagram.
       const shortPhone = innerWidth <= 699 && innerHeight <= 740;
@@ -647,7 +676,7 @@ import { required, eventElement, htmlChildren } from "./dom";
         let part = 0;
         scenes.forEach((scene, sceneIndex) => {
           const start = sceneIndex === 0 ? join(i === 0 ? 0 : lead(scene, absTop(s) - inset, room, inset, s), s, room) : lead(scene, absTop(scene) - inset, room, inset);
-          const end = Math.max(start, absTop(scene) + scene.offsetHeight - window.innerHeight);
+          const end = Math.max(start, absTop(scene) + scene.offsetHeight - viewportBottom);
           add(start, s, part++, scene);
           splitAt(scene, start, end, room, inset).forEach((y, n) => add(y, s, part++, scene, n + 1));
         });
@@ -656,7 +685,7 @@ import { required, eventElement, htmlChildren } from "./dom";
       const start = join(i === 0 ? 0 : lead(s, absTop(s) - inset, room, inset), s, room);
       const end = Math.max(
         start,
-        absTop(s) + s.offsetHeight - window.innerHeight,
+        absTop(s) + s.offsetHeight - viewportBottom,
       );
       add(start, s, 0);
       splitAt(s, start, end, room, inset).forEach((y, n) => add(y, s, n + 1));
@@ -801,10 +830,10 @@ import { required, eventElement, htmlChildren } from "./dom";
      than the browser's partial scroll-into-view, which rests between stops. */
   document.addEventListener("focusin", function (e) {
     const t = e.target;
-    if (!(t instanceof HTMLElement) || !main.contains(t) || t === main) return;
+    if (!(t instanceof HTMLElement) || (!main.contains(t) && !foot?.contains(t)) || t === main) return;
     const r = t.getBoundingClientRect();
-    if (!r.height || (r.top >= headerHeight - 1 && r.bottom <= window.innerHeight + 1)) return;
-    const f = frameForElement(t, frames());
+    if (!r.height || (r.top >= headerHeight - 1 && r.bottom <= readingBottom() + 1)) return;
+    const f = frameForElement(t, frames(), true);
     if (f && Math.abs(f.y - window.scrollY) > 1) cutTo(f.y);
   });
   window.chStory = { frames: frames, go: go, current: current };
@@ -873,8 +902,16 @@ import { required, eventElement, htmlChildren } from "./dom";
           : e.deltaMode === 2
             ? window.innerHeight - headerHeight
             : 1);
-      const decision = wheelGesture.next(dy, now, innerScroller(eventElement(e), dy, true));
-      if (decision.kind === "native") { cancel(); return; }
+      // The persistent dashboard rail sits beside its real scroll owner. Route
+      // wheel input through the same gesture latch, including momentum at edges.
+      const rail = eventElement(e)?.closest('[data-dashboard-scrollbar]');
+      const controlled = rail ? document.getElementById(rail.getAttribute('aria-controls') || '') : null;
+      const decision = wheelGesture.next(dy, now, innerScroller(controlled || eventElement(e), dy, true));
+      if (decision.kind === "native") {
+        cancel();
+        if (controlled) { e.preventDefault(); controlled.scrollTop += dy; }
+        return;
+      }
       e.preventDefault();
       if (decision.kind === "step" && !go(decision.direction, true))
         resetGesture(); // An outward boundary attempt must not hold an inward swipe.
@@ -944,7 +981,6 @@ import { required, eventElement, htmlChildren } from "./dom";
     'a[href], button, input:not([type="hidden"]), select, textarea, summary, iframe, [tabindex], [contenteditable]:not([contenteditable="false"])';
   let tabY = -1;
   let tabAt = -Infinity;
-  let arrowY = -1;
   // `shown` is false for a control in a scene that is not on screen yet: its scene is
   // inert and may be hidden until the story reaches it.
   function tabbable(el: HTMLElement, shown = true) {
@@ -998,11 +1034,6 @@ import { required, eventElement, htmlChildren } from "./dom";
       if (blocked()) return;
       const active = document.activeElement;
       if (active && active !== document.body && active !== root) {
-        // The floating "Next section" arrow ends the document's tab order. After it
-        // has moved the story, Tab continues into the scene it revealed.
-        if (!e.shiftKey && active.classList.contains("page-next") &&
-          Math.abs(window.scrollY - arrowY) > 3 && enterScene(false))
-          e.preventDefault();
         return;
       }
       const fs = frames();
@@ -1017,7 +1048,6 @@ import { required, eventElement, htmlChildren } from "./dom";
   document.addEventListener("focusin", function (e) {
     const t = e.target;
     if (!(t instanceof HTMLElement)) return;
-    if (t.classList.contains("page-next")) arrowY = window.scrollY;
     // The skip link, header and floating controls sit outside the scenes. Revealing
     // them must never carry the page away from the scene the visitor is reading: the
     // browser's smooth reveal starts after focus, so hold the scroll for a moment.

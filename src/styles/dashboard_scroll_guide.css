@@ -1,0 +1,66 @@
+/* A real, always-visible scroll control; Flash occupies his own layout space. */
+#main#main#main .native-scroll-feature.has-scroll-guide .native-scroll-shell {
+ display:grid;grid-template-columns:minmax(0,1fr) 44px 104px;gap:4px;align-items:start;
+}
+#main#main#main .has-scroll-guide .native-scroll {
+ border:1px solid #a9bba5;border-radius:4px;scrollbar-width:none;scrollbar-gutter:auto;
+}
+#main#main#main .has-scroll-guide .native-scroll::-webkit-scrollbar {display:none;}
+#main#main#main .native-scrollbar {
+ position:relative;align-self:stretch;width:44px;min-width:44px;min-height:44px;
+ margin:0;padding:0;border:0;border-radius:4px;background:transparent;cursor:ns-resize;touch-action:none;
+}
+#main#main#main .native-scroll-track {
+ position:absolute;inset:4px 14px;border:1px solid #94aa8f;border-radius:8px;background:#dce6d5;
+}
+#main#main#main .native-scroll-thumb {
+ position:absolute;top:0;left:1px;right:1px;min-height:0;border-radius:7px;background:var(--community-pine,#244b38);
+}
+#main#main#main .native-scrollbar:focus-visible {outline:3px solid var(--community-pine,#244b38);outline-offset:2px;}
+#main#main#main .native-scrollbar:disabled {opacity:.4;cursor:default;}
+#main#main#main .native-scroll-coach {position:relative;width:104px;min-height:205px;padding-top:10px;}
+#main#main#main .native-scroll-prompt {opacity:0;visibility:hidden;pointer-events:none;transition:opacity .18s ease;}
+#main#main#main .native-scroll-prompt>span {display:block;color:var(--community-pine,#244b38);font:700 15px/1.4 var(--font-body);text-align:center;margin:0 0 10px;}
+#main#main#main .native-scroll-prompt svg {display:block;width:96px;height:146px;overflow:visible;}
+#main#main#main .is-scroll-hint .native-scroll-prompt {opacity:1;visibility:visible;}
+#main#main#main .is-scroll-hint .native-scroll-track {outline:2px solid #5b864d;outline-offset:2px;}
+@media(max-width:900px) {
+ #main#main#main .native-scroll-feature.has-scroll-guide .native-scroll-shell {grid-template-columns:minmax(0,1fr) 44px;}
+ #main#main#main .home-preview .has-scroll-guide .native-scroll {height:clamp(260px,40dvh,320px);}
+ #main#main#main .native-scroll-coach {grid-column:1/-1;width:100%;min-height:88px;padding:0;}
+ #main#main#main .native-scroll-prompt {display:flex;justify-content:flex-end;align-items:center;gap:20px;padding-right:3px;}
+ #main#main#main .native-scroll-prompt svg {width:56px;height:85px;}
+ #main#main#main .native-scroll-prompt>span {margin:0;}
+}
+@media(prefers-reduced-motion:reduce) {#main#main#main .native-scroll-prompt {transition:none;}}
+@media(max-width:699px) {
+ #main#main#main .home-preview .has-scroll-guide .native-scroll {height:clamp(360px,60dvh,540px);}
+ #main#main#main .native-scroll-coach {min-height:88px;}
+ #main#main#main .native-scroll-prompt {gap:12px;}
+ #main#main#main .native-scroll-prompt svg {width:56px;height:85px;}
+}
+
+/* These tools already fit their inner window to available scene space. Put the
+   instruction above that window so its height is included in the measurement. */
+#main#main#main .context-scroll-guide.has-scroll-guide .native-scroll-shell {
+ grid-template-columns:minmax(0,1fr) 44px;gap:4px;align-items:start;
+}
+#main#main#main .context-scroll-guide .native-scroll-coach {
+ grid-column:1/-1;grid-row:1;width:100%;min-height:88px;padding:0;
+}
+#main#main#main .context-scroll-guide .native-scroll-prompt {
+ display:flex;align-items:center;justify-content:flex-end;gap:12px;padding-right:3px;
+}
+#main#main#main .context-scroll-guide .native-scroll-prompt > span {margin:0;text-align:left;font-size:16px;}
+#main#main#main .context-scroll-guide .native-scroll-prompt svg {width:56px;height:85px;flex:none;}
+#main#main#main .context-scroll-guide .guided-scroll-viewport {
+ grid-column:1;grid-row:2;min-width:0;margin-top:0;scrollbar-width:none;
+}
+#main#main#main .context-scroll-guide .guided-scroll-viewport::-webkit-scrollbar {display:none;}
+#main#main#main .context-scroll-guide .native-scrollbar {grid-column:2;grid-row:2;}
+@media(min-width:901px) {
+ #main#main#main[data-page="education"] #library .context-scroll-guide {grid-column:1/-1;grid-row:3;min-width:0;}
+}
+@media(max-width:699px) {
+ #main#main#main[data-page="education"] #library .rs-lessons.guided-scroll-viewport {min-height:220px;}
+}

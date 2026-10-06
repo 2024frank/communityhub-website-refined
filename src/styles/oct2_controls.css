@@ -1,0 +1,159 @@
+/* October 2 control contract: local choices, destination actions and media
+   controls retain distinct visual meanings. Existing behavior and layout own
+   placement; these rules address only the named, shared control families. */
+
+/* Local choices use the same underline state as the existing homepage tabs.
+   Leave the customizable embedded-product UI and its source palettes alone. */
+#main#main#main[data-page] :is(.native-choices,.dashboard-tabs,.cwd-views,.rs-seg){
+  background:transparent;
+  border-radius:0;
+  box-shadow:none;
+}
+#main#main#main[data-page] :is(.native-choices,.dashboard-tabs,.cwd-views,.rs-seg) > button{
+  min-height:44px;
+  border:0;
+  border-bottom:3px solid transparent;
+  border-radius:0;
+  background:transparent;
+  color:var(--ch-ink,#2c2c2c);
+  box-shadow:none;
+  font-family:var(--font-body);
+  cursor:pointer;
+}
+#main#main#main[data-page] :is(.native-choices,.dashboard-tabs,.cwd-views,.rs-seg) > button:is([aria-selected="true"],[aria-pressed="true"]){
+  border-bottom-color:var(--ch-pine,#244b38);
+  background:transparent;
+  color:var(--ch-pine,#244b38);
+  box-shadow:none;
+}
+#main#main#main[data-page] :is(.native-choices,.dashboard-tabs,.cwd-views,.rs-seg) > button:hover:not(:disabled){
+  color:var(--ch-pine,#244b38);
+  background:color-mix(in srgb,var(--ch-pine,#244b38) 6%,transparent);
+}
+#main#main#main[data-page] :is(.native-choices,.dashboard-tabs,.cwd-views,.rs-seg) > button:focus-visible{
+  outline:3px solid var(--ch-pine,#244b38);
+  outline-offset:3px;
+}
+
+/* Primary destination links share the established pine action treatment. */
+#main#main#main[data-page] a:is(.btn-ink,.ui-action):not(.btn-ghost):not(.ui-action--secondary){
+  background:var(--ch-pine,#244b38);
+  border-color:var(--ch-pine,#244b38);
+  color:#fff;
+}
+#main#main#main[data-page] a:is(.btn-ink,.ui-action):not(.btn-ghost):not(.ui-action--secondary):hover{
+  background:#173b2a;
+  border-color:#173b2a;
+}
+
+/* Keep the real installation's left edge with its context heading and caption
+   when object-fit adds horizontal space for a portrait photograph. */
+#main#main#main[data-page="index"] .home-preview .sp-slide > figure > picture > img{
+  object-position:left center!important;
+}
+@media(max-width:900px){
+  #main#main#main[data-page="index"] .chapter-heading{
+    display:grid;
+    grid-template-columns:auto minmax(0,1fr);
+    column-gap:14px;
+    row-gap:8px;
+  }
+  #main#main#main[data-page="index"] .chapter-connector{
+    display:inline-block;
+    justify-self:start;
+  }
+  #main#main#main[data-page="index"] .chapter-heading .eng-tabs{
+    grid-column:1/-1;
+    margin:0;
+  }
+}
+
+/* Pause/play is always a circle, including saved-photo galleries. */
+#main#main#main[data-page] :is(.story-player,.home-preview) [data-sp-pause],
+#main#main#main[data-page] #people [data-pp-play]{
+  display:inline-grid;
+  place-items:center;
+  box-sizing:border-box;
+  width:var(--control-size,44px);
+  height:var(--control-size,44px);
+  min-width:var(--control-size,44px);
+  min-height:var(--control-size,44px);
+  padding:10px;
+  border:var(--control-outline,1.75px) solid currentColor;
+  border-radius:50%;
+  background:transparent;
+  box-shadow:none;
+  color:var(--ch-pine,#244b38);
+}
+#main#main#main[data-page] :is(.story-player,.home-preview) [data-sp-pause]:hover,
+#main#main#main[data-page] #people [data-pp-play]:hover{
+  background:#e1e9d8;
+}
+#main#main#main[data-page] :is(.story-player,.home-preview) [data-sp-pause][hidden],
+#main#main#main[data-page] #people [data-pp-play][hidden]{
+  display:none;
+}
+#main#main#main[data-page] :is(.story-player,.home-preview) .sp-nav svg,
+#main#main#main[data-page] #people .pp-nav svg{
+  width:22px;
+  height:22px;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:var(--control-stroke,1.75);
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+#main#main#main[data-page] :is(.story-player,.home-preview) .sp-nav svg path,
+#main#main#main[data-page] #people .pp-nav svg path{
+  stroke-width:var(--control-stroke,1.75);
+}
+
+/* Use the same 44px circle geometry expected by the existing collision checks.
+   The script still centers or hides the action when content occupies its row. */
+#main#main#main[data-page] .sec-next,
+#main#main#main[data-page="index"] > .hv .hv-skip .sec-next,
+body > .page-next{
+  box-sizing:border-box;
+  width:var(--control-size,44px);
+  height:var(--control-size,44px);
+  min-width:var(--control-size,44px);
+  max-width:var(--control-size,44px);
+  padding:10px;
+  border:var(--control-outline,1.75px) solid currentColor;
+  border-radius:50%;
+}
+#main#main#main[data-page] .sec-next svg,
+body > .page-next svg{
+  width:22px;
+  height:22px;
+  fill:none;
+  stroke:currentColor;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+#main#main#main[data-page] .sec-next path,
+body > .page-next path{
+  stroke-width:var(--control-stroke,1.75);
+}
+
+/* Each narrow reading scene has its own next action, before the next scene.
+   Inert/visibility ownership and the existing collision check still apply. */
+#main#main#main[data-page="index"] .sec-next--scene{display:none;}
+@media(max-width:900px){
+  #main#main#main[data-page="index"] .eng-sequenced .eng-stage > .sec-next--chapter{
+    display:none;
+  }
+  #main#main#main[data-page="index"] .eng-sequenced :is([data-eng-context],[data-eng-view]){
+    position:relative;
+    padding-bottom:64px;
+  }
+  #main#main#main[data-page="index"] .eng-sequenced [data-story-scene] > .sec-next--scene{
+    display:grid;
+  }
+  #main#main#main[data-page="index"] .eng-measuring :is([data-eng-context],[data-eng-view]){
+    padding-bottom:0;
+  }
+  #main#main#main[data-page="index"] .eng-measuring .sec-next--scene{
+    display:none;
+  }
+}

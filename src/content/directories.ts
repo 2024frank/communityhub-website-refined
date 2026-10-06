@@ -30,6 +30,7 @@ export function register(H: SiteContext): void {
   const toolChoices = LIVE_DEMOS.map(([href, , title]) => `<li><a href="${href}">${title}</a></li>`).join("");
   const liveBody = `<section class="live-directory" data-nofit aria-labelledby="see-live-h"><div class="wrap">
     <h1 class="h1" id="see-live-h">See it live</h1>
+    <p class="lede">Explore the public dashboard below. Open the community menu to find other live examples.</p>
     <details class="live-demo-picker"><summary>${liveTitle}</summary><ul>${liveChoices}</ul></details>
     ${H.live_frame(liveSource, "The Cleveland Environmental Dashboard", "Great Lakes Science Center", 520)}
     <details class="live-more-tools"><summary>More live examples</summary><ul>${toolChoices}</ul><a href="dashboards.html">All public dashboards</a></details>

@@ -12,7 +12,7 @@ before(async () => {
 
 // Browser primitives and a deterministic clock only: all timing decisions and
 // event handlers are supplied by the production [data-story] controller.
-function gallery({ reduced = false, observer = true, initiallyVisible = true, reading = false, manual = false, interval = null } = {}) {
+function gallery({ reduced = false, observer = true, initiallyVisible = true, reading = false, manual = false, playbackControl = true, interval = null } = {}) {
   class Element {
     children = []; attrs = new Map(); events = new Map(); hidden = false; content = '';
     classList = { values: new Set(), add(...names) { names.forEach(n => this.values.add(n)); }, remove(...names) { names.forEach(n => this.values.delete(n)); }, contains(name) { return this.values.has(name); }, toggle(name, on) { if (on) this.values.add(name); else this.values.delete(name); } };
@@ -36,7 +36,7 @@ function gallery({ reduced = false, observer = true, initiallyVisible = true, re
   if(interval) box.setAttribute('data-reading-interval',String(interval));
   if (manual) box.setAttribute('data-manual-preview','');
   box.children = [...slides, ...dots, play, previous, next, count];
-  box.queries = { '[data-sp-pause]': play, '[data-sp-prev]': previous, '[data-sp-next]': next, '[data-sp-count]': count };
+  box.queries = { '[data-sp-pause]': playbackControl ? play : null, '[data-sp-prev]': previous, '[data-sp-next]': next, '[data-sp-count]': count };
   box.lists = { '.sp-slide': slides, '.sp-dots button': dots };
   play.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14M16 5v14"/></svg>';
   const document = new Element(); document.hidden = false; document.activeElement = null; document.documentElement = new Element(); document.lists = { '[data-story]': [box] };
@@ -187,12 +187,40 @@ test('gallery clearing reduced motion resumes its preserved remaining interval',
  const g=gallery({reading:true,manual:true});g.advance(120000);assert.equal(g.current(),0);g.next.emit('click');g.advance(120000);assert.equal(g.current(),1);
  });
 
+test('manual Building examples remain stable without a playback control through visibility and pointer changes',()=>{
+ const g=gallery({reading:true,manual:true,playbackControl:false});
+ g.advance(120000);assert.equal(g.current(),0);
+ g.box.emit('pointerenter');g.box.emit('pointerleave');g.visible(false);g.visible(true);g.productActive(false);g.productActive(true);
+ g.reducedMotion(true);g.reducedMotion(false);g.advance(120000);assert.equal(g.current(),0);
+});
+
+for(const event of ['wheel','touchstart','scroll']) {
+ test(`uncontrolled photo loop does not permanently stop after ${event}`,()=>{
+  const g=gallery({reading:true,playbackControl:false});
+  g.advance(3000);g.box.emit(event,{target:g.box});g.advance(9000);assert.equal(g.current(),1);
+ });
+}
+
+test('uncontrolled photo loop temporarily holds hover and focus then resumes',()=>{
+ const g=gallery({reading:true,playbackControl:false});
+ g.advance(3000);g.box.emit('pointerenter');g.focus(true,g.box);g.advance(24000);assert.equal(g.current(),0);
+ g.box.emit('pointerleave');g.advance(24000);assert.equal(g.current(),0);
+ g.focus(false,g.box);g.advance(11999);assert.equal(g.current(),0);g.advance(1);assert.equal(g.current(),1);
+});
+
+test('uncontrolled photo loop respects reduced motion and inactive product holds',()=>{
+ const g=gallery({reading:true,playbackControl:false});
+ g.reducedMotion(true);g.advance(24000);assert.equal(g.current(),0);
+ g.reducedMotion(false);g.productActive(false);g.advance(24000);assert.equal(g.current(),0);
+ g.productActive(true);g.advance(12000);assert.equal(g.current(),1);
+});
+
 test('reading preview focus latches pause until the reader explicitly resumes',()=>{const g=gallery({reading:true});g.advance(3000);g.focus(true,g.box);g.focus(false,g.box);g.advance(60000);assert.equal(g.current(),0);g.play.emit('click');g.advance(9000);assert.equal(g.current(),1);});
 test('reading preview pointer exit starts a full interval rather than instantly changing the example',()=>{const g=gallery({reading:true});g.advance(11900);g.box.emit('pointerenter');g.advance(5000);g.box.emit('pointerleave');g.advance(11999);assert.equal(g.current(),0);g.advance(1);assert.equal(g.current(),1);});
 
 test('pointer focus then Pause click pauses rather than reversing the intended action',()=>{const g=gallery({reading:true});g.advance(3000);g.focus(true,g.play);g.play.emit('click');g.focus(false,g.play);g.advance(60000);assert.equal(g.current(),0);assert.equal(g.play.getAttribute('aria-pressed'),'true');});
 test('touchstart then focus then Pause click retains pause intent',()=>{const g=gallery({reading:true});g.advance(3000);g.box.emit('touchstart',{target:g.play});g.focus(true,g.play);g.play.emit('click');g.focus(false,g.play);g.advance(60000);assert.equal(g.current(),0);assert.equal(g.play.getAttribute('aria-pressed'),'true');});
 
-test('Building preview initially rotates after18seconds and iframe focus latches pause',()=>{const g=gallery({reading:true,interval:18000});g.advance(17999);assert.equal(g.current(),0);g.advance(1);assert.equal(g.current(),1);g.iframeFocus();g.advance(120000);assert.equal(g.current(),1);assert.equal(g.play.getAttribute('aria-pressed'),'true');g.play.emit('click');g.advance(18000);assert.equal(g.current(),2);});
+test('timed reading previews honor their interval and iframe focus latches pause',()=>{const g=gallery({reading:true,interval:18000});g.advance(17999);assert.equal(g.current(),0);g.advance(1);assert.equal(g.current(),1);g.iframeFocus();g.advance(120000);assert.equal(g.current(),1);assert.equal(g.play.getAttribute('aria-pressed'),'true');g.play.emit('click');g.advance(18000);assert.equal(g.current(),2);});
 
 test('inactive overlapping product previews do not rotate and regain a full reading interval',()=>{const g=gallery({reading:true});g.advance(11000);g.productActive(false);g.advance(90000);assert.equal(g.current(),0);g.productActive(true);g.advance(11999);assert.equal(g.current(),0);g.advance(1);assert.equal(g.current(),1);});

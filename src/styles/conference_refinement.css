@@ -222,7 +222,7 @@ body{color:var(--ch-ink);background:var(--ch-field)}
 #main#main#main .live-directory>.wrap{display:block;max-width:1320px}
 #main#main#main .live-demo-picker{position:relative;width:fit-content;max-width:100%;margin:18px 0 20px;z-index:8}
 #main#main#main .live-demo-picker>summary{font:700 20px/1.4 var(--font-body);padding:10px 0;cursor:pointer;color:var(--ch-pine);min-height:44px}
-#main#main#main .live-demo-picker>ul{position:absolute;top:100%;left:0;min-width:320px;max-width:calc(100vw - 48px);padding:10px 20px;background:#fbfcf8;border:1px solid #bdccb4;border-radius:8px;z-index:8;box-shadow:0 12px 25px #2032271a}
+#main#main#main .live-demo-picker>ul{position:absolute;top:100%;left:0;min-width:min(320px,calc(100vw - 48px));max-width:calc(100vw - 48px);padding:10px 20px;background:#fbfcf8;border:1px solid #bdccb4;border-radius:8px;z-index:8;box-shadow:0 12px 25px #2032271a}
 #main#main#main .live-demo-picker li>a{display:block;min-height:44px;padding:10px 0;font-size:17px;line-height:1.45;text-decoration:none}
 #main#main#main .live-demo-picker li>a:hover{text-decoration:underline}
 #main#main#main .live-directory .lf-body{height:clamp(340px,calc(100dvh - 330px),680px);min-height:340px}

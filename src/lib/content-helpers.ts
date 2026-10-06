@@ -109,7 +109,7 @@ export function now_strip(
 /** The native public Citywide app owns its data, filters and controls. */
 export function cwd_sign(_with_whatif: boolean = true): string {
   return live_frame(
-    "https://www.environmentaldashboard.org/cwd?show-menu-bar=1",
+    "https://www.environmentaldashboard.org/cwd-files/dashboard.php?interval=&current_state=",
     "Oberlin Citywide Dashboard",
     "environmentaldashboard.org",
     620,
@@ -236,7 +236,7 @@ export function voices_wall(link = true): string {
       `<article class="cv"><div class="ph"><img src="assets/${img}" alt="${e(alt)}" loading="lazy"></div><div class="q"><p>&ldquo;${e(q)}&rdquo;</p><div class="who"><b>${e(who)}</b>, ${e(role)}</div><p class="cat" style="color:${CV_COLOR[c]}">${cat}</p></div></article>`,
   ).join("");
   const more = link
-    ? '<p style="margin-top:18px"><a class="hand-link" href="community-voices.html"><svg class="hand-arrow" viewBox="0 0 70 44" aria-hidden="true"><path d="M4 8 C 18 34, 40 38, 62 26"/></svg>How Community Voices works</a></p>'
+    ? '<p style="margin-top:18px"><a class="hand-link destination-action" href="community-voices.html"><svg class="hand-arrow" viewBox="0 0 70 44" aria-hidden="true"><path d="M4 8 C 18 34, 40 38, 62 26"/></svg>How Community Voices works</a></p>'
     : "";
   const seen = new Set<string>();
   const legend: string[] = [];

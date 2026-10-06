@@ -1,5 +1,5 @@
 import { originalStory } from "./original-story";
-import { nativeStories } from "./meeting-embeds";
+import { nativeStories, nativeScrollable } from "./meeting-embeds";
 import { renderButton, renderField, renderStatus } from "../lib/ui";
 /** Data Hub, Data Dashboard, Stories, and Pricing page renderers. */
 import type { SiteContext } from "../lib/site";
@@ -75,7 +75,7 @@ export function register(H: SiteContext): void {
     return `<article class="product-story-group dashboard-evidence-scene${copy ? "" : " dashboard-evidence-scene--image-only"}" data-story-scene="all"><figure class="dashboard-evidence-image"><img src="assets/${img}" alt="${e(alt)}" loading="lazy"><figcaption>${caption}</figcaption></figure>${copy ? `<div class="dashboard-evidence-copy">${copy}</div>` : ""}</article>`;
   }
   function staged_citywide(): string {
-    return H.cwd_sign();
+    return `<div class="citywide-native-demo"><div class="citywide-pan" data-citywide-pan data-scroll-owner tabindex="0" role="region" aria-label="Oberlin Citywide Dashboard, scroll horizontally to explore"><iframe data-defer-src="https://www.environmentaldashboard.org/cwd-files/dashboard.php?interval=&current_state=" title="Live Oberlin Citywide Dashboard" loading="lazy"></iframe></div><p class="citywide-open"><a class="destination-action" href="https://www.environmentaldashboard.org/cwd-files/dashboard.php?interval=&current_state=" target="_blank" rel="noopener">Open Citywide Dashboard full size</a></p></div>`;
   }
 
   function trio(items: readonly Triple[], after = ""): string {
@@ -244,7 +244,7 @@ export function register(H: SiteContext): void {
     body += sec(
       "live",
       "Live",
-      "Building Dashboard",
+      "Explore live data",
       `<div class="hub-live-scene" data-story-scene="all">${H.live_frame(
         lib_url,
         "the Oberlin Public Library's data",
@@ -275,25 +275,18 @@ export function register(H: SiteContext): void {
       ["heat", "During a competition"] as const,
       ["sources", "Where readings come from"] as const,
     ]);
-    const oc_url =
-      "https://oberlin.communityhub.cloud/dh-public/oc-embed?active-page=exploreData&active-data-dashboard=815";
+    const oc_url = "https://oberlin.communityhub.cloud/dh-public/ops/dashboard/815";
     body += sec(
       "building",
       "Buildings",
       H.PBY["building-dashboard"].name,
-      `<div class="building-live-scene" data-story-scene="all">${H.live_frame(
-        oc_url,
-        "an Oberlin College residence hall dashboard",
-        "oberlin.communityhub.cloud",
-        680,
-      )}</div>`,
-      H.PBY["building-dashboard"].desc,
+      `<div class="building-live-scene" data-story-scene="desktop"><div class="building-product-copy" data-story-scene="mobile"><p>${H.PBY["building-dashboard"].desc}</p><h3>Explore resource use</h3><ol><li>Start with a building’s electricity, water, heating or cooling readings.</li><li>Scroll down to its charts and change the time period to compare patterns.</li><li>Use the visual tool selector to explore time series, heat maps and comparisons between buildings.</li></ol><p>Below, see how communities use these readings in Ecolympics and where the data comes from.</p></div><div class="building-product-demo" data-story-scene="mobile">${nativeScrollable(oc_url,"Oberlin College · Harkness",1500)}<p class="building-open"><a class="destination-action" href="${oc_url}" target="_blank" rel="noopener">Open Harkness Dashboard full size</a></p></div></div>`,
     );
     body += sec(
       "citywide",
       "Citywide",
       H.PBY["citywide-dashboard"].name,
-      `<div class="citywide-product-layout" data-story-scene="all"><div class="citywide-product-copy"><p>${H.PBY["citywide-dashboard"].desc}</p></div><div class="citywide-product-live">${staged_citywide()}</div></div>`,
+      `<div class="citywide-product-layout" data-story-scene="desktop"><div class="citywide-product-copy" data-story-scene="mobile"><p>${H.PBY["citywide-dashboard"].desc}</p><h3>Explore Oberlin’s environment</h3><p>Choose Electricity, Water, Lake Erie or Air Quality in the dashboard to explore a different part of the community’s environment. Each view brings the readings into the city landscape.</p><p class="citywide-phone-guidance">On a phone, move the bar beneath the dashboard to reach the rest of the scene and its controls.</p></div><div class="citywide-product-live" data-story-scene="mobile" data-stable-start>${staged_citywide()}</div></div>`,
       undefined,
       undefined,
       true,

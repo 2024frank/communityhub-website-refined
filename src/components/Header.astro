@@ -26,22 +26,132 @@ const resourceCurrent = ['resources', 'education', 'research', 'media', 'bring-a
         <li><a class="nav-a" href="about.html" aria-current={current === 'about' ? 'page' : undefined}>About</a></li>
       </ul>
     </nav>
-    <a class="btn-ink hdr-cta" href="contact.html">Book a demo</a>
+    <a class="ch-btn-primary hdr-cta" href="contact.html">Book a demo</a>
     <button type="button" class="menu-btn" aria-expanded="false" aria-controls="mnav"><span class="menu-lines" aria-hidden="true"><i></i><i></i><i></i></span><span class="menu-t">Menu</span></button>
   </div>
 </header>
 <div class="mnav" id="mnav" hidden>
   {contents && <section class="mobile-contents"><h2>On this page</h2><div set:html={contents} /></section>}
-  <a class="btn-ink btn-big mnav-cta" href="contact.html">Book a demo</a>
-  <p class="mnav-h">Dashboard demos</p>
-  <ul class="mnav-live">{DASH_DEMOS.map(([href, icon, title, description]) => <li><a href={href}><img src={`assets/${icon}`} alt="" width="26" height="26" loading="lazy" /><span><b>{title}</b><small>{description}</small></span></a></li>)}</ul>
-  <p class="mnav-h">See it live</p>
-  <ul class="mnav-live">{LIVE_DEMOS.map(([href, icon, title, description]) => <li><a href={href}><img src={`assets/${icon}`} alt="" width="26" height="26" loading="lazy" /><span><b>{title}</b><small>{description}</small></span></a></li>)}</ul>
-  <p class="mnav-h">Products</p>
-  <ul class="mnav-grid">{PRODUCTS.map(p => <li><a href={`${p.slug}.html`}><img class="" src={`assets/${p.icon}`} alt="" width="36" height="36" loading="lazy" />{p.name}</a></li>)}<li><a href="products.html">Browse all products</a></li></ul>
-  <p class="mnav-h">Who it's for</p>
-  <ul class="mnav-grid">{AUDIENCES.map(a => <li><a href={`${a.slug}.html`}><img class="" src={`assets/${a.icon}`} alt="" width="36" height="36" loading="lazy" />{a.name}</a></li>)}<li><a href="examples.html">Case studies</a></li></ul>
-  <ul class="mnav-big">
-    <li><a href="pricing.html">Pricing</a></li><li><a href="dashboards.html">Dashboard demos</a></li><li><a href="education.html">Teacher toolkit</a></li><li><a href="research.html">Research</a></li><li><a href="media.html">Media</a></li><li><a href="bring-a-dashboard.html">Bring a dashboard to your community</a></li><li><a href="environmental-dashboard.html">The Dashboard story</a></li><li><a href="about.html">About</a></li>
-  </ul>
+  <div class="mnav-top-action">
+    <a class="ch-btn-primary mnav-cta" href="contact.html">Book a demo</a>
+  </div>
+  
+  <div class="mnav-sections">
+    <div class="mnav-group">
+      <button type="button" class="mnav-toggle" aria-expanded="false" aria-controls="mnav-sec-products">
+        <span>Products</span>
+        <Chevron />
+      </button>
+      <div class="mnav-sub" id="mnav-sec-products" hidden>
+        {GROUP_ORDER.map(group => (
+          <div class="mnav-cluster">
+            <p class="mnav-cluster-h">{group}</p>
+            <ul class="mnav-grid">
+              {PRODUCTS.filter(p => p.group === group).map(p => (
+                <li>
+                  <a href={`${p.slug}.html`}>
+                    <img src={`assets/${p.icon}`} alt="" width="26" height="26" loading="lazy" />
+                    <span><b>{p.name}</b><small>{p.short}</small></span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+        <a class="mnav-all" href="products.html">Browse all 9 products</a>
+      </div>
+    </div>
+
+    <div class="mnav-group">
+      <button type="button" class="mnav-toggle" aria-expanded="false" aria-controls="mnav-sec-live">
+        <span>See it live & Demos</span>
+        <Chevron />
+      </button>
+      <div class="mnav-sub" id="mnav-sec-live" hidden>
+        <p class="mnav-cluster-h">Dashboard demos</p>
+        <ul class="mnav-live">
+          {DASH_DEMOS.map(([href, icon, title, description]) => (
+            <li>
+              <a href={href}>
+                <img src={`assets/${icon}`} alt="" width="26" height="26" loading="lazy" />
+                <span><b>{title}</b><small>{description}</small></span>
+              </a>
+            </li>
+          ))}
+        </ul>
+        <p class="mnav-cluster-h">Working now</p>
+        <ul class="mnav-live">
+          {LIVE_DEMOS.map(([href, icon, title, description]) => (
+            <li>
+              <a href={href}>
+                <img src={`assets/${icon}`} alt="" width="26" height="26" loading="lazy" />
+                <span><b>{title}</b><small>{description}</small></span>
+              </a>
+            </li>
+          ))}
+        </ul>
+        <a class="mnav-all" href="see-it-live.html">All live views & dashboards</a>
+      </div>
+    </div>
+
+    <div class="mnav-group">
+      <button type="button" class="mnav-toggle" aria-expanded="false" aria-controls="mnav-sec-who">
+        <span>Who it's for</span>
+        <Chevron />
+      </button>
+      <div class="mnav-sub" id="mnav-sec-who" hidden>
+        <ul class="mnav-grid">
+          {AUDIENCES.map(a => (
+            <li>
+              <a href={`${a.slug}.html`}>
+                <img src={`assets/${a.icon}`} alt="" width="26" height="26" loading="lazy" />
+                <span><b>{a.name}</b><small>{a.short}</small></span>
+              </a>
+            </li>
+          ))}
+        </ul>
+        <p class="mnav-cluster-h">Case studies</p>
+        <ul class="mnav-grid">
+          {CASES.map(c => (
+            <li>
+              <a href={`${c.slug}.html`}>
+                <span><b>{c.name}</b><small>{c.kind}</small></span>
+              </a>
+            </li>
+          ))}
+        </ul>
+        <a class="mnav-all" href="examples.html">All case studies</a>
+      </div>
+    </div>
+
+    <div class="mnav-group">
+      <button type="button" class="mnav-toggle" aria-expanded="false" aria-controls="mnav-sec-res">
+        <span>Resources</span>
+        <Chevron />
+      </button>
+      <div class="mnav-sub" id="mnav-sec-res" hidden>
+        <ul class="mnav-res-list">
+          {RESOURCES.map(([href, title, description]) => (
+            <li>
+              <a href={href}>
+                <b>{title}</b>
+                <small>{description}</small>
+              </a>
+            </li>
+          ))}
+          <li>
+            <a href="environmental-dashboard.html">
+              <b>The Dashboard story</b>
+              <small>Why people need feedback from nature</small>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="mnav-direct-links">
+      <a class="mnav-direct" href="pricing.html">Pricing</a>
+      <a class="mnav-direct" href="about.html">About</a>
+    </div>
+  </div>
 </div>

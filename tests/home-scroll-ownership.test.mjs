@@ -6,7 +6,7 @@ before(async()=>{const r=await build({configFile:false,logLevel:'silent',build:{
 test('only the Building Dashboard gets the homepage scroll-through wrapper',()=>{
  assert.equal((html.match(/class="native-scroll"/g)||[]).length,3);
  assert.match(html,/Oberlin College · Harkness/);
- assert.match(html,/Scroll within the dashboard/);
+ assert.match(html,/Scroll here to explore/);
  assert.doesNotMatch(html,/Scroll through Cleveland community calendar/);
 });
 test('Web uses the real Cleveland feed with no iframe or local scroll trap',()=>{

@@ -41,23 +41,17 @@ class ReviewTasksBrowserTests(unittest.TestCase):
     def tearDown(self):
         self.context.close()
 
-    def test_storyboard_images_notes_and_all_31_slide_controls(self):
+    def test_original_presentation_respects_reduced_motion_and_uses_native_controls(self):
         self.page.goto(self.url+'story-of-dashboard.html', wait_until='domcontentloaded')
-        self.assertTrue(self.page.locator('[data-sb-prev]').is_disabled())
-        for index in range(31):
-            if index:
-                self.page.locator('[data-sb-next]').click()
-            self.page.wait_for_function('i => {const p=document.querySelector("[data-sb-img]"); return p.complete && p.naturalWidth>0 && p.src.endsWith(String(i).padStart(2,"0")+".jpg");}', arg=index+1)
-            self.assertEqual(self.page.locator('[data-sb-n]').inner_text(), f'{index+1} of 31')
-            self.assertTrue(self.page.locator('[data-sb-t]').inner_text().strip())
-            self.assertTrue(self.page.locator('[data-sb-d]').inner_text().strip())
-            self.assertEqual(self.page.locator('[data-sb-go][aria-current="true"]').get_attribute('data-sb-go'), str(index))
-        self.assertTrue(self.page.locator('[data-sb-next]').is_disabled())
-        self.page.locator('[data-sb]').focus()
-        self.page.keyboard.press('ArrowLeft')
-        self.assertEqual(self.page.locator('[data-sb-n]').inner_text(), '30 of 31')
-        self.page.locator('[data-sb-go="0"]').click()
-        self.assertEqual(self.page.locator('[data-sb-n]').inner_text(), '1 of 31')
+        frame=self.page.locator('[data-original-presentation]')
+        self.page.wait_for_function('document.querySelector("[data-original-presentation]").hasAttribute("src")')
+        self.assertIn('start=false&loop=false&delayms=9000',frame.get_attribute('src'))
+        self.assertEqual(self.page.locator('[data-sb]').count(),0)
+        self.assertEqual(frame.get_attribute('allow'),'autoplay; fullscreen')
+        self.page.emulate_media(reduced_motion='no-preference')
+        self.page.reload(wait_until='domcontentloaded')
+        self.page.wait_for_function('document.querySelector("[data-original-presentation]").hasAttribute("src")')
+        self.assertIn('start=true&loop=false&delayms=9000',frame.get_attribute('src'))
 
     def test_home_story_links_resolve_and_reach_requested_sections(self):
         self.page.goto(self.url, wait_until='domcontentloaded')
@@ -155,8 +149,12 @@ class ReviewTasksBrowserTests(unittest.TestCase):
                 self.page.goto(self.url+filename, wait_until='domcontentloaded')
                 self.assertLessEqual(self.page.evaluate('document.documentElement.scrollWidth-innerWidth'),1,(width,filename))
                 if filename.startswith('story'):
-                    self.page.locator('[data-sb-next]').click()
-                    self.assertEqual(self.page.locator('[data-sb-n]').inner_text(),'2 of 31')
+                    frame=self.page.locator('[data-original-presentation]')
+                    self.assertTrue(frame.is_visible())
+                    bounds=frame.bounding_box()
+                    self.assertGreater(bounds['width'],250)
+                    self.assertGreater(bounds['height'],190)
+                    self.assertLessEqual(bounds['x']+bounds['width'],width+1)
                 else:
                     self.page.wait_for_function('!!window.chStory')
                     self.page.evaluate('document.fonts.ready')

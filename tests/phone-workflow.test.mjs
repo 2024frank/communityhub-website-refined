@@ -24,7 +24,10 @@ test('walkthrough uses supplied product pieces and identifies recorded readings'
 
 test('local walkthrough opens the controller, selects source content and resets without timers or network',async()=>{
  const source=await readFile('src/scripts/meeting_embeds.ts','utf8');
- const part=source.slice(source.indexOf("document.querySelectorAll<HTMLElement>('[data-phone-demo]')"),source.indexOf('// The source\'s desktop layout'));
+ const start=source.indexOf("document.querySelectorAll<HTMLElement>('[data-phone-demo]')");
+ const end=source.indexOf("document.querySelectorAll<HTMLIFrameElement>('[data-native-scroll-frame]')",start);
+ assert.ok(start>=0&&end>start,'the walkthrough and dashboard initializers must be present');
+ const part=source.slice(start,end);
  const code=ts.transpileModule(part,{compilerOptions:{target:ts.ScriptTarget.ES2022}}).outputText;
  const node=()=>({hidden:false,dataset:{},attrs:new Map(),events:new Map(),textContent:'',src:'',alt:'',addEventListener(t,f){this.events.set(t,f)},setAttribute(n,v){this.attrs.set(n,v)},focus(){this.focused=true},emit(t){this.events.get(t)?.()},querySelector(){return heating}});
  const root=node(),screen=node(),preview=node(),status=node(),scan=node(),menu=node(),channels=node(),caption=node(),selection=node(),hint=node(),reset=node(),heating=node(),ajlc=node();

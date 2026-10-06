@@ -1,11 +1,13 @@
 import * as catalog from '../content/catalog';
 import copyPolicy from '../content/copy-policy.json';
 import imageSizes from '../content/image-sizes.json';
+import originalImages from '../content/original-images.json';
 import { responsiveCandidates } from './image-metadata';
 import * as helpers from './content-helpers';
 import type { PageDefinition, PageOptions, RedirectDefinition } from './types';
 
 const sizes: Readonly<Record<string, readonly number[]>> = imageSizes;
+const originals: Readonly<Record<string, {file: string; dimensions: readonly number[]}>> = originalImages;
 
 export function addImageSizes(markup: string): string {
   return markup.replace(/<img [^>]*>/g, tag => {
@@ -51,6 +53,18 @@ export function addResponsiveImages(markup: string, slug: string): string {
     const source = tag.match(/ src="assets\/([^"?]+)"/);
     if (!source) return tag;
     const file = source[1];
+    const original = originals[`assets/${file}`];
+    if (original) {
+      // Preserve source photographs and native figures. Small existing photo
+      // derivatives remain available; high-density displays get the original.
+      tag = tag.replace(`src="assets/${file}"`, `src="${original.file}"`)
+        .replace(/ (?:width|height)="[^"]*"/g, '');
+      const candidates = RESPONSIVE[file] ? responsiveCandidates(RESPONSIVE[file], sizes) : [];
+      const variants = candidates.filter(([, width]) => width < original.dimensions[0]);
+      variants.push([original.file.slice('assets/'.length), original.dimensions[0]]);
+      const srcset = variants.map(([name, width]) => `assets/${name} ${width}w`).join(', ');
+      return `${tag.slice(0, -1)} width="${original.dimensions[0]}" height="${original.dimensions[1]}" srcset="${srcset}" sizes="${responsiveSizes(tag, file, slug)}">`;
+    }
     const variants = RESPONSIVE[file] ? responsiveCandidates(RESPONSIVE[file], sizes) : [];
     if (variants.length) {
       const srcset = variants.map(([name, width]) => `assets/${name} ${width}w`).join(', ');

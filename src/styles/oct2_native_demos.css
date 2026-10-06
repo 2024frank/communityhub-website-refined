@@ -1,0 +1,13 @@
+/* The real controller belongs to the same demonstration as the display.
+   Let the display determine the desktop row height; keep phone stacking native. */
+@media (min-width:700px) {
+  #main#main#main[data-page] .native-story-pair .native-phone-device {
+    align-self:stretch;
+    min-height:0;
+  }
+  #main#main#main[data-page] .native-story-pair .native-phone-screen {
+    aspect-ratio:auto;
+    height:100%;
+    min-height:0;
+  }
+}

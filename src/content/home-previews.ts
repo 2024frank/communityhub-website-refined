@@ -7,6 +7,7 @@ export interface Preview {
   image: string;
   context: string;
   alt: string;
+  caption?: string;
   logo?: string;
   readableText?: string;
   quote?: string;
@@ -37,29 +38,29 @@ function previewFigure(example: Preview): string {
     ? `<blockquote class="preview-readable-quote"><p>“${esc(example.quote)}”</p><footer>${esc(example.byline || '')}</footer></blockquote>` : '';
   const text = example.readableText
     ? `<figcaption class="preview-readable-text">${esc(example.readableText)}</figcaption>` : '';
+  const caption = example.caption
+    ? `<figcaption class="sp-cap">${esc(example.caption)}</figcaption>` : '';
   return `<figure${example.quote ? ' class="source-voice"' : ''}>
     <h4 class="preview-context">${logo}${esc(example.context)}</h4>
     <picture><img src="assets/${esc(example.image)}" alt="${esc(example.alt)}" loading="lazy"></picture>
-    ${sourcePhoto(example)}${quote}${text}
+    ${sourcePhoto(example)}${quote}${caption}${text}
   </figure>`;
 }
 
-export function previewCarousel(label:string, examples:string[], interval=12000):string {
- const arrow=(path:string)=>`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${path}"/></svg>`;
- return `<div class="home-preview story-player story-player--quiet" data-story data-reading-preview data-reading-interval="${interval}" role="region" aria-roledescription="carousel" aria-label="${esc(label)}">
+export function previewCarousel(label:string, examples:string[], automatic=false):string {
+ return `<div class="home-preview story-player story-player--quiet" data-story data-reading-preview ${automatic&&examples.length>1?'data-reading-interval="12000"':'data-manual-preview'} role="region" aria-label="${esc(label)}">
  <div class="sp-stage">${examples.map((example,index)=>`<div class="sp-slide" data-sp${index?' hidden':''}>${example}</div>`).join('')}</div>
- ${examples.length>1?`<div class="sp-bar"><button type="button" class="sp-nav" data-sp-prev aria-label="Previous ${esc(label)} example">${arrow('m15 5-7 7 7 7')}</button><button type="button" class="sp-nav" data-sp-next aria-label="Next ${esc(label)} example">${arrow('m9 5 7 7-7 7')}</button><button type="button" class="sp-nav sp-pause" data-sp-pause aria-pressed="false" aria-label="Pause automatic examples">${arrow('M8 5v14M16 5v14')}</button></div>`:''}
  </div>`;
 }
 export function previewGallery(label: string, examples: Preview[]): string {
-  return previewCarousel(label, examples.map(previewFigure));
+  return previewCarousel(label, examples.map(previewFigure), true);
 }
 
 export const buildingPreview=()=>previewCarousel('Building Dashboard',[
  nativeScrollable('https://oberlin.communityhub.cloud/dh-public/ops/dashboard/815','Oberlin College · Harkness',1500),
  nativeScrollable('https://oberlin.communityhub.cloud/dh-public/ops/dashboard/529','Oberlin City Schools · Elementary School',1500),
  nativeScrollable('https://oberlin.communityhub.cloud/dh-public/ops/dashboard/1001','City of Oberlin · Public Library',1500),
-],18000);
+]);
 export function passiveEmbed(url: string, title: string, context: string): string {
  return `<figure class="home-live-preview"><h4 class="preview-context">${esc(context)}</h4><div class="home-live-canvas"><iframe data-defer-src="${esc(url)}" data-passive-preview tabindex="-1" aria-hidden="true" title="${esc(title)}" loading="lazy"></iframe></div></figure>`;
 }

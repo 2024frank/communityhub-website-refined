@@ -1,3 +1,4 @@
+import { attachScrollGuide } from './dashboard_scroll_guide';
 import type { Context } from '../content/meeting-embeds';
 
 // Only the selected context is mounted. Paired native story frames share a private web session.
@@ -7,15 +8,25 @@ document.querySelectorAll<HTMLElement>('[data-native-contexts]').forEach(root =>
   const heading = root.querySelector<HTMLElement>('[data-native-heading]')!;
   const open = root.querySelector<HTMLAnchorElement>('[data-native-open]')!;
   const status = root.querySelector<HTMLElement>('[data-native-status]')!;
+  const stableVoices = root.closest('#main[data-page="community-voices"]') && root.dataset.kind === 'voices';
+  if (stableVoices) root.style.overflowAnchor = 'none';
   let active = 0, mounted = false;
   let releaseResize: (() => void) | undefined;
+  let releaseGuide: (() => void) | undefined;
   function frame(url:string,title:string,klass:string):HTMLIFrameElement {
     const f=document.createElement('iframe'); f.src=url; f.title=title; f.className=klass;
     f.setAttribute('data-native-direct',''); f.loading='lazy'; return f;
   }
   function show(index:number) {
     releaseResize?.(); releaseResize=undefined;
+    releaseGuide?.(); releaseGuide=undefined;
     active=index; mounted=true;
+    // Community selection replaces the source, not the visitor's viewport.
+    // Keep the fitted dimensions during the replacement so scene measurement
+    // never sees the default-sized player and relocates the current section.
+    const priorContent = stableVoices ? mount.querySelector<HTMLElement>('.native-voices-content') : null;
+    const priorRoom = priorContent?.style.getPropertyValue('--viewport-tool-room');
+    const priorStageRoom = priorContent?.style.getPropertyValue('--voices-stage-room');
     const c=config[index]; mount.replaceChildren(); heading.replaceChildren();
     if(c.logo) {const logo=document.createElement('img');logo.src=c.logo;logo.alt='';heading.append(logo);}
     const name=document.createElement('span');name.textContent=c.name;heading.append(name);
@@ -27,7 +38,13 @@ document.querySelectorAll<HTMLElement>('[data-native-contexts]').forEach(root =>
       f.tabIndex=-1;
       const stage=document.createElement('div');stage.className='native-voices-stage';stage.append(f);
       const content=document.createElement('div');content.className='native-voices-content';content.setAttribute('data-scroll-owner','');content.tabIndex=0;content.setAttribute('role','region');content.setAttribute('aria-label',c.name+' voices and categories');
-      const hint=document.createElement('p');hint.className='native-voices-hint';hint.textContent='Scroll to browse the community’s categories.';
+      if (stableVoices) {
+        content.style.minHeight = '0';
+        content.style.height = 'var(--viewport-tool-room, 360px)';
+        if (priorRoom) content.style.setProperty('--viewport-tool-room', priorRoom);
+        if (priorStageRoom) content.style.setProperty('--voices-stage-room', priorStageRoom);
+      }
+
       const fit=()=>{
         const phone=matchMedia('(max-width:699px)').matches;
         const url=new URL(f.src);const portrait=url.searchParams.has('portrait-mode');
@@ -46,7 +63,7 @@ document.querySelectorAll<HTMLElement>('[data-native-contexts]').forEach(root =>
           categories.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));
           status.textContent=cat.name+' · '+c.name;
         });categories.append(button);
-      });content.append(stage,categories);mount.append(hint,content);const resize=new ResizeObserver(fit);resize.observe(stage);releaseResize=()=>resize.disconnect();fit();
+      });content.append(stage,categories);mount.append(content);releaseGuide=attachScrollGuide(content,'community voices and categories','Scroll here for voice categories');const resize=new ResizeObserver(fit);resize.observe(stage);releaseResize=()=>resize.disconnect();fit();
     } else if(c.display && c.remote && c.community) {
       const session=crypto.randomUUID();
       const display=new URL('https://config.communityhub.cloud/digital-signage/web-view/web-session');
@@ -139,12 +156,21 @@ document.querySelectorAll<HTMLElement>('[data-phone-demo]').forEach(root=>{
   });
 });
 
-// The source's desktop layout keeps its building photo and gauges side by side.
-// A scaled canvas lives inside a real parent scroller, so wheel/touch can hand off at its edges.
+// Preserve the source's desktop overview on large screens. On phones, let the
+// live application reflow at its actual width so its text and controls stay legible.
+// The parent remains the scroll owner in both layouts.
 document.querySelectorAll<HTMLIFrameElement>('[data-native-scroll-frame]').forEach(f=>{
  const canvas=f.parentElement!, viewport=canvas.parentElement!;
+ const phone=matchMedia('(max-width:699px)');
  let sourceHeight=Number(f.height)||1500;
- function fit(){const scale=Math.min(1,viewport.clientWidth/1100);canvas.style.height=(sourceHeight*scale)+'px';f.style.width='1100px';f.style.height=sourceHeight+'px';f.style.transform=`scale(${scale})`;}
+ function fit(){
+  const width=phone.matches?Math.max(1,viewport.clientWidth):1100;
+  const scale=phone.matches?1:Math.min(1,viewport.clientWidth/width);
+  canvas.style.height=(sourceHeight*scale)+'px';
+  f.style.width=width+'px';f.style.height=sourceHeight+'px';
+  f.style.transform=scale===1?'none':`scale(${scale})`;
+ }
+ phone.addEventListener('change',fit);
  new ResizeObserver(fit).observe(viewport);fit();
  window.addEventListener('message',event=>{
   const url=f.src||f.dataset.deferSrc;

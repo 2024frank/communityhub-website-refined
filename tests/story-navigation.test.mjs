@@ -28,13 +28,30 @@ before(() => {
   wheelSource = compile(`const handleWheel = ${wheel};`);
 });
 
+function testElement(properties = {}) {
+  return {
+    parentElement: null, attributes: {},
+    getAttribute(name) { return this.attributes[name] ?? null; },
+    closest(selector) {
+      for (let node = this; node; node = node.parentElement) {
+        if (selector === '[data-dashboard-scrollbar]' &&
+            Object.hasOwn(node.attributes || {}, 'data-dashboard-scrollbar')) return node;
+      }
+      return null;
+    },
+    ...properties,
+  };
+}
+
 function controller() {
   let now = 1000;
   let stops = [0, 720, 1440, 2160].map((y, index) => ({ y, els: [{ id: `scene-${index}` }] }));
   let pendingMeasure = null;
   const cuts = [];
-  const window = { scrollY: 0, innerHeight: 800, dispatchEvent() {} };
+  const elements = new Map();
+  const window = { scrollY: 0, innerWidth: 1200, innerHeight: 800, dispatchEvent() {} };
   const context = {
+    document: { getElementById: id => elements.get(id) ?? null },
     window, performance: { now: () => now }, touch: null, controls: 'input', 
     home: null, NEAR: 24, publicRequest: null, initialHashPending: false,
     blocked: () => false, productBoundary: () => null,
@@ -45,12 +62,27 @@ function controller() {
     cutTo: y => { window.scrollY = y; cuts.push(y); context.publicRequest = null; },
     cancel: () => { context.publicRequest = null; },
     eventElement: event => event.target,
-    innerScroller: target => !!target?.canScroll,
+    innerScroller: (target, dy) => target?.scrollHeight
+      ? (dy > 0 ? target.scrollTop + target.clientHeight < target.scrollHeight - 1 : target.scrollTop > 1)
+      : !!target?.canScroll,
     headerHeight: 80,
   };
   runInNewContext(`${gestureSource}\nconst wheelGesture = new WheelGesture(); function resetGesture() { wheelGesture.reset(); }\n${goSource}\n${wheelSource}\n${touchSources.touchstart}\n${touchSources.touchmove}\nthis.go = go; this.wheel = handleWheel;`, context);
   return {
     window, context, cuts,
+    dashboardRail: ({ offset = 0, viewport = 200, content = 500 } = {}) => {
+      let top = offset;
+      const owner = testElement({ clientHeight: viewport, scrollHeight: content });
+      // Match the browser's clamped scroll position at either boundary.
+      Object.defineProperty(owner, 'scrollTop', {
+        get: () => top,
+        set: value => { top = Math.max(0, Math.min(content - viewport, value)); },
+      });
+      elements.set('dashboard', owner);
+      const rail = testElement({ attributes: { 'data-dashboard-scrollbar': '', 'aria-controls': 'dashboard' } });
+      const thumb = testElement({ parentElement: rail });
+      return { owner, rail, thumb };
+    },
     go: (...args) => context.go(...args),
     advance: ms => { now += ms; },
     pendingLayout: (positions, relocatedY) => {
@@ -61,6 +93,7 @@ function controller() {
     },
     wheel: ({ delay = 0, deltaY = 90, target = null, ...options } = {}) => {
       now += delay;
+      if (target && !target.closest) target = testElement(target);
       const event = { timeStamp: now, deltaY, deltaX: 0, deltaMode: 0, target,
         defaultPrevented: false, preventDefault() { this.defaultPrevented = true; }, ...options };
       context.wheel(event);
@@ -162,6 +195,58 @@ test('a fresh same-direction swipe after quiet input has no extra hold', () => {
   assert.deepEqual(c.cuts, [720, 1440]);
 });
 
+for (const direction of [1, -1]) {
+  test(`a renewed ${direction > 0 ? 'downward' : 'upward'} trackpad stroke works during the old momentum tail`, () => {
+    const c = controller();
+    if (direction < 0) c.window.scrollY = 2160;
+    for (const [delay, amount] of [[0,90],[16,60],[16,20],[16,4],[80,55],[16,80],[16,60],[16,20],[16,4]])
+      c.wheel({ delay, deltaY: amount * direction });
+    assert.deepEqual(c.cuts, direction > 0 ? [720,1440] : [1440,720]);
+  });
+}
+
+test('a gentler renewed acceleration also advances without waiting for silence', () => {
+  const c = controller();
+  for (const [delay, deltaY] of [[0,90],[16,60],[16,20],[16,4],[80,12],[16,28],[16,55],[16,30]])
+    c.wheel({ delay, deltaY });
+  assert.deepEqual(c.cuts, [720,1440]);
+});
+
+test('one accelerating stroke, decaying inertia and small rebounds never repeat', () => {
+  const c = controller();
+  for (const deltaY of [30,60,100,85,60,30,10,4,3,7,4,.5])
+    c.wheel({ delay:16, deltaY });
+  assert.deepEqual(c.cuts,[720]);
+});
+
+test('a single large momentum outlier cannot impersonate a sustained fresh swipe', () => {
+  const c = controller();
+  for (const [delay, deltaY] of [[0,90],[16,60],[16,20],[16,4],[80,90],[16,3],[16,1]])
+    c.wheel({ delay, deltaY });
+  assert.deepEqual(c.cuts,[720]);
+});
+
+test('a new stroke can enter the dashboard while its preceding page tail stays blocked', () => {
+  const c = controller(); c.wheel();
+  const {owner,thumb}=c.dashboardRail();
+  for (const deltaY of [60,20,4]) c.wheel({delay:16,deltaY,target:thumb});
+  assert.equal(owner.scrollTop,0);
+  c.wheel({delay:80,deltaY:55,target:thumb});
+  c.wheel({delay:16,deltaY:80,target:thumb});
+  assert.ok(owner.scrollTop > 0);
+  assert.deepEqual(c.cuts,[720]);
+});
+
+test('a fresh burst at the dashboard edge exits without waiting out the old tail', () => {
+  const c = controller(); const {owner,thumb}=c.dashboardRail({offset:280});
+  for (const deltaY of [90,60,20,4]) c.wheel({delay:16,deltaY,target:thumb});
+  assert.equal(owner.scrollTop,300);
+  assert.deepEqual(c.cuts,[]);
+  c.wheel({delay:80,deltaY:55,target:thumb});
+  c.wheel({delay:16,deltaY:80,target:thumb});
+  assert.deepEqual(c.cuts,[720]);
+});
+
 test('an outward attempt at the final boundary never delays returning', () => {
   const c = controller(); c.window.scrollY = 2160;
   c.wheel(); c.wheel({ delay: 107, deltaY: -90 });
@@ -246,3 +331,67 @@ test('pinch, changed contact and zoomed touch never move the outer story',()=>{
  c.window.visualViewport={scale:2};touchEvent(c,'touchstart',500);touchEvent(c,'touchmove',400);
  assert.deepEqual(c.cuts,[]);
 });
+
+
+test('wheel over the dashboard thumb scrolls its controlled viewport instead of the page', () => {
+  const c = controller(); const { owner, thumb } = c.dashboardRail();
+  assert.equal(c.wheel({ target: thumb, deltaY: 90 }).defaultPrevented, true);
+  assert.equal(owner.scrollTop, 90);
+  c.wheel({ delay: 40, target: thumb, deltaY: 2, deltaMode: 1 });
+  assert.equal(owner.scrollTop, 122, 'Line-mode wheel input is converted before forwarding');
+  assert.deepEqual(c.cuts, []);
+});
+
+test('dashboard rail retains its edge momentum then hands a fresh gesture to the page', () => {
+  const c = controller(); const { owner, rail } = c.dashboardRail({ offset: 280 });
+  c.wheel({ target: rail, deltaY: 90 });
+  assert.equal(owner.scrollTop, 300, 'The browser clamps the last inner scroll at its edge');
+  assert.equal(c.wheel({ delay: 40, target: rail, deltaY: 50 }).defaultPrevented, true);
+  assert.deepEqual(c.cuts, [], 'Residual inner momentum must not cut the outer scene');
+  c.wheel({ delay: 600, target: rail, deltaY: 90 });
+  assert.deepEqual(c.cuts, [720]);
+  assert.equal(owner.scrollTop, 300);
+});
+
+test('dashboard rail hands off upward only after the inner gesture ends', () => {
+  const c = controller(); c.window.scrollY = 1440;
+  const { owner, thumb } = c.dashboardRail({ offset: 20 });
+  c.wheel({ target: thumb, deltaY: -90 });
+  assert.equal(owner.scrollTop, 0);
+  c.wheel({ delay: 40, target: thumb, deltaY: -40 });
+  assert.deepEqual(c.cuts, []);
+  c.wheel({ delay: 600, target: thumb, deltaY: -90 });
+  assert.deepEqual(c.cuts, [720]);
+});
+
+test('a page gesture tail cannot scroll a newly revealed dashboard rail', () => {
+  const c = controller(); c.wheel();
+  const { owner, thumb } = c.dashboardRail();
+  c.wheel({ delay: 40, target: thumb, deltaY: 50 });
+  assert.equal(owner.scrollTop, 0);
+  assert.deepEqual(c.cuts, [720]);
+  c.wheel({ delay: 600, target: thumb, deltaY: 90 });
+  assert.equal(owner.scrollTop, 90);
+  assert.deepEqual(c.cuts, [720]);
+});
+
+
+for (const width of [375, 440]) {
+  test(`phone ${width}px wheel advances one reading stop and consumes the same stroke's momentum`, () => {
+    const c = controller(); c.window.innerWidth = width;
+    for (const deltaY of [80,60,30,10,4]) c.wheel({ deltaY, delay:16 });
+    assert.deepEqual(c.cuts,[720]);
+    c.wheel({ delay:300, deltaY:80 });
+    assert.deepEqual(c.cuts,[720,1440]);
+  });
+  test(`phone ${width}px finger strokes advance reading stops and reverse without ordinary page drift`, () => {
+    const c = controller(); c.window.innerWidth = width;
+    touchEvent(c,'touchstart',500);
+    assert.equal(touchEvent(c,'touchmove',420).defaultPrevented,true);
+    touchEvent(c,'touchmove',300);
+    assert.deepEqual(c.cuts,[720]);
+    touchEvent(c,'touchstart',500);touchEvent(c,'touchmove',420);
+    touchEvent(c,'touchstart',500);touchEvent(c,'touchmove',580);
+    assert.deepEqual(c.cuts,[720,1440,720]);
+  });
+}

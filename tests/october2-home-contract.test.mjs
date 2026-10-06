@@ -28,7 +28,16 @@ test('every homepage product keeps its established icon beside its title',()=>{
 test('homepage Stories and Voices are passive previews without their product-page control banks',()=>{
  for(const name of ['Stories','Community Voices']){const panel=home.match(new RegExp(`<article class="eng-p"[^>]*aria-label="${name}">[\\s\\S]*?<\\/article>`))?.[0];assert.ok(panel);assert.doesNotMatch(panel,/data-native-choice|native-phone-device|native-categories|data-native-contexts/);assert.match(panel,/data-reading-preview/);}
 });
-test('Building contexts are college, school and city with standalone native routes and no Hamilton',()=>{const panel=home.match(/<article class="eng-p"[^>]*aria-label="Building Dashboard">[\s\S]*?<\/article>/)?.[0];assert.ok(panel);for(const id of [815,529,1001]) assert.ok(panel.includes(`/ops/dashboard/${id}`));assert.match(panel,/data-reading-interval="18000"/);assert.doesNotMatch(panel,/Hamilton|oc-embed/);});
+test('Building preview stays stable without outer playback, swipe or example controls',()=>{const panel=home.match(/<article class="eng-p"[^>]*aria-label="Building Dashboard">[\s\S]*?<\/article>/)?.[0];assert.ok(panel);for(const id of [815,529,1001]) assert.ok(panel.includes(`/ops/dashboard/${id}`));assert.match(panel,/data-manual-preview/);assert.match(panel,/Oberlin College · Harkness/);assert.doesNotMatch(panel,/data-sp-choice|data-sp-pause|data-sp-prev|data-sp-next|data-reading-interval|Hamilton|oc-embed/);});
+test('all homepage previews omit added gallery controls while photos keep their automatic loop',()=>{
+ const panels=[...home.matchAll(/<article class="eng-p"[\s\S]*?<\/article>/g)].map(x=>x[0]);
+ for(const panel of panels){
+  assert.doesNotMatch(panel,/data-sp-prev|data-sp-next|data-sp-pause|data-sp-choice|preview-example-choice/);
+ }
+ const signage=panels.find(panel=>panel.includes('aria-label="Digital Signage"'));
+ assert.match(signage,/data-reading-interval="12000"/);assert.doesNotMatch(signage,/data-manual-preview/);
+ assert.match(signage,/Hotel at Oberlin/);
+});
 test('narrow Community Voices photo crops clip to source photograph bounds, not SVG letterbox area',()=>{const panel=home.match(/<article class="eng-p"[^>]*aria-label="Community Voices">[\s\S]*?<\/article>/)?.[0];assert.ok(panel);assert.equal((panel.match(/<clipPath /g)||[]).length,4);assert.match(panel,/x="15" y="17" width="325" height="434"/);assert.equal((panel.match(/clip-path="url\(#voice-photo-/g)||[]).length,4);});
 test('initial hero waits for reduced-motion policy before starting playback',()=>{const video=home.match(/<video[^>]+data-hv-vid[^>]*>/)?.[0];assert.ok(video);assert.doesNotMatch(video,/\bautoplay\b/);});
 test('Stories catalog classification matches the final Educate homepage chapter',async()=>{const fs=await import('node:fs');const code=fs.readFileSync('src/content/catalog.ts','utf8');assert.match(code,/"slug": "stories",\s*"name": "Stories",\s*"group": "Educate"/);});

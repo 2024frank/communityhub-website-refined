@@ -3,17 +3,6 @@ import { phoneDemo, nativeStories, nativeVoices } from "./meeting-embeds";
 import type { SiteContext } from "../lib/site";
 import type { Pair, Triple } from "../lib/types";
 
-type PartnerExample = readonly [
-  image: string,
-  alt: string,
-  label: string,
-  title: string,
-  description: string,
-  url: string,
-  cta: string,
-  host: string,
-];
-
 export function register(H: SiteContext): void {
   const e = H.e;
   const ARR = H.ARR;
@@ -105,15 +94,6 @@ export function register(H: SiteContext): void {
       return `<div class="zpb-stepper" data-zpb-stepper data-zpb-step-ms="${step_ms}" aria-label="${e(aria_label)}">${content}</div>`;
     }
     return `<div class="zpb-stepper" data-zpb-stepper data-zpb-step-ms="${step_ms}" aria-label="${e(aria_label)}" style="display:block">${list_html}</div>`;
-  }
-  function trio(items: readonly PartnerExample[]): string {
-    const figs = items
-      .map(
-        ([img, alt, k, t, d, u, cta, _host]) =>
-          `<a href="${u}" target="_blank" rel="noopener" data-story-scene><figure><img src="assets/${img}" alt="${e(alt)}" loading="lazy"></figure><figcaption><p class="fig">${k}</p><h3>${t}</h3><p>${d}</p><span class="go">${cta} ${ARR}</span></figcaption></a>`,
-      )
-      .join("");
-    return `<div class="zpb-trio" data-reveal-group>${figs}</div>`;
   }
   function slugify(s: string): string {
     return s.toLowerCase().replaceAll(" ", "-");
@@ -437,7 +417,7 @@ export function register(H: SiteContext): void {
       "locations",
       "Where the screens are",
       "Where the screens are",
-      locations + related_group("What plays on the screen", ["community-calendar", "community-voices", "phone-app"]),
+      locations + related_group("Connected apps", ["community-calendar", "community-voices", "phone-app"]),
       undefined,
       undefined,
       true,
@@ -481,7 +461,7 @@ export function register(H: SiteContext): void {
     body += jump([
       ["controller", "Try it"] as const,
       ["what", "What it does"] as const,
-      ["qr", "QR posters"] as const,
+      ["qr", "App and controller"] as const,
       ["related", "Works well with"] as const,
     ]);
     const what = feature_groups([
@@ -505,7 +485,7 @@ export function register(H: SiteContext): void {
       true,
     ).replace('<section ', '<section data-stable-start ');
     const qr = `<div class="product-evidence" data-story-scene="desktop"><div class="product-evidence-media" data-story-scene>${media}</div><div class="product-evidence-copy" id="what" aria-labelledby="what-h" data-story-scene><h3 id="what-h">What it does</h3>${what}<div class="phone-related-links">${related_group("What the app opens", ["digital-signage", "community-calendar", "community-voices", "stories"])}</div></div></div>`;
-    body += sec("qr", "QR posters", "Phone App & Screen Controller", qr);
+    body += sec("qr", "App and controller", "Phone App & Screen Controller", qr);
     body += H.cta_band("Contact Us", "");
     H.write_page(
       "phone-app",
@@ -1002,9 +982,11 @@ ${_ticks()}
   }
   function web_embeddables(): void {
     const p = H.PBY["web-embeddables"];
-    const media = H.postcard(
-      "ops-embed-shot.jpg",
+    const media = H.live_frame(
+      "https://oberlin.communityhub.cloud/dh-public/ops-embed",
       "The Oberlin City Schools dashboard embed, with the district's logo and menu",
+      "Oberlin City Schools",
+      520,
     );
     let body = opening(
       H.crumbs([null, p["group"]] as const, [null, p["name"]] as const),
@@ -1124,7 +1106,7 @@ ${_ticks()}
     );
     const examples = [
       [
-        "ops-embed-shot.jpg",
+        "https://oberlin.communityhub.cloud/dh-public/ops-embed",
         "The Oberlin City Schools dashboard embed, with the district's logo and menu",
         "School district",
         "Oberlin City Schools",
@@ -1134,7 +1116,7 @@ ${_ticks()}
         "oberlin.communityhub.cloud/dh-public/ops-embed",
       ] as const,
       [
-        "ecolympics-2026-standings.jpg",
+        "https://oberlin.communityhub.cloud/data-hub/embed/ecolympic-tab-contents/2026",
         "The 2026 Ecolympics standings from Data Hub, as embedded on environmentaldashboard.org",
         "Competition",
         "Ecolympics standings",
@@ -1144,21 +1126,21 @@ ${_ticks()}
         "environmentaldashboard.org/ecolympics",
       ] as const,
       [
-        "cv-slideshow-shot.jpg",
-        "Mike Cariglio's Community Voices slide, as it runs in the full-screen slideshow",
+        "https://oberlin.communityhub.cloud/cv-public/digital-signage",
+        "Oberlin's Community Voices, running in the full-screen slideshow",
         "Slideshow",
         "Community Voices slideshow",
         "A full-screen slideshow that any partner site can show.",
-        "https://environmentaldashboard.org/cv-public/digital-signage",
+        "https://oberlin.communityhub.cloud/cv-public/digital-signage",
         "Open Oberlin's slideshow",
-        "environmentaldashboard.org/cv-public/digital-signage",
+        "oberlin.communityhub.cloud/cv-public/digital-signage",
       ] as const,
     ];
     body += sec(
       "examples",
       "Already in use",
       "Embeds already running",
-      trio(examples),
+      `<div class="live-example-list" style="display:grid;gap:40px">${examples.map(([embed, alt, _label, title, description, url, cta, host]) => `<article data-story-scene="all"><h3 class="h3">${title}</h3><p style="margin:12px 0 20px">${description}</p>${H.live_frame(url, alt, host, 480, "", "", embed).replace('>Open dashboard ', `>${cta} `)}</article>`).join("")}</div>`,
       undefined,
       undefined,
       true,

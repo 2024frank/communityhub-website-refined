@@ -75,9 +75,6 @@
 #main > .eng .eng-tabs button[aria-selected="true"] { opacity:1; font-weight:700; border-bottom-color:currentColor; }
 #main > .eng .eng-panels { margin:0; }
 #main > .eng .eng-p { grid-template-columns:minmax(0,1fr) minmax(0,1.6fr); gap:clamp(28px,5vw,72px); align-items:center; }
-#main > #engage .eng-p { grid-template-columns:minmax(0,1.6fr) minmax(0,1fr); }
-#main > #engage .eng-copy { grid-column:2; grid-row:1; }
-#main > #engage .eng-media { grid-column:1; grid-row:1; }
 #main > .eng .eng-copy { padding:0; max-height:none; overflow:visible; }
 #main > .eng .eng-copy h3 { margin:0 0 18px; font:700 clamp(26px,2.5vw,38px)/1.15 var(--font-body); letter-spacing:-.02em; }
 #main > .eng .eng-copy > p { max-width:48ch; margin:0 0 16px; font:400 clamp(16px,1.3vw,20px)/1.5 var(--font-body); }
@@ -157,8 +154,6 @@
   #main > .eng .eng-tabs button { flex:none; font-size:14px; }
   #main > .eng .eng-panels { align-items:start; }
   #main > .eng .eng-p,#main > #engage .eng-p { display:flex; flex-direction:column; align-items:stretch; gap:20px; }
-  #main > #engage .eng-copy { order:2; }
-  #main > #engage .eng-media { order:1; }
   #main > .eng .eng-copy h3 { font-size:26px; margin:0 0 12px; }
   #main > .eng .eng-copy > p { font-size:16px; line-height:1.5; margin-bottom:12px; }
   #main > .eng .eng-q { display:block; margin-top:18px; padding-top:16px; }

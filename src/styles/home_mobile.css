@@ -1,0 +1,71 @@
+/* Phone products read as one continuous composition. Their existing page
+   controller advances through actual content instead of padded copy/media screens. */
+@media (max-width:699px) {
+ #main#main#main#main[data-page="index"] > #problem[data-identity-explanation] {
+  display:block;height:auto;min-height:0;padding-block:24px 28px!important;
+ }
+ #main#main#main#main[data-page="index"] > section.eng {
+  display:block;height:auto;min-height:0;padding:16px 0 0!important;
+ }
+ #main#main#main#main[data-page="index"] > .eng .eng-stage {
+  position:static;display:block;height:auto;min-height:0;padding:0;justify-content:flex-start;
+ }
+ #main#main#main#main[data-page="index"] > .eng .chapter-heading {
+  display:grid;grid-template-columns:minmax(0,1fr) 32px;align-items:center;
+  column-gap:12px;row-gap:8px;margin:0 0 16px;padding:0 0 8px;
+ }
+ #main#main#main#main[data-page="index"] > .eng .eng-label {
+  font-size:28px;line-height:1.2;width:auto;min-width:0;max-width:100%!important;
+  white-space:normal;text-align:left;
+ }
+ #main#main#main#main[data-page="index"] > .eng .chapter-connector {
+  display:inline-flex;align-items:center;justify-content:center;justify-self:start;
+  width:32px;height:32px;font-size:28px;line-height:1;transform:rotate(90deg);
+ }
+ #main#main#main#main[data-page="index"] > .eng .eng-tabs {
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-column:1/-1;
+  gap:4px 16px;width:100%;max-width:100%;min-width:0;margin:0!important;padding:0;
+  overflow:visible;border:0;
+ }
+ #main#main#main#main[data-page="index"] > .eng .eng-tabs button {
+  display:flex;align-items:center;justify-content:flex-start;white-space:normal;
+  min-width:0;min-height:44px;padding:8px 0;text-align:left;
+  font-size:14px;line-height:1.35;border-bottom:3px solid transparent;
+ }
+ #main#main#main#main[data-page="index"] > .eng .eng-tabs button:last-child:nth-child(odd) {grid-column:1/-1;}
+ #main#main#main#main[data-page="index"] > .eng .eng-tabs button[aria-selected="true"] {
+  color:var(--ch-pine);border-bottom-color:var(--ch-pine);
+ }
+ #main#main#main#main[data-page="index"] > .eng .eng-panels {
+  align-items:start;align-content:start;margin:0!important;
+ }
+ #main#main#main#main[data-page="index"] > .eng .eng-p {
+  display:flex;flex-direction:column;align-items:stretch;align-content:start;gap:16px;
+  /* The story controller measures the article as a content unit, so this
+     space remains present at its final reading stop for the fixed next button. */
+  padding-bottom:calc(80px + env(safe-area-inset-bottom,0px));
+ }
+ #main#main#main#main[data-page="index"] > .eng :is(.eng-copy,.eng-media) {
+  position:relative;display:block;width:100%;min-width:0;min-height:0;max-width:100%;
+  height:auto;padding:0!important;align-self:stretch;
+ }
+ #main#main#main#main[data-page="index"] > .eng .eng-copy {order:0;}
+ #main#main#main#main[data-page="index"] > .eng .eng-media {order:1;}
+ #main#main#main#main[data-page="index"] > .eng .product-identity {margin:0 0 12px;}
+ #main#main#main#main[data-page="index"] > .eng .eng-copy h3 {
+  font-size:24px;line-height:1.25;margin:0!important;
+ }
+ #main#main#main#main[data-page="index"] > .eng .eng-copy > p:not(.eng-go) {
+  max-width:100%;margin:0;font-size:16px;line-height:1.5;
+ }
+ #main#main#main#main[data-page="index"] > .eng .eng-copy .eng-go {margin:16px 0 0!important;}
+ #main#main#main#main[data-page="index"] > .eng .home-preview .sp-slide > figure > picture > img {
+  width:100%;height:auto!important;max-height:none!important;object-fit:contain!important;
+ }
+ #main#main#main#main[data-page="index"] > .eng :is(.preview-context,.native-heading) {
+  font-size:18px;line-height:1.4;margin-bottom:12px;
+ }
+ #main#main#main#main[data-page="index"] > .eng .home-preview .sp-cap {
+  min-height:0;padding:12px 0 0;font-size:15px;line-height:1.45;
+ }
+}

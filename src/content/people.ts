@@ -113,7 +113,7 @@ export function register(H: SiteContext): void {
     return H.quote(t["quote"], t["who"], t["role"], cls);
   }
   function cross(href: string, label: string): string {
-    return `<p class="ppl-cross"><a class="hand-link" href="${href}"><svg class="hand-arrow" viewBox="0 0 70 44" aria-hidden="true"><path d="M4 8 C 18 34, 40 38, 62 26"/></svg>${label}</a></p>`;
+    return `<p class="ppl-cross"><a class="hand-link destination-action" href="${href}"><svg class="hand-arrow" viewBox="0 0 70 44" aria-hidden="true"><path d="M4 8 C 18 34, 40 38, 62 26"/></svg>${label}</a></p>`;
   }
   function bars(
     rows: readonly (readonly [label: string, value: number, shown: string])[],
@@ -658,8 +658,8 @@ ${tquote("Scott Volmer").replace("data-story-scene", 'data-story-scene="all"')}`
       ),
     );
     const cases_html = `<div class="feat-list c2">
-<div class="campus-case" data-story-scene>${H.postcard("cs-oberlin-snow.jpg", "Snow-covered trees and a campus building in Oberlin at dusk", undefined, -1)}<h3 style="margin-top:14px">Oberlin College</h3>${stats([["85", "buildings metered"] as const, ["700+", "metered points"] as const, ["12", "signs on campus"] as const])}<p style="margin-top:12px"><a class="hand-link" href="oberlin-college.html">Read the Oberlin College case study</a></p></div>
-<div class="campus-case" data-story-scene>${H.postcard("tile-hamilton.jpg", "Hamilton College, drawn in the Citywide Dashboard illustration style", undefined, 1)}<h3 style="margin-top:14px">Hamilton College</h3>${stats([["67%", "of 2023 emissions came from heating buildings"] as const, ["2026", "to 2027, the pilot's run"] as const])}<p style="margin-top:12px"><a class="hand-link" href="hamilton-college.html">Read the Hamilton College case study</a></p></div>
+<div class="campus-case" data-story-scene>${H.postcard("cs-oberlin-snow.jpg", "Snow-covered trees and a campus building in Oberlin at dusk", undefined, -1)}<h3 style="margin-top:14px">Oberlin College</h3>${stats([["85", "buildings metered"] as const, ["700+", "metered points"] as const, ["12", "signs on campus"] as const])}<p style="margin-top:12px"><a class="hand-link destination-action" href="oberlin-college.html">Read the Oberlin College case study</a></p></div>
+<div class="campus-case" data-story-scene>${H.postcard("tile-hamilton.jpg", "Hamilton College, drawn in the Citywide Dashboard illustration style", undefined, 1)}<h3 style="margin-top:14px">Hamilton College</h3>${stats([["67%", "of 2023 emissions came from heating buildings"] as const, ["2026", "to 2027, the pilot's run"] as const])}<p style="margin-top:12px"><a class="hand-link destination-action" href="hamilton-college.html">Read the Hamilton College case study</a></p></div>
 </div>`;
     body += sec(
       "cases",
@@ -1324,7 +1324,7 @@ ${H.postcard("hotel-oberlin-sign.jpg", "A Community Hub screen on a wood-paneled
       `
 <p>When nobody's using the screen at Dave's Market, it cycles through three kinds of content: app content shared across the neighborhood (Community Voices, the Citywide Dashboard, the calendar and jobs board), the MidTown Story, and Dave's Market's own content, shown only on its screen.</p>
 <p>Anyone can take over a screen from their phone: scan the QR code, choose content or take control, and watch it play. Tap More to keep reading on the phone.</p>
-<p><a class="hand-link" href="neighborhoods.html"><svg class="hand-arrow" viewBox="0 0 70 44" aria-hidden="true"><path d="M4 8 C 18 34, 40 38, 62 26"/></svg>See the six levels a partner can take part at</a></p>`,
+<p><a class="hand-link destination-action" href="neighborhoods.html"><svg class="hand-arrow" viewBox="0 0 70 44" aria-hidden="true"><path d="M4 8 C 18 34, 40 38, 62 26"/></svg>See the six levels a partner can take part at</a></p>`,
       { alt: true },
     );
     const orgs = [
@@ -1598,7 +1598,7 @@ ${H.postcard("cs-illo-ajlc.png", "The Adam Joseph Lewis Center at Oberlin Colleg
 <div><h3>In class</h3><p>Environmental Studies, Data Science, Geology, Biology, Psychology, Computer Science and Public Health.</p></div>
 <div><h3>In residential life</h3><p>The plan includes town-gown projects, C-Neutral stories like Oberlin's, and a sustainability trail, still in development.</p></div>
 </div>
-<p style="margin-top:16px"><a class="hand-link" href="oberlin-college.html"><svg class="hand-arrow" viewBox="0 0 70 44" aria-hidden="true"><path d="M4 8 C 18 34, 40 38, 62 26"/></svg>See how Oberlin College uses stories and orbs</a></p>`,
+<p style="margin-top:16px"><a class="hand-link destination-action" href="oberlin-college.html"><svg class="hand-arrow" viewBox="0 0 70 44" aria-hidden="true"><path d="M4 8 C 18 34, 40 38, 62 26"/></svg>See how Oberlin College uses stories and orbs</a></p>`,
     );
     body += sec(
       "journey",

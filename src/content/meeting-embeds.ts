@@ -1,4 +1,5 @@
 import { VOICES_CATEGORIES } from "./voices-categories";
+import flashScrollGuide from '../components/flash-scroll-guide.svg?raw';
 /** Native public applications and explicitly local demonstrations, October 1 review. */
 const esc = (s: string) => s.replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll('<','&lt;');
 export type Context = {name:string; url:string; embedUrl?:string; logo?:string; display?:number; remote?:string; community?:string; categories?: {id:number;name:string;icon:string}[]};
@@ -12,7 +13,7 @@ export function nativeContexts(kind:string, contexts:Context[]):string {
  return `<div class="meeting-embed" data-native-contexts data-kind="${kind}">
  ${contexts.length > 1 ? `<div class="native-choices" role="group" aria-label="Choose ${kind} community">${contexts.map((c,i)=>`<button type="button" data-native-choice="${i}" aria-pressed="${i===0}">${esc(c.name)}</button>`).join('')}</div>` : ''}
  <h4 class="native-heading" data-native-heading>${first.logo?`<img src="${esc(first.logo)}" alt="" loading="lazy">`:''}<span>${esc(first.name)}</span></h4>
- ${kind === 'stories' ? '<p class="native-controller-cue">Choose a story on the phone to change this display.</p>' : ''}
+ ${kind === 'stories' ? '<p class="native-controller-cue">Try the controller. It works! Choose a story on the phone to change this display.</p>' : ''}
  <div data-native-mount>${kind === 'stories' ? '<div class="native-story-pair"><div class="native-tv-device"><div class="native-tv-screen"><span class="native-loading" role="status">Loading the story…</span></div></div><div class="native-phone-device"><div class="native-phone-screen"><span class="native-loading">Loading controller…</span></div></div></div>' : '<p>Loading the community application…</p>'}</div>
  <p class="native-caption"><span class="sr-only" role="status" aria-live="polite" data-native-status></span> <a data-native-open href="${esc(first.url)}" target="_blank" rel="noopener">Open full size</a></p>
  <script type="application/json" data-native-config>${JSON.stringify(contexts).replaceAll('<','\\u003c')}</script></div>`;
@@ -24,11 +25,17 @@ export const nativeVoices = () => nativeContexts('voices',[
  {name:'Oberlin',url:'https://oberlin.communityhub.cloud/cv-public/digital-signage',logo:'https://environmentaldashboard.org/images/uploads/2015/07/ob-300x300.jpg',categories:VOICES_CATEGORIES.oberlin},
 ]);
 export const nativeCitywide = () => nativeContexts('citywide',[
- {name:'Oberlin',url:'https://www.environmentaldashboard.org/cwd?show-menu-bar=1',embedUrl:'https://www.environmentaldashboard.org/cwd-files/dashboard.php?interval=&current_state='},
+ {name:'Oberlin',url:'https://www.environmentaldashboard.org/cwd-files/dashboard.php?interval=&current_state=',embedUrl:'https://www.environmentaldashboard.org/cwd-files/dashboard.php?interval=&current_state='},
  {name:'Cleveland',url:'https://cleveland.communityhub.cloud/citywide-dashboard/index?embed=1&show-menu=0'},
 ]);
 export function nativeScrollable(url:string,title:string,height:number):string {
- return `<div class="native-scroll-feature"><h4 class="native-heading">${esc(title)}</h4><div class="native-scroll" data-scroll-owner tabindex="0" role="region" aria-label="${esc(title)}"><div class="native-scroll-canvas"><iframe data-native-scroll-frame data-defer-src="${esc(url)}" title="${esc(title)}" width="100%" height="${height}" loading="lazy"></iframe></div></div><p class="native-scroll-help">Scroll within the dashboard to explore its resource-use data.</p></div>`;
+ const id = `dashboard-scroll-${new URL(url).pathname.split('/').filter(Boolean).join('-')}`;
+ return `<div class="native-scroll-feature" data-scroll-guide><h4 class="native-heading">${esc(title)}</h4>
+ <div class="native-scroll-shell">
+  <div class="native-scroll" id="${id}" data-scroll-owner tabindex="0" role="region" aria-label="${esc(title)}"><div class="native-scroll-canvas"><iframe data-native-scroll-frame data-defer-src="${esc(url)}" title="${esc(title)}" width="100%" height="${height}" loading="lazy"></iframe></div></div>
+  <button class="native-scrollbar" data-dashboard-scrollbar type="button" role="scrollbar" aria-label="Scroll inside ${esc(title)}" aria-controls="${id}" aria-orientation="vertical" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" hidden><span class="native-scroll-track" aria-hidden="true"><span class="native-scroll-thumb"></span></span></button>
+  <div class="native-scroll-coach" hidden><div class="native-scroll-prompt" aria-hidden="true"><span>Scroll here to explore</span>${flashScrollGuide}</div></div>
+ </div></div>`;
 }
 export function phoneDemo():string {
  const arrow='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg>';

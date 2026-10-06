@@ -1,0 +1,59 @@
+/* Standalone links that open a destination share one treatment everywhere.
+   Native anchors retain their URLs, keyboard behavior and open-in-new-tab support.
+   Local tabs, inline prose links and linked directory rows have separate roles. */
+:root {
+  --destination-fill:var(--community-pine,#244b38);
+  --destination-hover:#173b2a;
+  --destination-ink:#fff;
+  --destination-radius:4px;
+}
+:is(#main#main#main#main[data-page]) a:is(.btn-ink,.ui-action,.pc-a,.pp-btn,.product-how-link,.now-go,.destination-action,[data-native-open],.original-story-source > a,.cal-open > a,.case-source-link > a):not([href^="#"]):not([data-yt]) {display:inline-flex;}
+:is(#main#main#main#main[data-page]) a:is(.btn-ink,.ui-action,.pc-a,.pp-btn,.product-how-link,.now-go,.destination-action,[data-native-open],.original-story-source > a,.cal-open > a,.case-source-link > a):not([href^="#"]):not([data-yt]) {
+  box-sizing:border-box;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  width:fit-content;
+  min-width:44px;
+  max-width:100%;
+  min-height:44px;
+  padding:10px 18px;
+  border:1px solid var(--destination-fill);
+  border-radius:var(--destination-radius);
+  background:var(--destination-fill);
+  color:var(--destination-ink)!important;
+  box-shadow:none;
+  font:700 16px/1.4 var(--font-body);
+  text-align:center;
+  text-decoration:none;
+  white-space:normal;
+  overflow-wrap:anywhere;
+}
+:is(#main#main#main#main[data-page]) a:is(.btn-ink,.ui-action,.pc-a,.pp-btn,.product-how-link,.now-go,.destination-action,[data-native-open],.original-story-source > a,.cal-open > a,.case-source-link > a):not([href^="#"]):not([data-yt]):hover {
+  background:var(--destination-hover);
+  border-color:var(--destination-hover);
+  text-decoration:underline;
+  text-underline-offset:3px;
+}
+:is(#main#main#main#main[data-page]) a:is(.btn-ink,.ui-action,.pc-a,.pp-btn,.product-how-link,.now-go,.destination-action,[data-native-open],.original-story-source > a,.cal-open > a,.case-source-link > a):not([href^="#"]):not([data-yt]):focus-visible {
+  outline:3px solid var(--destination-fill);
+  outline-offset:4px;
+}
+#main#main#main#main[data-page] a.destination-action > .hand-arrow {display:none;}
+
+/* Video launchers keep their native player behavior and a readable filled action. */
+#main#main#main#main[data-page] a.btn-ink[data-yt] {
+  color:var(--destination-ink)!important;
+  background:var(--destination-fill);
+}
+
+/* These actions move inside the current page, like the product selectors. */
+#main#main#main#main[data-page] a.btn-ink[href^="#"] {
+  background:transparent;
+  color:var(--destination-fill);
+  border-color:transparent;
+  padding-inline:0;
+  text-decoration:underline;
+  text-underline-offset:5px;
+  box-shadow:none;
+}

@@ -1,4 +1,4 @@
-import { shouldLoadDeferredFrame } from "./ui/deferred-frame-policy";
+import { deferredFrameSource, shouldLoadDeferredFrame } from "./ui/deferred-frame-policy";
 import type { GaugeReading, Mood } from "./types";
 import { calendarData } from "./data";
 type NowReading = Pick<GaugeReading, "title" | "value" | "num" | "pos" | "ok">;
@@ -198,12 +198,24 @@ import { $, $$, isPresent, required, eventElement } from "./dom";
       mb.addEventListener("click", function () {
         setMenu(mb.getAttribute("aria-expanded") !== "true");
       });
-    if (mnav)
+    if (mnav) {
       $$("a", mnav).forEach(function (a) {
         a.addEventListener("click", function () {
           setMenu(false);
         });
       });
+      $$(".mnav-toggle", mnav).forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          const open = btn.getAttribute("aria-expanded") === "true";
+          btn.setAttribute("aria-expanded", String(!open));
+          const targetId = btn.getAttribute("aria-controls");
+          if (targetId) {
+            const panel = doc.getElementById(targetId);
+            if (panel) panel.hidden = open;
+          }
+        });
+      });
+    }
     doc.addEventListener("focusin", function (e) {
       if (!mb || !mnav || mnav.hidden) return;
       const target = eventElement(e);
@@ -1023,7 +1035,7 @@ import { $, $$, isPresent, required, eventElement } from "./dom";
       // picture or automatically advancing starts a complete new interval.
       function choose(n: number) {
         go(n);
-        if (readingPreview) { paused = true; updatePauseControl(); }
+        if (readingPreview && ps) { paused = true; updatePauseControl(); }
         tick(true);
       }
       const pv = $("[data-sp-prev]", root_);
@@ -1042,9 +1054,10 @@ import { $, $$, isPresent, required, eventElement } from "./dom";
         ps.addEventListener("click", function () { paused = !paused; updatePauseControl(); tick(); });
         updatePauseControl();
       }
-      if (readingPreview) {
+      if (readingPreview && ps) {
         // Explicit interaction keeps the selected example stable after focus or
-        // pointer leaves. The visible play control is the only resume action.
+        // pointer leaves only when a visible play control can resume it.
+        // Automatic photo previews without controls use temporary holds below.
         root_.addEventListener("wheel", () => { paused = true; updatePauseControl(); tick(); }, { passive: true });
         root_.addEventListener("touchstart", e => { if (!ps?.contains(e.target as Node)) { paused = true; updatePauseControl(); tick(); } }, { passive: true });
         root_.addEventListener("scroll", () => { paused = true; updatePauseControl(); tick(); }, { passive: true, capture: true });
@@ -1055,7 +1068,7 @@ import { $, $$, isPresent, required, eventElement } from "./dom";
       // Independent gates prevent pointer exit from cancelling a keyboard hold.
       root_.addEventListener("pointerenter", () => { hovered = true; tick(); });
       root_.addEventListener("pointerleave", () => { hovered = false; tick(readingPreview); });
-      root_.addEventListener("focusin", e => { focused = true; if (readingPreview && !ps?.contains(e.target as Node)) { paused = true; updatePauseControl(); } tick(); });
+      root_.addEventListener("focusin", e => { focused = true; if (readingPreview && ps && !ps.contains(e.target as Node)) { paused = true; updatePauseControl(); } tick(); });
       root_.addEventListener("focusout", e => {
         if (!root_.contains(e.relatedTarget instanceof Node ? e.relatedTarget : null)) {
           focused = false;
@@ -1123,7 +1136,8 @@ import { $, $$, isPresent, required, eventElement } from "./dom";
     const loadDeferred = (f: HTMLIFrameElement) => {
       const rect = f.getBoundingClientRect();
       if (!shouldLoadDeferredFrame({loaded:!!f.getAttribute("src"),inactive:!!f.closest("[inert]"),visibility:getComputedStyle(f).visibility,width:rect.width,height:rect.height,top:rect.top,bottom:rect.bottom},innerHeight)) return;
-      f.src = f.dataset.deferSrc || "";
+      const source = f.dataset.deferSrc || "";
+      f.src = deferredFrameSource(source, f.hasAttribute("data-original-presentation"), matchMedia("(prefers-reduced-motion: reduce)").matches);
       deferred.delete(f);
     };
     const activateVisible = () => deferred.forEach(loadDeferred);
@@ -1418,7 +1432,9 @@ import { $, $$, isPresent, required, eventElement } from "./dom";
       })
       .catch(function () {
         const f = $(".events-fallback", box);
-        if (f)
+        if (f && box.getAttribute("data-event-preview") === "") {
+          f.textContent = "Upcoming events couldn't load here.";
+        } else if (f)
           f.innerHTML =
             "Upcoming events couldn't load here. <a href=\"" + city.api +
             "/calendar/\" target=\"_blank\" rel=\"noopener\">Browse the " +
